@@ -1,0 +1,37 @@
+{
+    "TOKEN": "",
+    "MONGO_URI": "",
+    "TOKEN_DEV": "",
+    "MONGO_URI_DEV": "",
+    "DEV_MODE": false,
+    "PREFIX": "s!",
+    "OWNER_ID": "",
+    "ADMIN_IDS": [""],
+    "admin_bypass": [{ "COMMAND_NAME": "", "USER_IDS": [] }],
+    "support_server": {
+        "INVITE_URL": "https://discord.gg/your_server",
+        "GUILD_ID": "",
+        "channels": {
+            "WELCOME": "1234"
+        }
+    },
+    "client_status": {
+        "default": {
+            "INTERVAL": "1m",
+            "RANDOM_ACTIVITY": false,
+            "ACTIVITY": [
+                { "STATUS": "online", "TYPE": "CUSTOM", "NAME": "Need any help? Use /help or !help" },
+                { "STATUS": "online", "TYPE": "CUSTOM", "NAME": "Join our community! discord.gg/your_server" },
+                { "STATUS": "online", "TYPE": "WATCHING", "NAME": "✨ $GUILD_COUNT servers" }
+            ]
+        },
+        "dev": {
+            "ACTIVITY": {
+                "STATUS": "dnd",
+                "TYPE": "CUSTOM",
+                "NAME": "🧨 playing with unstable substances...",
+                "STREAM_URL": ""
+            }
+        }
+    }
+}
