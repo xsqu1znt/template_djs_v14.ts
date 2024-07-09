@@ -9,6 +9,12 @@ declare module "discord.js" {
             userInstall: Collection<K, V>;
             custom: Collection<K, V>;
         };
-        prefixCommands: Collection<K, V>;
+
+        prefixCommands: {
+            all: Collection<K, V>;
+            public: Collection<K, V>;
+            staff: Collection<K, V>;
+            custom: Collection<K, V>;
+        };
     }
 }

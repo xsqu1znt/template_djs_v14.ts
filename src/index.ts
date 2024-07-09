@@ -60,10 +60,15 @@ client.slashCommands = {
     custom: new Collection()
 };
 
-client.prefixCommands = new Collection();
+client.prefixCommands = {
+    all: new Collection(),
+    public: new Collection(),
+    staff: new Collection(),
+    custom: new Collection()
+};
 
 // Run Importers
-let importers_dir = jt.readDir("@utils/importers").filter(fn => fn.startsWith("import_") && fn.endsWith(".ts"));
+let importers_dir = jt.readDir("@utils/importers").filter(fn => fn.startsWith("import") && fn.endsWith(".ts"));
 
 //prettier-ignore
 importers_dir.forEach(fn => {

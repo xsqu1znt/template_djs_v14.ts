@@ -1,7 +1,14 @@
 import fs from "fs";
 
-/** Get an array of file paths inside of a folder. */
-export function readDir(path: string, options?: readDirOptions): string[] {
+interface readDir_options {
+    /** Return nested files inside of the directory. */
+    recursive: boolean;
+}
+
+/** Get an array of file paths inside of a folder.
+ * @param path Path to the folder.
+ * @param options Extra options. */
+export function readDir(path: string, options?: readDir_options): string[] {
     options = { ...{ recursive: true }, ...options };
 
     // Check if the file path exists first
