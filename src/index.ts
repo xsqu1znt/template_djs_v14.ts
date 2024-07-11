@@ -35,7 +35,6 @@ if (DEV_MODE) {
 /* - - - - - { Setup Client } - - - - - */
 logger.log("initializing...");
 
-// Bot ready phase
 const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
@@ -67,6 +66,7 @@ client.prefixCommands = {
     custom: new Collection()
 };
 
+/* - - - - - { Import & Connect } - - - - - */
 async function init(): Promise<void> {
     // Run Importers
     await importers.init(client);
