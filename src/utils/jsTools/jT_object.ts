@@ -1,6 +1,4 @@
-/** Return a property value from inside a given object using the provided path.
- * @param obj The object.
- * @param prop A path to a nested property within the object.
+/** Return a nested property from a given object using the provided path.
  *
  * ```ts
  * // returns 5
@@ -10,22 +8,26 @@
  * // returns "hello, world!"
  * let obj = { a: [{ content: "hello, world!" }] };
  * getProp(obj, "a[0].content");
- * ``` */
-export function getProp<V extends object, K extends keyof V>(obj: V, prop: K): V[K] | V {
+ * ```
+ *
+ * @param obj The object.
+ * @param path The path to a nested property within the object. */
+export function getProp(obj: {}, path: string): any {
     if (typeof obj !== "object") throw new TypeError("You must provide a valid object");
-    if (typeof prop !== "string") throw new TypeError("You must provide a valid path string");
-    if (!prop.trim()) return obj;
+    if (typeof path !== "string") throw new TypeError("You must provide a valid path string");
+    if (!path.trim()) return obj;
 
-    let propNew = prop
+    let _obj: any = obj;
+
+    let _path = path
         // Strip whitespace
         .trim()
         // Replace array indexes with property index values
         .replace(/\[(\w+)\]/g, ".$1")
         // Strip leading dots
-        .replace(/^\./, "");
-
-    // Split path into an array of property names
-    let _path = propNew.split(".");
+        .replace(/^\./, "")
+        // Split path into an array of property names
+        .split(".");
 
     // Used for debugging where we were at before throwing an error
     let debug_path = [];
@@ -40,15 +42,15 @@ export function getProp<V extends object, K extends keyof V>(obj: V, prop: K): V
 
         try {
             // Check if the property exists
-            if (prop in obj && obj[prop] === undefined)
+            if (prop in _obj && _obj[prop] === undefined)
                 throw new Error(`Object property \'${debug_path.join(".")}\' is undefined`);
 
             // Set obj to the new value
-            obj = obj[prop];
+            _obj = _obj[prop];
         } catch {
-            throw new Error(`Cannot get property \'${prop}\' from \'${obj}\'`);
+            throw new Error(`Cannot get property \'${prop}\' from \'${_obj}\'`);
         }
     }
 
-    return obj;
+    return _obj;
 }

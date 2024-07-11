@@ -1,23 +1,12 @@
-type InteractionBasedEventCallback = (client: Client, interaction: BaseInteraction) => Promise<Message> | void | null;
-type MessageBasedEventCallback = (client: Client, message: Message) => Promise<Message> | void | null;
-type AnyOtherEventBasedCallback = (client: Client, ...args: any) => Promise<Message> | void | null;
+import { EventCallback } from "@customTypes/events";
 
-interface EventCallback {
-    /** The name of the event. *Used for error logging.* */
-    name: string;
-    /** The type of event to bind to the appropriate client event. */
-    eventType: keyof ClientEvents;
-    /** Whether this event will be executed or not. ***Default: true*** */
-    enabled?: boolean;
-    /** The asyncrous function to be executed. */
-    execute: InteractionBasedEventCallback | MessageBasedEventCallback | AnyOtherEventBasedCallback;
-}
-
-import { BaseInteraction, Client, ClientEvents, Message } from "discord.js";
+import { Client } from "discord.js";
 import * as logger from "@utils/logger";
 import * as jt from "@utils/jsTools";
 
-async function importEvents(path: string) {
+const eventModuleDirectoryPath = "./events";
+
+async function importEventModules(path: string) {
     let files = jt.readDir(path, { recursive: true }).filter(fn => fn.endsWith(".ts"));
 
     // Import the files found in the given directory
@@ -30,11 +19,9 @@ async function importEvents(path: string) {
 }
 
 export default async function (client: Client) {
-    const directoryPath = "./events";
-
     // Import event files
-    let events = await importEvents(directoryPath);
-    if (!events.length) logger.debug(`No events found in '${directoryPath}'`);
+    let events = await importEventModules(eventModuleDirectoryPath);
+    if (!events.length) logger.debug(`No events found in '${eventModuleDirectoryPath}'`);
 
     // Get an array of every EventType
     let eventTypes = jt.unique(events.map(e => e.eventType));
@@ -51,16 +38,17 @@ export default async function (client: Client) {
                 client.on(event.eventType, async (...args) => {
                     try {
                         // Execute the event
-                        event.execute.apply(null, [client, ...args]);
+                        await event.execute.apply(null, [client, ...args]);
                     } catch (err) {
+                        // prettier-ignore
                         // Catch execution errors
-                        logger.error("Failed to execute function", `\'${event.name}\' on event \'${event.eventType}\'`, err);
+                        logger.error("[CLIENT] Failed to execute function", `'${event.name}' on event '${event.eventType}'`, err);
                     }
                 });
             } catch (err) {
                 // prettier-ignore
                 // Invalid event type recieved
-                logger.error("Failed to bind event", `invalid event: \'${event.eventType}\' for function \'${event.name}\'`, err);
+                logger.error("[CLIENT] Failed to bind event", `invalid event: '${event.eventType}' for function '${event.name}'`, err);
             }
         }
     }

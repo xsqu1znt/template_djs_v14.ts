@@ -5,15 +5,15 @@ dotenv.config();
 
 import { Client, Collection, GatewayIntentBits, Partials } from "discord.js";
 // import * as slashCommandManager from "@utils/slashCommandManager";
+import * as importers from "@utils/importers";
 import * as logger from "@utils/logger";
 // import * as mongo from "@utils/mongo";
-import * as jt from "@utils/jsTools";
 
-import config from "@configs/config_client.json";
+import * as config from "@configs";
 
-const TOKEN: string = process.env.TOKEN || config.TOKEN;
-const TOKEN_DEV: string = process.env.TOKEN_DEV || config.TOKEN_DEV;
-const DEV_MODE: boolean = process.env.DEV_MODE === "true" ? true : config.DEV_MODE;
+const TOKEN: string = process.env.TOKEN || config.client.TOKEN;
+const TOKEN_DEV: string = process.env.TOKEN_DEV || config.client.TOKEN_DEV;
+const DEV_MODE: boolean = process.env.DEV_MODE === "true" ? true : config.client.DEV_MODE;
 
 /* - - - - - { Check for TOKEN } - - - - - */
 if (DEV_MODE && !TOKEN_DEV) {
@@ -36,7 +36,7 @@ if (DEV_MODE) {
 logger.log("initializing...");
 
 // Bot ready phase
-const client: Client = new Client({
+const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
         GatewayIntentBits.GuildMessages,
@@ -67,31 +67,30 @@ client.prefixCommands = {
     custom: new Collection()
 };
 
-// Run Importers
-let importers_dir = jt.readDir("@utils/importers").filter(fn => fn.startsWith("import") && fn.endsWith(".ts"));
+async function init(): Promise<void> {
+    // Run Importers
+    await importers.init(client);
 
-//prettier-ignore
-importers_dir.forEach(fn => {
-	try { require(`@utils/importers/${fn}`)(client); }
-	catch (err: any) { logger.error("Importer failed to load", `\'${fn}\' could not initialize`, err); }
-});
+    // Log the next step to console
+    logger.log("connecting to Discord...");
 
-// Connect the client to Discord
-console.log("connecting to Discord...");
+    // prettier-ignore
+    // Connect the client to Discord
+    client.login(DEV_MODE ? TOKEN_DEV : TOKEN).then(async () => {
+    	// Register slash commands to a specific server :: { LOCAL }
+    	// await slashCommandManager.push(client, { ids: "your_id_here" });
 
-// prettier-ignore
-client.login(DEV_MODE ? TOKEN_DEV : TOKEN).then(async () => {
-	// Register slash commands to a specific server :: { LOCAL }
-	// await slashCommandManager.push(client, { ids: "your_id_here" });
+    	// Register slash commands :: { GLOBAL }
+    	// await slashCommandManager.push(client, { global: true });
 
-	// Register slash commands :: { GLOBAL }
-	// await slashCommandManager.push(client, { global: true });
+    	// Remove commands (does nothing if commands were registered globally) :: { LOCAL }
+    	// await slashCommandManager.remove(client, { ids: "your_id_here" });
 
-	// Remove commands (does nothing if commands were registered globally) :: { LOCAL }
-	// await slashCommandManager.remove(client, { ids: "your_id_here" });
+    	// Remove commands (does nothing if commands were registered locally) :: { GLOBAL }
+    	// await slashCommandManager.remove(client, { global: true });
 
-	// Remove commands (does nothing if commands were registered locally) :: { GLOBAL }
-	// await slashCommandManager.remove(client, { global: true });
+    	// await mongo.connect();
+    });
+}
 
-	// await mongo.connect();
-});
+init();
