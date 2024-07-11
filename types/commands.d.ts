@@ -1,4 +1,4 @@
-import { BaseInteraction, Client, ClientEvents, Message } from "discord.js";
+import { Client, ClientEvents, CommandInteraction, Message, PermissionFlags } from "discord.js";
 
 /* - - - - - { Callback Types } - - - - - */
 export interface PrefixCommandCallbackExtraParams {
@@ -11,7 +11,7 @@ export interface PrefixCommandCallbackExtraParams {
 }
 
 export type BaseCommandCallback = (client: Client, ...args: any[]) => Promise<Message | void | null>;
-export type SlashCommandCallback = (client: Client, interaction: BaseInteraction) => Promise<Message | void | null>;
+export type SlashCommandCallback = (client: Client, interaction: CommandInteraction) => Promise<Message | void | null>;
 export type PrefixCommandCallback = (
     client: Client,
     message: Message,
@@ -29,9 +29,9 @@ export interface BaseCommandOptions {
     /** Only allow guild admins to use this command. */
     guildAdminOnly?: boolean;
     /** Require the user to have certain permissions in the current guild. */
-    specialBotPerms?: PermissionFlagsBits | PermissionFlagsBits[];
+    specialBotPerms?: PermissionFlags | PermissionFlags[];
     /** Require the bot to have certain permissions in the current guild. */
-    specialUserPerms?: PermissionFlagsBits | PermissionFlagsBits[];
+    specialUserPerms?: PermissionFlags | PermissionFlags[];
     /** Hide this command from the help command list. */
     hidden?: boolean;
 }

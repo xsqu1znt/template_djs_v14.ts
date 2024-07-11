@@ -1,4 +1,4 @@
-import { EventCallback, EventCallbackConst } from "@customTypes/events";
+import { EventModule, EventModuleConst } from "@customTypes/events";
 
 import { Client } from "discord.js";
 import * as logger from "@utils/logger";
@@ -10,11 +10,9 @@ async function importEventModules(path: string) {
     let files = jt.readDir(path, { recursive: true }).filter(fn => fn.endsWith(".ts"));
 
     // Import the files found in the given directory
-    let events: EventCallback[] = (
-        (await Promise.all(files.map(fn => import(`../.${path}/${fn}`)))) as EventCallbackConst[]
-    )
+    let events: EventModule[] = ((await Promise.all(files.map(fn => import(`../.${path}/${fn}`)))) as EventModuleConst[])
         // Destructure the imported event to get the callback
-        .map(e => e.cb);
+        .map(e => e.module);
 
     // Filter out files that don't have an eventType property or is disabled
     events.filter(f => f.eventType !== undefined && f.enabled !== false);

@@ -1,6 +1,8 @@
 import { Client, ClientEvents, Message } from "discord.js";
 
-export interface EventCallback {
+export type BaseEventCallback = (client: Client, ...args: any[]) => Promise<Message | void | null>;
+
+export interface EventModule {
     /** Name of the event. *Used for error logging.* */
     name: string;
     /** Type of event to bind to the appropriate client event. */
@@ -8,9 +10,9 @@ export interface EventCallback {
     /** Whether this event will be executed or not. ***Default: true*** */
     enabled?: boolean;
     /** The asyncrous function to be executed. */
-    execute: (client: Client, ...args: any[]) => Promise<Message | void | null>;
+    execute: BaseEventCallback;
 }
 
-export interface EventCallbackConst {
-    cb: EventCallback;
+export interface EventModuleConst {
+    module: EventModule;
 }
