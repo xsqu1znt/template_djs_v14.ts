@@ -6,7 +6,7 @@
         /* Modules */
         "resolveJsonModule": true,
         "module": "commonjs",
-        "rootDir": "./",
+        "rootDir": "./src",
         "baseUrl": "./",
         "paths": {
             "@customTypes/*": ["./types/*"],
