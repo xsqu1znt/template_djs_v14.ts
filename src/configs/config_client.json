@@ -20,22 +20,22 @@
         }
     },
 
-    "client_status": {
+    "client_activity": {
         "default": {
             "INTERVAL": "1m",
             "RANDOM_ACTIVITY": false,
 
             "ACTIVITY": [
-                { "STATUS": "online", "TYPE": "CUSTOM", "NAME": "Need any help? Use /help or !help" },
-                { "STATUS": "online", "TYPE": "CUSTOM", "NAME": "Join our community! discord.gg/your_server" },
-                { "STATUS": "online", "TYPE": "WATCHING", "NAME": "✨ $GUILD_COUNT servers" }
+                { "STATUS": "online", "TYPE": "custom", "NAME": "Need any help? Use /help or !help" },
+                { "STATUS": "online", "TYPE": "custom", "NAME": "Join our community! discord.gg/your_server" },
+                { "STATUS": "online", "TYPE": "watching", "NAME": "✨ $GUILD_COUNT servers" }
             ]
         },
 
         "dev": {
             "ACTIVITY": {
                 "STATUS": "dnd",
-                "TYPE": "CUSTOM",
+                "TYPE": "custom",
                 "NAME": "🧨 playing with unstable substances...",
                 "STREAM_URL": ""
             }

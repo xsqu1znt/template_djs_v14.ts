@@ -4,7 +4,7 @@ import * as _o from "./jT_object";
  * @param arr The array of items to filter.
  * @param prop The nested property within each item to filter by.
  * @param copy Return a deep copy of the array using structuredClone(). */
-export function unique(arr: any[], prop = "", copy = false) {
+export function unique(arr: any[], prop: string = "", copy: boolean = false) {
     let arr_new = [];
     let map = new Map();
 
