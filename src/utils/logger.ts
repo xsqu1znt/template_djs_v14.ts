@@ -1,15 +1,24 @@
 /** @file Reusable functions for using `console.log()`, but in 4k ultra HD retrocolor. */
 
 import { Shard } from "discord.js";
+import * as jt from "@utils/jsTools";
 import chalk from "chalk";
 
 import { name as PROJECT } from "@pkgJSON";
 
+const STARTUP_MESSAGES = [
+    "Initalizing...",
+    "Starting up...",
+    "Revving engines...",
+    "Brewing a cup of coffee...",
+    "Giving the developer a pat on the back..."
+];
+
 /* - - - - - { Shorthand } - - - - - */
 const _client = (): string => chalk.bold.gray("[CLIENT]");
-const _event = (): string => chalk.bold.yellow("[EVENT]");
+const _event = (): string => chalk.bold.gray("[EVENT]");
 
-const _timestamp = (): string => chalk.bold(`[${new Date().toLocaleTimeString()}]`);
+const _timestamp = (): string => chalk(`[${new Date().toLocaleTimeString()}]`);
 
 const _dynamic_shard = (shards: Shard[]): string =>
     shards?.length ? chalk.gray`(${shards.length === 1 ? "Shard:" : "Shards:"} ${shards.join(", ")})` : "";
@@ -35,10 +44,10 @@ export function success(msg: string): void {
 export const client = {
     initializing: (shards?: Shard[]): void => {
         console.log(
-            `$_TIMESTAMP $_CLIENT ⏳ ${chalk.italic("Initalizing...")} $_DYNAMIC_SHARD`
+            `$_TIMESTAMP $_CLIENT ⏳ ${chalk.italic(jt.choice(STARTUP_MESSAGES))} $_DYNAMIC_SHARD`
                 .replace("$_TIMESTAMP", _timestamp())
                 .replace("$_CLIENT", _client())
-                .replace("_$DYNAMIC_SHARD", _dynamic_shard(shards || []))
+                .replace("$_DYNAMIC_SHARD", _dynamic_shard(shards || []))
         );
     },
 
@@ -47,33 +56,36 @@ export const client = {
             `$_TIMESTAMP $_CLIENT ⏳ ${chalk.italic("Connecting to Discord...")} $_DYNAMIC_SHARD`
                 .replace("$_TIMESTAMP", _timestamp())
                 .replace("$_CLIENT", _client())
-                .replace("_$DYNAMIC_SHARD", _dynamic_shard(shards || []))
+                .replace("$_DYNAMIC_SHARD", _dynamic_shard(shards || []))
         );
     },
 
     online: (shardCount = 0): void => {
         console.log(
-            `$_TIMESTAMP $_CLIENT ✅ ${chalk.italic.green("Successfuly connected to Discord!")} $_SHARD_COUNT`
+            `$_TIMESTAMP $_CLIENT ✅ ${chalk.green("Successfuly connected to Discord!")} $_SHARD_COUNT`
                 .replace("$_TIMESTAMP", _timestamp())
                 .replace("$_CLIENT", _client())
                 .replace("$_SHARD_COUNT", _shard_count(shardCount))
         );
     },
 
-    // prettier-ignore
     ready: (shards?: Shard[]): void => {
         console.log(
-            `$_TIMESTAMP 🎉 ${chalk.blueBright(PROJECT)} is up and running! $_DYNAMIC_SHARD`
+            `$_TIMESTAMP ${chalk`{bold {blueBright ${PROJECT}} is up and running!}`} 🎉 $_DYNAMIC_SHARD`
                 .replace("$_TIMESTAMP", _timestamp())
-                .replace("_$DYNAMIC_SHARD", _dynamic_shard(shards || []))
+                .replace("$_DYNAMIC_SHARD", _dynamic_shard(shards || []))
         );
     },
 
-    eventBinded: (name: string, path: string, enabled: boolean = false): void => {
+    eventBinded: (name: string, path: string, enabled: boolean): void => {
         console.log(
-            `$_TIMESTAMP $_EVENT ${enabled ? "Loaded" : chalk.bgRed("Ignored")}: ${chalk.bold(name)} | Path: ${chalk.bgGray.white(path)}`
+            `$_TIMESTAMP $_EVENT ${
+                enabled
+                    ? chalk`{bold {yellow ${name}}} {italic {gray ${path}}}`
+                    : chalk`{strikethrough {bold {dim ${name}}} {italic {gray ${path}}}}`
+            }`
                 .replace("$_TIMESTAMP", _timestamp())
-                .replace("$_CLIENT", _client())
+                .replace("$_EVENT", _event())
         );
     }
 };

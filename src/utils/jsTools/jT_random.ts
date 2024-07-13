@@ -13,7 +13,7 @@ export function randomNumber(min: number, max: number, round: boolean = true) {
 /** Choose a psuedo-random item from an array.
  * @param arr Array of items to choose from.
  * @param copy Return a deep copy of the array using structuredClone(). */
-export function choice(arr: Array<any>, copy: boolean = false) {
+export function choice<T>(arr: T[], copy: boolean = false): T {
     let item = arr[randomNumber(0, arr.length - 1)];
     return copy ? structuredClone(item) : item;
 }

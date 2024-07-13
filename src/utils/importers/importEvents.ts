@@ -9,21 +9,14 @@ async function importEventModules() {
     let files = jt.readDir(path.join(__dirname, "../../events"), { recursive: true });
 
     // Import the files found in the given directory
-    // `../../events/${fn}`
-    let events = await Promise.all(
-        files.map(async fn => {
-            let _path: string = path.join(__dirname, "../../events", fn);
+    return await Promise.all(
+        files.map(async filename => {
+            let _path: string = path.join(__dirname, "../../events", filename);
             let _module: EventModule = (await import(_path)).default;
 
-            return { module: _module, path: _path };
+            return { module: _module, path: path.join("events", filename) };
         })
     );
-
-    // Destructure the imported event to get the callback and path
-    // let events_destructured = events.map(e => ({event: e.default, path: path.join(__dirname, "../../events", fn)}));
-
-    // Filter out files that don't have an eventType property or is disabled
-    return events;
 }
 
 export default async function (client: Client): Promise<void> {
@@ -45,7 +38,7 @@ export default async function (client: Client): Promise<void> {
         // Iterate through events inside the group
         for (let event of group) {
             // Ignore binding events that are disabled
-            if (!event.module.enabled) {
+            if (Object.hasOwn(event.module, "enabled") && !event.module.enabled) {
                 logger.client.eventBinded(event.module.name, event.path, false);
                 continue;
             }
