@@ -14,7 +14,7 @@
         "rootDir": "./src",
         "baseUrl": "./",
         "paths": {
-            "@customTypes/*": ["src/types/*"],
+            "@customTypes/*": ["./src/types/*"],
 
             "@configs": ["./src/configs"],
             "@events/*": ["./src/events/*"],
@@ -24,7 +24,9 @@
             "@prefixCommands/*": ["./src/commands/prefix/*"],
             "@commands/*": ["./src/commands/*"],
 
-            "@utils/*": ["./src/utils/*"]
+            "@utils/*": ["./src/utils/*"],
+
+            "@pkgJSON": ["./package.json"],
         },
 
         /* Emit */

@@ -1,29 +1,27 @@
-import { EventModule, EventModuleConst } from "@customTypes/events";
+import { EventModule, EventModuleExport } from "@customTypes/events";
 
 import { Client } from "discord.js";
 import * as logger from "@utils/logger";
 import * as jt from "@utils/jsTools";
+import * as path from "path";
 
-const eventModuleDirectoryPath = "../../events";
-
-async function importEventModules(path: string) {
-    let files = jt.readDir(path, { recursive: true }).filter(fn => fn.endsWith(".ts"));
+async function importEventModules() {
+    let files = jt.readDir(path.join(__dirname, "../../events"), { recursive: true });
 
     // Import the files found in the given directory
-    let events: EventModule[] = ((await Promise.all(files.map(fn => import(`../.${path}/${fn}`)))) as EventModuleConst[])
+    let events: EventModule[] = ((await Promise.all(files.map(fn => import(`../../events/${fn}`)))) as EventModuleExport[])
         // Destructure the imported event to get the callback
-        .map(e => e.module);
+        .map(e => e.default);
 
     // Filter out files that don't have an eventType property or is disabled
     events.filter(f => f.eventType !== undefined && f.enabled !== false);
-
     return events;
 }
 
 export default async function (client: Client) {
     // Import event files
-    let events = await importEventModules(eventModuleDirectoryPath);
-    if (!events.length) logger.error("[CLIENT]: No event modules found", `dir: '${eventModuleDirectoryPath}'`);
+    let events = await importEventModules();
+    if (!events.length) logger.error("[CLIENT]: No event modules found", `dir: '${path.join(__dirname, "../../events")}'`);
 
     // Get an array of every EventType
     let eventTypes = jt.unique(events.map(e => e.eventType));

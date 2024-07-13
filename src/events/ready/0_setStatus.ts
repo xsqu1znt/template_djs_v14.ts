@@ -8,7 +8,7 @@ import * as config from "@configs";
 
 const DEV_MODE: boolean = process.env.DEV_MODE === "true" ? true : config.client.DEV_MODE;
 
-export const cb: EventModule = {
+export default {
     name: "setClientActivity",
     eventType: Events.ClientReady,
 
@@ -94,4 +94,4 @@ export const cb: EventModule = {
         // Set the client's status
         return await setStatus();
     }
-};
+} as EventModule;

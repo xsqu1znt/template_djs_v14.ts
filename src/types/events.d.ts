@@ -13,6 +13,6 @@ export interface EventModule {
     execute: BaseEventCallback;
 }
 
-export interface EventModuleConst {
-    module: EventModule;
+export interface EventModuleExport {
+    default: EventModule;
 }
