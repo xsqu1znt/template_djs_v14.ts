@@ -11,7 +11,6 @@ const DEV_MODE: boolean = process.env.DEV_MODE === "true" ? true : config.client
 export default {
     name: "setClientActivity",
     eventType: Events.ClientReady,
-    enabled: false,
 
     execute: async (client: Client) => {
         let clientActivity: ClientActivity = DEV_MODE

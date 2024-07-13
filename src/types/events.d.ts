@@ -12,7 +12,3 @@ export interface EventModule {
     /** The asyncrous function to be executed. */
     execute: BaseEventCallback;
 }
-
-export interface EventModuleExport {
-    default: EventModule;
-}

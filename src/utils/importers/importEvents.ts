@@ -1,4 +1,4 @@
-import { EventModule, EventModuleExport } from "@customTypes/events";
+import { EventModule } from "@customTypes/events";
 
 import { Client } from "discord.js";
 import * as logger from "@utils/logger";
@@ -6,15 +6,17 @@ import * as jt from "@utils/jsTools";
 import * as path from "path";
 
 async function importEventModules() {
-    let files = jt.readDir(path.join(__dirname, "../../events"), { recursive: true });
+    let files = jt
+        .readDir(path.join(__dirname, "../../events"), { recursive: true })
+        .filter(fn => fn.endsWith(".js") || fn.endsWith(".ts"));
 
     // Import the files found in the given directory
     return await Promise.all(
-        files.map(async filename => {
-            let _path: string = path.join(__dirname, "../../events", filename);
+        files.map(async fn => {
+            let _path: string = path.join(__dirname, "../../events", fn);
             let _module: EventModule = (await import(_path)).default;
 
-            return { module: _module, path: path.join("events", filename) };
+            return { module: _module, path: path.join("events", fn) };
         })
     );
 }

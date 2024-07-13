@@ -5,6 +5,7 @@ import * as jt from "@utils/jsTools";
 import chalk from "chalk";
 
 import { name as PROJECT } from "@pkgJSON";
+import * as config from "@configs";
 
 const STARTUP_MESSAGES = [
     "Initalizing...",
@@ -17,6 +18,7 @@ const STARTUP_MESSAGES = [
 /* - - - - - { Shorthand } - - - - - */
 const _client = (): string => chalk.bold.gray("[CLIENT]");
 const _event = (): string => chalk.bold.gray("[EVENT]");
+const _command = (): string => chalk.bold.gray("[COMMAND]");
 
 const _timestamp = (): string => chalk(`[${new Date().toLocaleTimeString()}]`);
 
@@ -81,11 +83,27 @@ export const client = {
         console.log(
             `$_TIMESTAMP $_EVENT ${
                 enabled
-                    ? chalk`{bold {yellow ${name}}} {italic {gray ${path}}}`
-                    : chalk`{strikethrough {bold {dim ${name}}} {italic {gray ${path}}}}`
+                    ? `${chalk.bold.yellow(name)} ${chalk.italic.gray(path)}`
+                    : chalk.strikethrough(`${chalk.dim(name)} ${chalk.italic.gray(path)}`)
             }`
                 .replace("$_TIMESTAMP", _timestamp())
                 .replace("$_EVENT", _event())
+        );
+    },
+
+    commandLoaded: (name: string, path: string, type: "prefix" | "slash"): void => {
+        let prefix = "";
+
+        // prettier-ignore
+        switch (type) {
+            case "prefix": prefix = config.client.PREFIX; break;
+            case "slash": prefix = "/"; break;
+        }
+
+        console.log(
+            `$_TIMESTAMP $_COMMAND ${chalk.bold.yellow(`${prefix}${name}`)} ${chalk.italic.gray(path)}`
+                .replace("$_TIMESTAMP", _timestamp())
+                .replace("$_COMMAND", _command())
         );
     }
 };
