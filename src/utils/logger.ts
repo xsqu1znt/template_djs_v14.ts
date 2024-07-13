@@ -17,16 +17,22 @@ const _shard_count = (count: number) => `${count ? chalk.gray(`Shards running: $
 export const client = {
     // prettier-ignore
     initializing: function (shards?: Shard[]) {
-        console.log(`${_timestamp()} ${_client()} ${chalk`{red 🕒} {italic Initalizing...} ${_dynamic_shard(shards || [])}`}`);
+        console.log(`${_timestamp()} ${_client()} ⏳ ${chalk`{italic Initalizing...} ${_dynamic_shard(shards || [])}`}`);
+    },
+
+    // prettier-ignore
+    conecting: function (shards?: Shard[]) {
+        console.log(`${_timestamp()} ${_client()} ⏳ ${chalk`{italic Connecting to Discord...} ${_dynamic_shard(shards || [])}`}`);
+    },
+
+    // prettier-ignore
+    online: function (shardCount = 0) {
+        console.log(`${_timestamp()} ${_client()} ✅ ${chalk`{italic {green Successfuly connected to Discord!}} ${_shard_count(shardCount)}`}`);
     },
 
     // prettier-ignore
     ready: function (shards?: Shard[]) {
-        console.log(`${_timestamp()} ${_client()} ${chalk`{green ✔️} {italic Successfuly connected to Discord!} ${_dynamic_shard(shards || [])}`}`);
-    },
-
-    online: function (shardCount = 0) {
-        console.log(`${_timestamp()} ${chalk.blueBright(`${PROJECT}`)} is up and running! ${_shard_count(shardCount)}`);
+        console.log(`${_timestamp()} 🎉 ${chalk.blueBright(PROJECT)} is up and running! ${_dynamic_shard(shards || [])}`);
     }
 };
 

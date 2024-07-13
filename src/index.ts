@@ -30,7 +30,7 @@ if (!TOKEN && !TOKEN_DEV) {
 if (DEV_MODE) logger.debug("DEV_MODE is enabled! You can change this by setting DEV_MODE to false in either .env or config_client.json");
 
 /* - - - - - { Setup Client } - - - - - */
-logger.log("initializing...");
+logger.client.initializing();
 
 const client = new Client({
     intents: [
@@ -69,7 +69,7 @@ async function init(): Promise<void> {
     await importers.init(client);
 
     // Log the next step to console
-    logger.log("connecting to Discord...");
+    logger.client.conecting();
 
     // prettier-ignore
     // Connect the client to Discord
@@ -86,7 +86,9 @@ async function init(): Promise<void> {
     	// Remove commands (does nothing if commands were registered locally) :: { GLOBAL }
     	// await slashCommandManager.remove(client, { global: true });
 
-    	// await mongo.connect();
+        // await mongo.connect();
+
+        logger.client.ready();
     });
 }
 

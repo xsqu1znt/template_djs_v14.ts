@@ -21,7 +21,7 @@ async function importEventModules() {
 export default async function (client: Client) {
     // Import event files
     let events = await importEventModules();
-    if (!events.length) logger.error("[CLIENT]: No event modules found", `dir: '${path.join(__dirname, "../../events")}'`);
+    if (!events.length) logger.error("[CLIENT] No event modules found", `dir: '${path.join(__dirname, "../../events")}'`);
 
     // Get an array of every EventType
     let eventTypes = jt.unique(events.map(e => e.eventType));
