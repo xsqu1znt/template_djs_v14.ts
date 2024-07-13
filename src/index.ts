@@ -27,10 +27,7 @@ if (!TOKEN && !TOKEN_DEV) {
 }
 
 // prettier-ignore
-if (DEV_MODE) {
-    logger.debug("DEV_MODE is enabled! You can change this by setting DEV_MODE to false in either .env or config_client.json");
-    process.exit(0);
-}
+if (DEV_MODE) logger.debug("DEV_MODE is enabled! You can change this by setting DEV_MODE to false in either .env or config_client.json");
 
 /* - - - - - { Setup Client } - - - - - */
 logger.log("initializing...");

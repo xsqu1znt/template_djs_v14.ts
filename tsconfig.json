@@ -1,4 +1,9 @@
 {
+    "ts-node": {
+        "files": true,
+        "require": ["tsconfig-paths/register"]
+    },
+
     "compilerOptions": {
         /* Language and Environment */
         "target": "ESNext",
@@ -9,7 +14,7 @@
         "rootDir": "./src",
         "baseUrl": "./",
         "paths": {
-            "@customTypes/*": ["./types/*"],
+            "@customTypes/*": ["src/types/*"],
 
             "@configs": ["./src/configs"],
             "@events/*": ["./src/events/*"],

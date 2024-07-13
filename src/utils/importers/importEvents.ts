@@ -4,7 +4,7 @@ import { Client } from "discord.js";
 import * as logger from "@utils/logger";
 import * as jt from "@utils/jsTools";
 
-const eventModuleDirectoryPath = "./events";
+const eventModuleDirectoryPath = "../../events";
 
 async function importEventModules(path: string) {
     let files = jt.readDir(path, { recursive: true }).filter(fn => fn.endsWith(".ts"));
@@ -23,7 +23,7 @@ async function importEventModules(path: string) {
 export default async function (client: Client) {
     // Import event files
     let events = await importEventModules(eventModuleDirectoryPath);
-    if (!events.length) logger.debug(`No events found in '${eventModuleDirectoryPath}'`);
+    if (!events.length) logger.error("[CLIENT]: No event modules found", `dir: '${eventModuleDirectoryPath}'`);
 
     // Get an array of every EventType
     let eventTypes = jt.unique(events.map(e => e.eventType));
