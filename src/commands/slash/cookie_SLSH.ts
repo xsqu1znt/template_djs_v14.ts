@@ -1,5 +1,8 @@
 import { SlashCommand } from "@customTypes/commands";
+
 import { SlashCommandBuilder } from "discord.js";
+// import { BetterEmbed } from "@utils/discordTools";
+import * as jt from "@utils/jsTools";
 
 export default {
     category: "Fun",
