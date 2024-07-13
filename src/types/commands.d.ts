@@ -1,4 +1,4 @@
-import { Client, ClientEvents, CommandInteraction, Message, PermissionFlags } from "discord.js";
+import { Client, ClientEvents, CommandInteraction, Message, PermissionFlags, SlashCommandBuilder } from "discord.js";
 
 /* - - - - - { Callback Types } - - - - - */
 export interface PrefixCommandCallbackExtraParams {
@@ -20,7 +20,11 @@ export type PrefixCommandCallback = (
 
 /* - - - - - { Command Export Types } - - - - - */
 export interface BaseCommandOptions {
-    /** The emoji to show in the help command list. */
+    /** The emoji to show in the help command list. Can also be a custom emoji.
+     *
+     * `<:Emoji_Name:Emoji_ID>` - for custom emojis.
+     *
+     * `<a:Emoji_Name:Emoji_ID>` - for animated custom emojis. */
     emoji?: string;
     /** Only allow this command to be used in guilds. */
     guildOnly?: boolean;
@@ -46,11 +50,41 @@ export interface SlashCommandOptions extends BaseCommandOptions {
 export interface PrefixCommandOptions extends BaseCommandOptions {}
 
 /* - - - - - { Command Types } - - - - - */
+export interface SlashCommand {
+    /** The category to place the command inside the help command. */
+    category: string;
+    /** Extra options for this command. */
+    options: SlashCommandOptions;
+    /** Slash command builder. */
+    builder: SlashCommandBuilder;
+    /** Executed when the command is used. */
+    execute: SlashCommandCallback;
+}
+
+export interface PrefixCommand {
+    /** Name of the command. */
+    name: string;
+    /** Different ways this command can be called. */
+    aliases: string[];
+    /** Description of the command. */
+    description: string;
+    /** How the command can be used. */
+    usage: string;
+    /** The category to place the command inside the help command list. */
+    category: string;
+    /** Extra options for this command. */
+    options: PrefixCommandOptions;
+    /** Executed when the command is used. */
+    execute: PrefixCommandCallback;
+}
+
 export interface RawCommand {
     /** Name of the command. */
     name: string;
     /** Description of the command. */
     description: string;
+    /** The category to place the command inside the help command list. */
+    category: string;
     /** Type of command.
      * - `1` `CHAT_INPUT`
      *
@@ -76,23 +110,4 @@ export interface RawCommand {
     options: BaseCommandOptions;
     /** Executed when the command is used. */
     execute: BaseCommandCallback;
-}
-
-export interface PrefixCommand {
-    /** Name of the command. */
-    name: string;
-    /** Different ways this command can be called. */
-    aliases: string[];
-    /** Description of the command. */
-    description: string;
-    /** How the command can be used. */
-    usage: string;
-    /** Category of the command. */
-    category: string;
-    /** Icon of the command category. */
-    categoryIcon: string;
-    /** Extra options for this command. */
-    options: PrefixCommandOptions;
-    /** Executed when the command is used. */
-    execute: PrefixCommandCallback;
 }
