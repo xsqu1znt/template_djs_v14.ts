@@ -7,10 +7,10 @@ export async function init(client: Client) {
     await Promise.all([
         importEvents
             .default(client)
-            .catch(err => logger.error("[CLIENT] Importer failed", `'importEvents' could not initialize`, err)),
+            .catch(err => logger.error("$_TIMESTAMP $_IMPORTER", `'importEvents' could not initialize`, err)),
 
         importCommands
             .default(client)
-            .catch(err => logger.error("[CLIENT] Importer failed", `'importCommands' could not initialize`, err))
+            .catch(err => logger.error("$_TIMESTAMP $_IMPORTER", `'importCommands' could not initialize`, err))
     ]);
 }

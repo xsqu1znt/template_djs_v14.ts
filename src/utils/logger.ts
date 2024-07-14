@@ -17,6 +17,7 @@ const STARTUP_MESSAGES = [
 
 /* - - - - - { Shorthand } - - - - - */
 const _client = (): string => chalk.bold.gray("[CLIENT]");
+const _importer = (): string => chalk.bold.gray("[IMPORTER]");
 const _import_event = (): string => chalk.bold.gray("[IMPORT/EVENT]");
 const _import_command = (): string => chalk.bold.gray("[IMPORT/COMMAND]");
 
@@ -32,7 +33,14 @@ export function debug(msg: string): void {
 }
 
 export function error(header: string, msg: string, err: any = ""): void {
-    console.error(`${chalk.bgRed.black(header)} ${chalk.magenta(msg)}`, err);
+    header = header
+        .replace("$_TIMESTAMP", _timestamp())
+        .replace("$_CLIENT", _client())
+        .replace("$_IMPORTER", _importer())
+        .replace("$_IMPORT_EVENT", _import_event())
+        .replace("$_IMPORT_COMMAND", _import_command());
+
+    console.error(`${chalk.bgRed(header)} ${chalk`${msg}`}`, err);
 }
 
 export function log(msg: string): void {
