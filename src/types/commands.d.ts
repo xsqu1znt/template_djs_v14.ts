@@ -1,4 +1,12 @@
-import { Client, ClientEvents, CommandInteraction, Message, PermissionFlags, SlashCommandBuilder } from "discord.js";
+import {
+    Client,
+    ClientEvents,
+    CommandInteraction,
+    ContextMenuCommandBuilder,
+    Message,
+    PermissionFlags,
+    SlashCommandBuilder
+} from "discord.js";
 
 /* - - - - - { Callback Types } - - - - - */
 export interface PrefixCommandCallbackExtraParams {
@@ -106,6 +114,15 @@ export interface RawCommand {
      *
      * - `2` `PRIVATE_CHANNEL` */
     contexts: 0 | 1 | 2;
+    /** Extra options for this command. */
+    options: BaseCommandOptions;
+    /** Executed when the command is used. */
+    execute: BaseCommandCallback;
+}
+
+export interface InteractionCommand extends RawCommand {
+    /** Context menu builder. */
+    builder?: ContextMenuCommandBuilder;
     /** Extra options for this command. */
     options: BaseCommandOptions;
     /** Executed when the command is used. */

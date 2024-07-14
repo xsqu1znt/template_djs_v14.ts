@@ -8,7 +8,6 @@ declare module "discord.js" {
             all: Collection<string, SlashCommandBuilder | RawCommand>;
             public: Collection<string, SlashCommandBuilder>;
             staff: Collection<string, SlashCommandBuilder>;
-            userInstall: Collection<string, RawCommand>;
             custom: Collection<string, SlashCommandBuilder>;
         };
 
@@ -17,6 +16,12 @@ declare module "discord.js" {
             public: Collection<string, PrefixCommand | RawCommand>;
             staff: Collection<string, PrefixCommand | RawCommand>;
             custom: Collection<string, PrefixCommand | RawCommand>;
+        };
+
+        interactionCommands: {
+            all: Collection<string, RawCommand>;
+            contextMenu: Collection<string, RawCommand>;
+            userInstall: Collection<string, RawCommand>;
         };
     }
 }

@@ -17,8 +17,8 @@ const STARTUP_MESSAGES = [
 
 /* - - - - - { Shorthand } - - - - - */
 const _client = (): string => chalk.bold.gray("[CLIENT]");
-const _event = (): string => chalk.bold.gray("[EVENT]");
-const _command = (): string => chalk.bold.gray("[COMMAND]");
+const _import_event = (): string => chalk.bold.gray("[IMPORT/EVENT]");
+const _import_command = (): string => chalk.bold.gray("[IMPORT/COMMAND]");
 
 const _timestamp = (): string => chalk(`[${new Date().toLocaleTimeString()}]`);
 
@@ -77,21 +77,23 @@ export const client = {
                 .replace("$_TIMESTAMP", _timestamp())
                 .replace("$_DYNAMIC_SHARD", _dynamic_shard(shards || []))
         );
-    },
+    }
+};
 
-    eventBinded: (name: string, path: string, enabled: boolean): void => {
+export const importer = {
+    eventImport: (name: string, path: string, enabled: boolean): void => {
         console.log(
-            `$_TIMESTAMP $_EVENT ${
+            `$_TIMESTAMP $IMPORT_EVENT ${
                 enabled
                     ? `${chalk.bold.yellow(name)} ${chalk.italic.gray(path)}`
                     : chalk.strikethrough(`${chalk.dim(name)} ${chalk.italic.gray(path)}`)
             }`
                 .replace("$_TIMESTAMP", _timestamp())
-                .replace("$_EVENT", _event())
+                .replace("$IMPORT_EVENT", _import_event())
         );
     },
 
-    commandLoaded: (name: string, path: string, type: "prefix" | "slash"): void => {
+    commandImport: (name: string, path: string, type: "prefix" | "slash"): void => {
         let prefix = "";
 
         // prettier-ignore
@@ -101,9 +103,9 @@ export const client = {
         }
 
         console.log(
-            `$_TIMESTAMP $_COMMAND ${chalk.bold.yellow(`${prefix}${name}`)} ${chalk.italic.gray(path)}`
+            `$_TIMESTAMP $IMPORT_COMMAND ${chalk.bold.yellow(`${prefix}${name}`)} ${chalk.italic.gray(path)}`
                 .replace("$_TIMESTAMP", _timestamp())
-                .replace("$_COMMAND", _command())
+                .replace("$IMPORT_COMMAND", _import_command())
         );
     }
 };
