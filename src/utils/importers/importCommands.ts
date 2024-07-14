@@ -193,37 +193,39 @@ export default async function (client: Client): Promise<void> {
         interaction: await importInteractionCommands()
     };
 
-    // Add the imported commands to the client
-
-    // Slash commands
+    // Add the imported slash commands to the client
     for (let [k, v] of Object.entries(importedCommands.slash)) {
         for (let command of v) {
             if (!command.module) continue;
+            client.commands.slash.all.set(command.module.builder.name, command.module);
             client.commands.slash[k as "public" | "staff" | "custom"].set(command.module.builder.name, command.module);
         }
     }
 
-    // Prefix commands
+    // Add the imported prefix commands to the client
     for (let [k, v] of Object.entries(importedCommands.prefix)) {
         for (let command of v) {
             if (!command.module) continue;
+            client.commands.prefix.all.set(command.module.name, command.module);
             client.commands.prefix[k as "public" | "staff" | "custom"].set(command.module.name, command.module);
 
             // Apply aliases
             if (command.module.aliases) {
                 for (let alias of command.module.aliases) {
+                    client.commands.prefix.all.set(alias, command.module);
                     client.commands.prefix[k as "public" | "staff" | "custom"].set(alias, command.module);
                 }
             }
         }
     }
 
-    // Interaction commands
+    // Add the imported interaction commands to the client
     for (let [k, v] of Object.entries(importedCommands.interaction)) {
         for (let command of v) {
             if (!command.module) continue;
             if (!command.module.raw?.name || !command.module.builder?.name) continue;
 
+            client.commands.interaction.all.set(command.module.raw?.name || command.module.builder?.name, command.module);
             client.commands.interaction[k as "contextMenu" | "userInstall"].set(
                 command.module.raw?.name || command.module.builder?.name,
                 command.module
