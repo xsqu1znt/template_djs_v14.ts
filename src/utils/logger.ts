@@ -48,7 +48,7 @@ export function log(msg: string): void {
 }
 
 export function success(msg: string): void {
-    console.log(chalk.green(msg));
+    console.log(chalk.greenBright(msg));
 }
 
 export const client = {
@@ -81,7 +81,7 @@ export const client = {
 
     ready: (shards?: Shard[]): void => {
         console.log(
-            `$_TIMESTAMP ${chalk`{bold {yellow ${PROJECT}} is up and running!}`} 🎉 $_DYNAMIC_SHARD`
+            `$_TIMESTAMP ${chalk`{bold {greenBright ${PROJECT}} is up and running!}`} 🎉 $_DYNAMIC_SHARD`
                 .replace("$_TIMESTAMP", _timestamp())
                 .replace("$_DYNAMIC_SHARD", _dynamic_shard(shards || []))
         );
@@ -93,7 +93,7 @@ export const importer = {
         console.log(
             `$_TIMESTAMP $IMPORT_EVENT ${
                 enabled
-                    ? `${chalk.bold.blueBright(name)} ${chalk.italic.gray(path)}`
+                    ? `${chalk.bold.cyan(name)} ${chalk.italic.gray(path)}`
                     : chalk.strikethrough(`${chalk.bold.dim(name)} ${chalk.italic.gray(path)}`)
             }`
                 .replace("$_TIMESTAMP", _timestamp())
