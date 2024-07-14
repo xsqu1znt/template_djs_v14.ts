@@ -86,13 +86,11 @@ export interface PrefixCommand {
     execute: PrefixCommandCallback;
 }
 
-export interface RawCommand {
+export interface RawCommandData {
     /** Name of the command. */
     name: string;
     /** Description of the command. */
     description: string;
-    /** The category to place the command inside the help command list. */
-    category: string;
     /** Type of command.
      * - `1` `CHAT_INPUT`
      *
@@ -114,15 +112,15 @@ export interface RawCommand {
      *
      * - `2` `PRIVATE_CHANNEL` */
     contexts: 0 | 1 | 2;
-    /** Extra options for this command. */
-    options: BaseCommandOptions;
-    /** Executed when the command is used. */
-    execute: BaseCommandCallback;
 }
 
-export interface InteractionCommand extends RawCommand {
-    /** Context menu builder. */
+export interface InteractionCommand {
+    /** Raw command data instead of a command builder. */
+    raw?: RawCommandData;
+    /** Command builder. */
     builder?: ContextMenuCommandBuilder;
+    /** The category to place the command inside the help command list. */
+    category: string;
     /** Extra options for this command. */
     options: BaseCommandOptions;
     /** Executed when the command is used. */

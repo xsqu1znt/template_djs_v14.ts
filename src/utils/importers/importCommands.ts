@@ -1,4 +1,4 @@
-import { SlashCommand, PrefixCommand, RawCommand, InteractionCommand } from "@customTypes/commands";
+import { SlashCommand, PrefixCommand, InteractionCommand } from "@customTypes/commands";
 
 import { Client } from "discord.js";
 import * as logger from "@utils/logger";
@@ -35,8 +35,8 @@ type ImportedCommandModule<T> = T extends "slash"
     : T extends "prefix"
     ? { module: PrefixCommand | null; path: string }
     : T extends "interaction"
-    ? { module: RawCommand | InteractionCommand | null; path: string }
-    : { module: null; path: string };
+    ? { module: InteractionCommand | null; path: string }
+    : never;
 
 async function importCommandModules<T extends CommandType>(commandType: T): Promise<ImportedCommandModule<T>[]> {
     let _moduleRelativePath: string = "";
@@ -75,19 +75,17 @@ async function importCommandModules<T extends CommandType>(commandType: T): Prom
     // Import the modules found in the given directory
     let modules: ImportedCommandModule<T>[] = await Promise.all(
         files.map(async fn => {
+            let _path = path.join(_moduleDirectory, fn);
             let _logPath = path.join(_moduleLogPath, fn);
+            let _module = await import(_path)
+                .then(m => m.default)
+                .catch(err => {
+                    // Log the error to the console
+                    logger.error("$_TIMESTAMP $_IMPORT_COMMAND", `Failed to import command at '${_logPath}'`, err);
+                    return null;
+                });
 
-            try {
-                let _path = path.join(_moduleDirectory, fn);
-                let _module = (await import(_path)).default;
-
-                return { module: _module, path: _logPath } as ImportedCommandModule<T>;
-            } catch (err) {
-                // Log the error to the console
-                logger.error("$_TIMESTAMP $_IMPORT_COMMAND", `Failed to import command at '${_logPath}'`, err);
-
-                return { module: null, path: _logPath } as ImportedCommandModule<T>;
-            }
+            return { module: _module, path: _logPath } as ImportedCommandModule<T>;
         })
     );
 
@@ -95,36 +93,16 @@ async function importCommandModules<T extends CommandType>(commandType: T): Prom
 }
 
 async function importSlashCommandModules() {
-    let files = jt
-        .readDir(SLSH_MODULE_DIR, { recursive: true })
-        .filter(fn => fn.includes("SLSH") && (fn.endsWith(".js") || fn.endsWith(".ts")));
-
     let importedCommands = {
         public: [] as Array<{ module: SlashCommand; path: string }>,
         staff: [] as Array<{ module: SlashCommand; path: string }>,
         custom: [] as Array<{ module: SlashCommand; path: string }>
     };
 
-    // Import the modules found in the given directory
-    let modules = await Promise.all(
-        files.map(async fn => {
-            try {
-                let _path = path.join(SLSH_MODULE_DIR, fn);
-                let _module: SlashCommand = (await import(_path)).default;
+    // Import the command modules
+    let modules = await importCommandModules("slash");
 
-                return { module: _module, path: path.join("commands/slash", fn) };
-            } catch (err) {
-                let _errPath = path.join("commands/slash", fn);
-
-                // Log the error to the console
-                logger.error("$_TIMESTAMP $_IMPORT_COMMAND", `Failed to import command at '${_errPath}'`, err);
-
-                return { module: null, path: _errPath };
-            }
-        })
-    );
-
-    // Filter the imported modules
+    /* // Filter the imported modules
     for (let module of modules) {
         if (!module.module) continue;
 
@@ -142,7 +120,7 @@ async function importSlashCommandModules() {
         else {
             importedCommands.public.push(module);
         }
-    }
+    } */
 
     return importedCommands;
 }
