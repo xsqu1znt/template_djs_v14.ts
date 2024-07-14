@@ -81,7 +81,7 @@ async function importCommandModules<T extends CommandType>(commandType: T): Prom
                 .then(m => m.default)
                 .catch(err => {
                     // Log the error to the console
-                    logger.error("$_TIMESTAMP $_IMPORT_COMMAND", `Failed to import command at '${_logPath}'`, err);
+                    logger.error("$_TIMESTAMP $_IMPORT_COMMAND", `Failed to import command module at '${_logPath}'`, err);
                     return null;
                 });
 
@@ -199,6 +199,8 @@ export default async function (client: Client): Promise<void> {
             if (!command.module) continue;
             client.commands.slash.all.set(command.module.builder.name, command.module);
             client.commands.slash[k as "public" | "staff" | "custom"].set(command.module.builder.name, command.module);
+
+            logger.importer.commandImport(command.module.builder.name, command.path, "slash");
         }
     }
 
@@ -209,11 +211,15 @@ export default async function (client: Client): Promise<void> {
             client.commands.prefix.all.set(command.module.name, command.module);
             client.commands.prefix[k as "public" | "staff" | "custom"].set(command.module.name, command.module);
 
+            logger.importer.commandImport(command.module.name, command.path, "prefix");
+
             // Apply aliases
             if (command.module.aliases) {
                 for (let alias of command.module.aliases) {
                     client.commands.prefix.all.set(alias, command.module);
                     client.commands.prefix[k as "public" | "staff" | "custom"].set(alias, command.module);
+
+                    logger.importer.commandImport(`${command.module.name} -> @${alias}`, "", "prefix");
                 }
             }
         }
@@ -223,13 +229,14 @@ export default async function (client: Client): Promise<void> {
     for (let [k, v] of Object.entries(importedCommands.interaction)) {
         for (let command of v) {
             if (!command.module) continue;
-            if (!command.module.raw?.name || !command.module.builder?.name) continue;
 
-            client.commands.interaction.all.set(command.module.raw?.name || command.module.builder?.name, command.module);
-            client.commands.interaction[k as "contextMenu" | "userInstall"].set(
-                command.module.raw?.name || command.module.builder?.name,
-                command.module
-            );
+            let _name = command.module.raw?.name || command.module.builder?.name;
+            if (!_name) continue;
+
+            client.commands.interaction.all.set(_name, command.module);
+            client.commands.interaction[k as "contextMenu" | "userInstall"].set(_name, command.module);
+
+            logger.importer.commandImport(_name, command.path, "interaction");
         }
     }
 }

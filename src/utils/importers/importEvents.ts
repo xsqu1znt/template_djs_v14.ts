@@ -5,8 +5,9 @@ import * as logger from "@utils/logger";
 import * as jt from "@utils/jsTools";
 import * as path from "path";
 
-const EVENT_RELATIVE_PATH = "../../events";
-const EVENT_MODULE_DIRECTORY = path.join(__dirname, EVENT_RELATIVE_PATH);
+const EVENT_MODULE_RELATIVE_PATH = "../../events";
+const EVENT_MODULE_DIRECTORY = path.join(__dirname, EVENT_MODULE_RELATIVE_PATH);
+const EVENT_MODULE_LOG_PATH = "events";
 
 async function importEventModules() {
     let files = jt
@@ -14,15 +15,24 @@ async function importEventModules() {
         .filter(fn => fn.endsWith(".js") || fn.endsWith(".ts"));
 
     // Import the modules found in the given directory
-    return await Promise.all(
+    let modules = await Promise.all(
         files.map(async fn => {
-            let _path: string = path.join(__dirname, EVENT_RELATIVE_PATH, fn);
-            let _module: EventModule = (await import(_path)).default;
-            // TODO: Add try catch and log import errors
+            let _path = path.join(__dirname, EVENT_MODULE_RELATIVE_PATH, fn);
+            let _logPath = path.join(EVENT_MODULE_LOG_PATH, fn);
+            let _module = await import(_path)
+                .then(m => m.default as EventModule)
+                .catch(err => {
+                    // Log the error to the console
+                    logger.error("$_TIMESTAMP $_IMPORT_EVENT", `Failed to import event module at '${_logPath}'`, err);
+                    return null;
+                });
 
-            return { module: _module, path: path.join("events", fn) };
+            return { module: _module, path: _logPath };
         })
     );
+
+    // Filter out modules that failed to import and return
+    return modules.filter(m => m.module) as { module: EventModule; path: string }[];
 }
 
 export default async function (client: Client): Promise<void> {
@@ -55,9 +65,12 @@ export default async function (client: Client): Promise<void> {
                     // Execute the event
                     await event.module.execute.apply(null, [client, ...args]);
                 } catch (err) {
-                    // prettier-ignore
-                    // Catch execution errors
-                    logger.error("[CLIENT] Failed to execute function", `'${event.module.name}' on event '${event.module.eventType}'`, err);
+                    // Log the error to the console
+                    logger.error(
+                        "$_TIMESTAMP $_EVENT",
+                        `Failed to execute '{bold ${event.module.name}}' on event '{bold {blueBright ${event.module.eventType}}}'`,
+                        err
+                    );
                 }
             });
 

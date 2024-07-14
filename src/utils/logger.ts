@@ -73,7 +73,7 @@ export const client = {
 
     ready: (shards?: Shard[]): void => {
         console.log(
-            `$_TIMESTAMP ${chalk`{bold {blueBright ${PROJECT}} is up and running!}`} 🎉 $_DYNAMIC_SHARD`
+            `$_TIMESTAMP ${chalk`{bold {yellow ${PROJECT}} is up and running!}`} 🎉 $_DYNAMIC_SHARD`
                 .replace("$_TIMESTAMP", _timestamp())
                 .replace("$_DYNAMIC_SHARD", _dynamic_shard(shards || []))
         );
@@ -85,21 +85,22 @@ export const importer = {
         console.log(
             `$_TIMESTAMP $IMPORT_EVENT ${
                 enabled
-                    ? `${chalk.bold.yellow(name)} ${chalk.italic.gray(path)}`
-                    : chalk.strikethrough(`${chalk.dim(name)} ${chalk.italic.gray(path)}`)
+                    ? `${chalk.bold.blueBright(name)} ${chalk.italic.gray(path)}`
+                    : chalk.strikethrough(`${chalk.bold.dim(name)} ${chalk.italic.gray(path)}`)
             }`
                 .replace("$_TIMESTAMP", _timestamp())
                 .replace("$IMPORT_EVENT", _import_event())
         );
     },
 
-    commandImport: (name: string, path: string, type: "prefix" | "slash"): void => {
+    commandImport: (name: string, path: string, type: "prefix" | "slash" | "interaction"): void => {
         let prefix = "";
 
         // prettier-ignore
         switch (type) {
             case "prefix": prefix = config.client.PREFIX; break;
             case "slash": prefix = "/"; break;
+            case "interaction": prefix = ""; break;
         }
 
         console.log(
