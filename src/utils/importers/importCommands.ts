@@ -92,17 +92,17 @@ async function importCommandModules<T extends CommandType>(commandType: T): Prom
     return modules;
 }
 
-async function importSlashCommandModules() {
+async function importSlashCommands() {
     let importedCommands = {
-        public: [] as Array<{ module: SlashCommand; path: string }>,
-        staff: [] as Array<{ module: SlashCommand; path: string }>,
-        custom: [] as Array<{ module: SlashCommand; path: string }>
+        public: [] as ImportedCommandModule<"slash">[],
+        staff: [] as ImportedCommandModule<"slash">[],
+        custom: [] as ImportedCommandModule<"slash">[]
     };
 
     // Import the command modules
     let modules = await importCommandModules("slash");
 
-    /* // Filter the imported modules
+    // Filter the imported modules
     for (let module of modules) {
         if (!module.module) continue;
 
@@ -120,9 +120,114 @@ async function importSlashCommandModules() {
         else {
             importedCommands.public.push(module);
         }
-    } */
+    }
 
     return importedCommands;
 }
 
-export default async function (client: Client): Promise<void> {}
+async function importPrefixCommands() {
+    let importedCommands = {
+        public: [] as ImportedCommandModule<"prefix">[],
+        staff: [] as ImportedCommandModule<"prefix">[],
+        custom: [] as ImportedCommandModule<"prefix">[]
+    };
+
+    // Import the command modules
+    let modules = await importCommandModules("prefix");
+
+    // Filter the imported modules
+    for (let module of modules) {
+        if (!module.module) continue;
+
+        let _filename = module.path.split(".").shift();
+
+        // Prefix Commands :: { STAFF } (staff server only commands)
+        if (_filename?.endsWith("_STAFF")) {
+            importedCommands.staff.push(module);
+        }
+        // Prefix Commands :: { CUSTOM } (custom server only commands)
+        else if (_filename?.endsWith("_CUS")) {
+            importedCommands.custom.push(module);
+        }
+        // Prefix Commands :: { PUBLIC }
+        else {
+            importedCommands.public.push(module);
+        }
+    }
+
+    return importedCommands;
+}
+
+async function importInteractionCommands() {
+    let importedCommands = {
+        contextMenu: [] as ImportedCommandModule<"interaction">[],
+        userInstall: [] as ImportedCommandModule<"interaction">[]
+    };
+
+    // Import the command modules
+    let modules = await importCommandModules("interaction");
+
+    // Filter the imported modules
+    for (let module of modules) {
+        if (!module.module) continue;
+
+        let _filename = module.path.split(".").shift();
+
+        // Interaction Commands :: { CONTEXT MENU }
+        if (_filename?.endsWith("_CTX")) {
+            importedCommands.contextMenu.push(module);
+        }
+        // Interaction Commands :: { USER INSTALL }
+        else if (_filename?.endsWith("_UI")) {
+            importedCommands.userInstall.push(module);
+        }
+    }
+
+    return importedCommands;
+}
+
+export default async function (client: Client): Promise<void> {
+    const importedCommands = {
+        slash: await importSlashCommands(),
+        prefix: await importPrefixCommands(),
+        interaction: await importInteractionCommands()
+    };
+
+    // Add the imported commands to the client
+
+    // Slash commands
+    for (let [k, v] of Object.entries(importedCommands.slash)) {
+        for (let command of v) {
+            if (!command.module) continue;
+            client.commands.slash[k as "public" | "staff" | "custom"].set(command.module.builder.name, command.module);
+        }
+    }
+
+    // Prefix commands
+    for (let [k, v] of Object.entries(importedCommands.prefix)) {
+        for (let command of v) {
+            if (!command.module) continue;
+            client.commands.prefix[k as "public" | "staff" | "custom"].set(command.module.name, command.module);
+
+            // Apply aliases
+            if (command.module.aliases) {
+                for (let alias of command.module.aliases) {
+                    client.commands.prefix[k as "public" | "staff" | "custom"].set(alias, command.module);
+                }
+            }
+        }
+    }
+
+    // Interaction commands
+    for (let [k, v] of Object.entries(importedCommands.interaction)) {
+        for (let command of v) {
+            if (!command.module) continue;
+            if (!command.module.raw?.name || !command.module.builder?.name) continue;
+
+            client.commands.interaction[k as "contextMenu" | "userInstall"].set(
+                command.module.raw?.name || command.module.builder?.name,
+                command.module
+            );
+        }
+    }
+}

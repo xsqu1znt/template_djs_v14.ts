@@ -60,9 +60,9 @@ export interface PrefixCommandOptions extends BaseCommandOptions {}
 /* - - - - - { Command Types } - - - - - */
 export interface SlashCommand {
     /** The category to place the command inside the help command. */
-    category: string;
+    category?: string;
     /** Extra options for this command. */
-    options: SlashCommandOptions;
+    options?: SlashCommandOptions;
     /** Slash command builder. */
     builder: SlashCommandBuilder;
     /** Executed when the command is used. */
@@ -73,15 +73,15 @@ export interface PrefixCommand {
     /** Name of the command. */
     name: string;
     /** Different ways this command can be called. */
-    aliases: string[];
+    aliases?: string[];
     /** Description of the command. */
-    description: string;
+    description?: string;
     /** How the command can be used. */
-    usage: string;
+    usage?: string;
     /** The category to place the command inside the help command list. */
-    category: string;
+    category?: string;
     /** Extra options for this command. */
-    options: PrefixCommandOptions;
+    options?: PrefixCommandOptions;
     /** Executed when the command is used. */
     execute: PrefixCommandCallback;
 }
@@ -120,9 +120,9 @@ export interface InteractionCommand {
     /** Command builder. */
     builder?: ContextMenuCommandBuilder;
     /** The category to place the command inside the help command list. */
-    category: string;
+    category?: string;
     /** Extra options for this command. */
-    options: BaseCommandOptions;
+    options?: BaseCommandOptions;
     /** Executed when the command is used. */
     execute: BaseCommandCallback;
 }

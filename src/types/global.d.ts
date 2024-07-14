@@ -1,27 +1,29 @@
-import { PrefixCommand, RawCommand } from "@customTypes/commands";
+import { InteractionCommand, PrefixCommand, SlashCommand } from "@customTypes/commands";
 
 import { Client, Collection, SlashCommandBuilder } from "discord.js";
 
 declare module "discord.js" {
     interface Client {
-        slashCommands: {
-            all: Collection<string, SlashCommandBuilder | RawCommand>;
-            public: Collection<string, SlashCommandBuilder>;
-            staff: Collection<string, SlashCommandBuilder>;
-            custom: Collection<string, SlashCommandBuilder>;
-        };
+        commands: {
+            slash: {
+                all: Collection<string, SlashCommand>;
+                public: Collection<string, SlashCommand>;
+                staff: Collection<string, SlashCommand>;
+                custom: Collection<string, SlashCommand>;
+            };
 
-        prefixCommands: {
-            all: Collection<string, PrefixCommand | RawCommand>;
-            public: Collection<string, PrefixCommand | RawCommand>;
-            staff: Collection<string, PrefixCommand | RawCommand>;
-            custom: Collection<string, PrefixCommand | RawCommand>;
-        };
+            prefix: {
+                all: Collection<string, PrefixCommand>;
+                public: Collection<string, PrefixCommand>;
+                staff: Collection<string, PrefixCommand>;
+                custom: Collection<string, PrefixCommand>;
+            };
 
-        interactionCommands: {
-            all: Collection<string, RawCommand>;
-            contextMenu: Collection<string, RawCommand>;
-            userInstall: Collection<string, RawCommand>;
+            interaction: {
+                all: Collection<string, InteractionCommand>;
+                contextMenu: Collection<string, InteractionCommand>;
+                userInstall: Collection<string, InteractionCommand>;
+            };
         };
     }
 }

@@ -48,24 +48,26 @@ const client = new Client({
 /* - - - - - { Custom Client Properties } - - - - - */
 /* NOTE: You must define extra properties in './types/global.d.ts' before adding them here */
 
-client.slashCommands = {
-    all: new Collection(),
-    public: new Collection(),
-    staff: new Collection(),
-    custom: new Collection()
-};
+client.commands = {
+    slash: {
+        all: new Collection(),
+        public: new Collection(),
+        staff: new Collection(),
+        custom: new Collection()
+    },
 
-client.prefixCommands = {
-    all: new Collection(),
-    public: new Collection(),
-    staff: new Collection(),
-    custom: new Collection()
-};
+    prefix: {
+        all: new Collection(),
+        public: new Collection(),
+        staff: new Collection(),
+        custom: new Collection()
+    },
 
-client.interactionCommands = {
-    all: new Collection(),
-    contextMenu: new Collection(),
-    userInstall: new Collection()
+    interaction: {
+        all: new Collection(),
+        contextMenu: new Collection(),
+        userInstall: new Collection()
+    }
 };
 
 /* - - - - - { Import & Connect } - - - - - */
