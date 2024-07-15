@@ -15,6 +15,15 @@ const STARTUP_MESSAGES = [
     "Giving the developer a pat on the back..."
 ];
 
+/* - - - - - { Color Template } - - - - - */
+export const colors = {
+    debug: chalk.hex("#C45AB3"),
+    log: chalk.hex("#9F7F95"),
+
+    eventName: chalk.hex("#9381FF"),
+    commandName: chalk.hex("#EFCD1E")
+};
+
 /* - - - - - { Shorthand } - - - - - */
 const _client = (): string => chalk.bold.gray("[CLIENT]");
 const _importer = (): string => chalk.bold.gray("[IMPORTER]");
@@ -28,23 +37,25 @@ const _dynamic_shard = (shards: Shard[]): string =>
 const _shard_count = (count: number): string => `${count ? chalk.gray(`Shards running: ${count}`) : ""}`;
 
 /* - - - - - { Exports } - - - - - */
-export function debug(msg: string): void {
-    console.log(chalk.magenta(msg));
-}
-
-export function error(header: string, msg: string, err: any = ""): void {
-    header = header
+function contextFormatter(str: string): string {
+    return str
         .replace("$_TIMESTAMP", _timestamp())
         .replace("$_CLIENT", _client())
         .replace("$_IMPORTER", _importer())
         .replace("$_IMPORT_EVENT", _import_event())
         .replace("$_IMPORT_COMMAND", _import_command());
+}
 
-    console.error(`${chalk.bgRed(header)} ${chalk`${msg}`}`, err);
+export function debug(msg: string): void {
+    console.log(colors.debug.italic(contextFormatter(msg)));
+}
+
+export function error(header: string, msg: string, err: any = ""): void {
+    console.error(`${chalk.bgRed(contextFormatter(header))} ${chalk`${msg}`}`, err);
 }
 
 export function log(msg: string): void {
-    console.log(chalk.gray(msg));
+    console.log(colors.log.italic(msg));
 }
 
 export function success(msg: string): void {
@@ -93,7 +104,7 @@ export const importer = {
         console.log(
             `$_TIMESTAMP $IMPORT_EVENT ${
                 enabled
-                    ? `${chalk.bold.cyan(name)} ${chalk.italic.gray(path)}`
+                    ? `${colors.eventName.bold(name)} ${chalk.italic.gray(path)}`
                     : chalk.strikethrough(`${chalk.bold.dim(name)} ${chalk.italic.gray(path)}`)
             }`
                 .replace("$_TIMESTAMP", _timestamp())
@@ -112,7 +123,7 @@ export const importer = {
         }
 
         console.log(
-            `$_TIMESTAMP $IMPORT_COMMAND ${chalk.bold.yellow(`${prefix}${name}`)} ${chalk.italic.gray(path)}`
+            `$_TIMESTAMP $IMPORT_COMMAND ${colors.commandName.bold(`${prefix}${name}`)} ${chalk.italic.gray(path)}`
                 .replace("$_TIMESTAMP", _timestamp())
                 .replace("$IMPORT_COMMAND", _import_command())
         );
