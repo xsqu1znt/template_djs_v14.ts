@@ -5,7 +5,6 @@ import { PrefixCommand } from "@customTypes/commands";
 
 export default {
     name: "cookie",
-    aliases: ["kuuki", "cock"],
     category: "Fun",
     options: { emoji: "🍪" },
 
