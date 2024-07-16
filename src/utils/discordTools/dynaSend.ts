@@ -1,4 +1,4 @@
-import { SendHandler, SendMethod, SendMethodMessageBased } from "./types";
+import { SendHandler, SendMethod } from "./types";
 
 interface DynaSendOptions {
     /** The method used to send the message.
