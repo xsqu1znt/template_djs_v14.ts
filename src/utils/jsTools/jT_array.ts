@@ -20,10 +20,13 @@ export function unique(arr: any[], prop: string = "", copy: boolean = false) {
     return copy ? structuredClone(arr_new) : arr_new;
 }
 
+interface ForceArrayOptions {
+    copy?: boolean;
+    filterFalsey?: boolean;
+}
+
 /** Check if the given item is an array, return the item in an array if it isn't. */
-export function forceArray<T extends any[]>(item: T, options?: { copy?: boolean; filterFalsey?: boolean }): T;
-export function forceArray<T>(item: T, options?: { copy?: boolean; filterFalsey?: boolean }): T[];
-export function forceArray<T>(item: T, options?: { copy?: boolean; filterFalsey?: boolean }) {
+export function forceArray<T>(item: T, options?: ForceArrayOptions) {
     let _item: T[] = [];
 
     if (Array.isArray(item)) _item.push(item);
@@ -31,5 +34,5 @@ export function forceArray<T>(item: T, options?: { copy?: boolean; filterFalsey?
     if (options?.filterFalsey) _item = _item.filter(i => i);
     if (options?.copy) _item = structuredClone(_item);
 
-    return _item as T;
+    return _item as T extends any[] ? T : T[];
 }

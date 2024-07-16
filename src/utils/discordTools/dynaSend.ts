@@ -1,16 +1,6 @@
-import { SendMethod } from "./types";
+import { SendMethod, DynaSendInteractionBased, DynaSendChannelBased, DynaSendMessageBased } from "./types";
 
 interface DynaSendOptions {
-    /** Handler used to send the message.
-     *
-     * The type of handler depends on the `SendMethod` you choose to use.
-     *
-     * ___1.___ `BaseInteraction`: required for `Interaction` based `SendMethods`
-     *
-     * ___2.___ `Channel`: required for the "sendToChannel" `SendMethod`
-     *
-     * ___3.___ `Message`: required for `Message` based `SendMethods` */
-    handler: BaseInteraction | BaseChannel | Message;
     /** Text content to send in the message. */
     content?: string;
     /** Embeds to send with the message. */
@@ -19,16 +9,6 @@ interface DynaSendOptions {
     components?: ActionRowBuilder | ActionRowBuilder[];
     /** Mention types allowed for the message. */
     allowedMentions?: MessageMentionOptions;
-    /** The method used to send the message.
-     *
-     * Defaults based on the `handler` type:
-     *
-     * ___1.___ `BaseInteraction`: "reply" _(uses "editReply" if an interaction cannot be replied)_
-     *
-     * ___2.___ `Channel`: "sendToChannel"
-     *
-     * ___3.___ `Message`: "messageReply" */
-    sendMethod?: SendMethod;
     /** If the message should be ephemeral. _This only works for the "reply" `SendMethod`._ */
     ephemeral?: boolean;
     /** An amount of time to wait in __milliseconds__ before deleting the message.
@@ -39,13 +19,25 @@ interface DynaSendOptions {
     fetchReply?: boolean;
 }
 
-import { ActionRowBuilder, BaseChannel, BaseInteraction, EmbedBuilder, Message, MessageMentionOptions } from "discord.js";
+import {
+    ActionRowBuilder,
+    BaseChannel,
+    BaseGuildTextChannel,
+    BaseInteraction,
+    CommandInteraction,
+    EmbedBuilder,
+    Message,
+    MessageMentionOptions,
+    TextChannel
+} from "discord.js";
 // import * as deleteMessageAfter from "./deleteMessageAfter";
 // import * as BetterEmbed from "./betterEmbed";
 import * as logger from "@utils/logger";
 import * as jt from "@utils/jsTools";
+import { Channel } from "diagnostics_channel";
 
-export async function dynaSend(options: DynaSendOptions) {
+export async function dynaSend(handler: CommandInteraction, options: DynaSendInteractionBased): Promise<Message | null>;
+export async function dynaSend(handler: CommandInteraction | TextChannel | Message, options: DynaSendMessageBased): Promise<Message | null> {
     options = {
         ...{
             handler: undefined,
@@ -60,9 +52,9 @@ export async function dynaSend(options: DynaSendOptions) {
         },
         ...options,
 
-        /* Ensure all arrays are arrays */
-        embeds: jt.forceArray(options.embeds, { filterFalsey: true }),
-        components: jt.forceArray(options.components, { filterFalsey: true }),
+        /* Ensure all arrays are, well, arrays */
+        embeds: options.embeds ? jt.forceArray(options.embeds, { filterFalsey: true }) : [],
+        components: options.components ? jt.forceArray(options.components, { filterFalsey: true }) : [],
 
         // Fixes a bug with allowed mention not being applied properly
         allowedMentions: {
@@ -73,4 +65,9 @@ export async function dynaSend(options: DynaSendOptions) {
             ...options.allowedMentions
         }
     };
+
+    /* - - - - - { Error Checking } - - - - - */
+    /* if (["messageReply", "messageEdit"].includes(options.sendMethod as string) && options.handler! instanceof Message) {
+        throw new TypeError("[DynaSend]", { cause: "handler is not a 'Message' based" });
+    } */
 }
