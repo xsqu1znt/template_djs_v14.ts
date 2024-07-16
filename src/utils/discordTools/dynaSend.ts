@@ -79,15 +79,24 @@ export async function dynaSend(handler: SendHandler, options: DynaSendOptions): 
         }
     };
 
+    // Parse deleteAfter time
+    options.deleteAfter = jt.parseTime(options.deleteAfter as string | number);
+
     /* - - - - - { Error Checking } - - - - - */
     if (options.sendMethod) {
-        if (["reply", "editReply", "followUp"].includes(options.sendMethod) && !(handler instanceof BaseInteraction))
+        if (!(handler instanceof BaseInteraction) && ["reply", "editReply", "followUp"].includes(options.sendMethod))
             throw new TypeError("[DynaSend] Invalid SendMethod", { cause: "'handler' is not 'Interaction' based" });
 
-        if (["sendToChannel"].includes(options.sendMethod) && !(handler instanceof BaseChannel))
+        if (!(handler instanceof BaseChannel) && ["sendToChannel"].includes(options.sendMethod))
             throw new TypeError("[DynaSend] Invalid SendMethod", { cause: "'handler' is not 'Channel' based" });
 
-        if (["messageReply", "messageEdit"].includes(options.sendMethod) && !(handler instanceof Message))
+        if (!(handler instanceof Message) && ["messageReply", "messageEdit"].includes(options.sendMethod))
             throw new TypeError("[DynaSend] Invalid SendMethod", { cause: "'handler' is not 'Message' based" });
+
+        if (options.sendMethod !== "reply" && options.ephemeral)
+            logger.log("[DynaSend] Ephemeral can only be used with the 'reply' SendMethod");
     } else throw new TypeError("[DynaSend] Invalid SendMethod", { cause: "'sendMethod' cannot be null or undefined" });
+
+    if (options.deleteAfter && (options.deleteAfter as number) < 1000)
+        logger.debug("[DynaSend] 'deleteAfter' is less than 1 second; is this intentional?");
 }
