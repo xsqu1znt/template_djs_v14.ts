@@ -31,22 +31,17 @@ interface DynaSendOptions {
 
 import {
     ActionRowBuilder,
-    APIActionRowComponent,
-    APIEmbed,
-    APIMessageActionRowComponent,
     BaseChannel,
     BaseInteraction,
-    CommandInteraction,
     EmbedBuilder,
-    EmbedData,
     Message,
     MessageActionRowComponentBuilder,
     MessageMentionOptions,
     RepliableInteraction,
     TextBasedChannel
 } from "discord.js";
-// import * as deleteMessageAfter from "./deleteMessageAfter";
-// import * as BetterEmbed from "./betterEmbed";
+import { deleteMessageAfter } from "./deleteMessageAfter";
+// import { BetterEmbed } from "./betterEmbed";
 import * as logger from "@utils/logger";
 import * as jt from "@utils/jsTools";
 
@@ -180,8 +175,7 @@ export async function dynaSend(handler: SendHandler, options: DynaSendOptions): 
     }
 
     // Delete the message after the given delay
-    /* if (_options.deleteAfter && message)
-        deleteMessageAfter(message, _options.deleteAfter); */
+    if (_options.deleteAfter && message) return await deleteMessageAfter(message, _options.deleteAfter);
 
     return message;
 }

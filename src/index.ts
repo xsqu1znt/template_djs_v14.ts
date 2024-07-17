@@ -13,10 +13,10 @@ import * as config from "@configs";
 
 const TOKEN: string = process.env.TOKEN || config.client.TOKEN;
 const TOKEN_DEV: string = process.env.TOKEN_DEV || config.client.TOKEN_DEV;
-const DEV_MODE: boolean = process.env.DEV_MODE === "true" ? true : config.client.DEV_MODE;
+export const IS_DEV_MODE: boolean = process.env.DEV_MODE === "true" ? true : config.client.DEV_MODE;
 
 /* - - - - - { Check for TOKEN } - - - - - */
-if (DEV_MODE && !TOKEN_DEV) {
+if (IS_DEV_MODE && !TOKEN_DEV) {
     logger.error("TOKEN Missing", "DEV_MODE is enabled, but TOKEN_DEV is not set");
     process.exit(0);
 }
@@ -27,7 +27,7 @@ if (!TOKEN && !TOKEN_DEV) {
 }
 
 // prettier-ignore
-if (DEV_MODE) logger.debug("DEV_MODE is enabled! You can change this by setting DEV_MODE to false in either .env or config_client.json");
+if (IS_DEV_MODE) logger.debug("DEV_MODE is enabled! You can change this by setting DEV_MODE to false in either .env or config_client.json");
 
 /* - - - - - { Setup Client } - - - - - */
 logger.client.initializing();
@@ -80,7 +80,7 @@ async function init(): Promise<void> {
 
     // prettier-ignore
     // Connect the client to Discord
-    client.login(DEV_MODE ? TOKEN_DEV : TOKEN).then(async () => {
+    client.login(IS_DEV_MODE ? TOKEN_DEV : TOKEN).then(async () => {
     	// Register slash commands to a specific server :: { LOCAL }
     	// await slashCommandManager.push(client, { ids: "your_id_here" });
 

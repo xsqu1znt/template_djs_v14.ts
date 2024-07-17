@@ -26,7 +26,8 @@
 
             "@utils/*": ["./src/utils/*"],
 
-            "@pkgJSON": ["./package.json"],
+            "@index": ["./src"],
+            "@pkgJSON": ["./package.json"]
         },
 
         /* Emit */
