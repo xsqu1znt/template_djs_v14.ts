@@ -7,7 +7,7 @@ interface DynaSendOptions {
      *
      * ___1.___ `BaseInteraction`: "reply" _(uses "editReply" if an interaction cannot be replied)_
      *
-     * ___2.___ `TextBasedChannel`: "sendToChannel"
+     * ___2.___ `TextBasedChannel`: "sendInChannel"
      *
      * ___3.___ `Message`: "messageReply" */
     sendMethod?: SendMethod;
@@ -42,7 +42,8 @@ import {
     Message,
     MessageActionRowComponentBuilder,
     MessageMentionOptions,
-    RepliableInteraction
+    RepliableInteraction,
+    TextBasedChannel
 } from "discord.js";
 // import * as deleteMessageAfter from "./deleteMessageAfter";
 // import * as BetterEmbed from "./betterEmbed";
@@ -61,7 +62,7 @@ export async function dynaSend(handler: SendHandler, options: DynaSendOptions): 
                 handler instanceof BaseInteraction
                     ? "reply"
                     : handler instanceof BaseChannel
-                    ? "sendToChannel"
+                    ? "sendInChannel"
                     : handler instanceof Message
                     ? "messageReply"
                     : "reply",
@@ -93,7 +94,7 @@ export async function dynaSend(handler: SendHandler, options: DynaSendOptions): 
         if (!(handler instanceof BaseInteraction) && ["reply", "editReply", "followUp"].includes(_options.sendMethod))
             throw new TypeError("[DynaSend] Invalid SendMethod", { cause: "'handler' is not 'Interaction' based" });
 
-        if (!(handler instanceof BaseChannel) && ["sendToChannel"].includes(_options.sendMethod))
+        if (!(handler instanceof BaseChannel) && ["sendInChannel"].includes(_options.sendMethod))
             throw new TypeError("[DynaSend] Invalid SendMethod", { cause: "'handler' is not 'Channel' based" });
 
         if (!(handler instanceof Message) && ["messageReply", "messageEdit"].includes(_options.sendMethod))
@@ -130,36 +131,48 @@ export async function dynaSend(handler: SendHandler, options: DynaSendOptions): 
         case "reply":
             let _reply = await (handler as RepliableInteraction)
                 .reply(sendData)
-                .catch(err =>
-                    logger.error(
-                        "$_TIMESTAMP [DYNASEND]",
-                        `REPLY_TO_INTERACTION | SendMethod: '${_options.sendMethod}'`,
-                        err
-                    )
-                );
+                .catch(err => logger.error("$_TIMESTAMP [DYNASEND]", "REPLY_TO_INTERACTION | SendMethod: 'reply'", err));
             message = _options.fetchReply && _reply ? await _reply.fetch() : null;
             break;
 
         case "editReply":
-            let _editReply = await (handler as RepliableInteraction).editReply(sendData);
+            let _editReply = await (handler as RepliableInteraction)
+                .editReply(sendData)
+                .catch(err => logger.error("$_TIMESTAMP [DYNASEND]", "EDIT_INTERACTION | SendMethod: 'editReply'", err));
             message = _options.fetchReply && _editReply ? await _editReply.fetch() : null;
             break;
 
         case "followUp":
-            let _followUp = await (handler as RepliableInteraction).followUp({
-                ...sendData,
-                fetchReply: _options.fetchReply
-            });
+            let _followUp = await (handler as RepliableInteraction)
+                .followUp({ ...sendData, fetchReply: _options.fetchReply })
+                .catch(err => logger.error("$_TIMESTAMP [DYNASEND]", "FOLLOW_UP_INTERACTION | SendMethod: 'followUp'", err));
             message = _options.fetchReply && _followUp ? _followUp : null;
             break;
 
-        case "sendToChannel":
+        case "sendInChannel":
+            message = await (handler as TextBasedChannel).send(sendData).catch(err => {
+                logger.error("$_TIMESTAMP [DYNASEND]", "SEND_IN_CHANNEL | SendMethod: 'sendInChannel'", err);
+                return null;
+            });
             break;
 
         case "messageReply":
+            message = await (handler as Message).reply(sendData).catch(err => {
+                logger.error("$_TIMESTAMP [DYNASEND]", "REPLY_TO_MESSAGE | SendMethod: 'messageReply'", err);
+                return null;
+            });
             break;
 
         case "messageEdit":
+            // Check if the message can be edited
+            if (!(handler as Message).editable) {
+                logger.log("[DYNASEND] Message cannot be edited");
+                break;
+            }
+            message = await (handler as Message).edit(sendData).catch(err => {
+                logger.error("$_TIMESTAMP [DYNASEND]", "EDIT_MESSAGE | SendMethod: 'messageEdit'", err);
+                return null;
+            });
             break;
 
         default:
