@@ -1,4 +1,4 @@
-import { BaseInteraction, Channel, Message, RepliableInteraction, TextBasedChannel } from "discord.js";
+import { Message, RepliableInteraction, TextBasedChannel } from "discord.js";
 
 export type SendHandler = RepliableInteraction | TextBasedChannel | Message;
 

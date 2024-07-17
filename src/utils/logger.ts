@@ -30,7 +30,7 @@ const _importer = (): string => chalk.bold.gray("[IMPORTER]");
 const _import_event = (): string => chalk.bold.gray("[IMPORT/EVENT]");
 const _import_command = (): string => chalk.bold.gray("[IMPORT/COMMAND]");
 
-const _timestamp = (): string => chalk(`[${new Date().toLocaleTimeString()}]`);
+const _timestamp = (): string => `[${new Date().toLocaleTimeString()}]`;
 
 const _dynamic_shard = (shards: Shard[]): string =>
     shards?.length ? chalk.gray`(${shards.length === 1 ? "Shard:" : "Shards:"} ${shards.join(", ")})` : "";
@@ -51,7 +51,7 @@ export function debug(msg: string): void {
 }
 
 export function error(header: string, msg: string, err: any = ""): void {
-    console.error(`${chalk.bgRed(contextFormatter(header))} ${chalk`${msg}`}`, err);
+    console.error(contextFormatter(`${chalk.bgRed.white("ERROR!")} ${chalk.bold.red(header)} ${msg}`), err);
 }
 
 export function log(msg: string): void {

@@ -7,7 +7,7 @@ interface DynaSendOptions {
      *
      * ___1.___ `BaseInteraction`: "reply" _(uses "editReply" if an interaction cannot be replied)_
      *
-     * ___2.___ `Channel`: "sendToChannel"
+     * ___2.___ `TextBasedChannel`: "sendToChannel"
      *
      * ___3.___ `Message`: "messageReply" */
     sendMethod?: SendMethod;
@@ -16,27 +16,33 @@ interface DynaSendOptions {
     /** Embeds to send with the message. */
     embeds?: EmbedBuilder | EmbedBuilder[] /* | BetterEmbed | BetterEmbed[] */;
     /** Components to send with the message. */
-    components?: ActionRowBuilder | ActionRowBuilder[];
+    components?: ActionRowBuilder<MessageActionRowComponentBuilder> | ActionRowBuilder<MessageActionRowComponentBuilder>[];
     /** Mention types allowed for the message. */
     allowedMentions?: MessageMentionOptions;
-    /** If the message should be ephemeral. _This only works for the "reply" `SendMethod`._ */
+    /** If the message should be ephemeral. _This only works for the "reply" and "followUp" `SendMethod`._ */
     ephemeral?: boolean;
     /** An amount of time to wait in __milliseconds__ before deleting the message.
      *
      * This option also utilizes `@utils/jsTools.parseTime()`, letting you use "10s" or "1m 30s" instead of a number. */
     deleteAfter?: number | string;
-    /** If the `Message` object is returned after sending. _`true` by default._ */
+    /** If the `Message` data is returned after replying to or editing an `Interaction`. _`true` by default._ */
     fetchReply?: boolean;
 }
 
 import {
     ActionRowBuilder,
+    APIActionRowComponent,
+    APIEmbed,
+    APIMessageActionRowComponent,
     BaseChannel,
     BaseInteraction,
+    CommandInteraction,
     EmbedBuilder,
+    EmbedData,
     Message,
+    MessageActionRowComponentBuilder,
     MessageMentionOptions,
-    TextChannel
+    RepliableInteraction
 } from "discord.js";
 // import * as deleteMessageAfter from "./deleteMessageAfter";
 // import * as BetterEmbed from "./betterEmbed";
@@ -44,7 +50,7 @@ import * as logger from "@utils/logger";
 import * as jt from "@utils/jsTools";
 
 export async function dynaSend(handler: SendHandler, options: DynaSendOptions): Promise<Message | null> {
-    options = {
+    let _options = {
         ...{
             content: "",
             embeds: [],
@@ -75,28 +81,94 @@ export async function dynaSend(handler: SendHandler, options: DynaSendOptions): 
             repliedUser: true,
             roles: undefined,
             users: undefined,
-            ...options.allowedMentions
+            ...(options.allowedMentions || {})
         }
     };
 
     // Parse deleteAfter time
-    options.deleteAfter = jt.parseTime(options.deleteAfter as string | number);
+    _options.deleteAfter = jt.parseTime(_options.deleteAfter as string | number);
 
     /* - - - - - { Error Checking } - - - - - */
-    if (options.sendMethod) {
-        if (!(handler instanceof BaseInteraction) && ["reply", "editReply", "followUp"].includes(options.sendMethod))
+    if (_options.sendMethod) {
+        if (!(handler instanceof BaseInteraction) && ["reply", "editReply", "followUp"].includes(_options.sendMethod))
             throw new TypeError("[DynaSend] Invalid SendMethod", { cause: "'handler' is not 'Interaction' based" });
 
-        if (!(handler instanceof BaseChannel) && ["sendToChannel"].includes(options.sendMethod))
+        if (!(handler instanceof BaseChannel) && ["sendToChannel"].includes(_options.sendMethod))
             throw new TypeError("[DynaSend] Invalid SendMethod", { cause: "'handler' is not 'Channel' based" });
 
-        if (!(handler instanceof Message) && ["messageReply", "messageEdit"].includes(options.sendMethod))
+        if (!(handler instanceof Message) && ["messageReply", "messageEdit"].includes(_options.sendMethod))
             throw new TypeError("[DynaSend] Invalid SendMethod", { cause: "'handler' is not 'Message' based" });
 
-        if (options.sendMethod !== "reply" && options.ephemeral)
+        // Ephemeral fallback
+        if (["reply", "followUp"].includes(_options.sendMethod) && _options.ephemeral) {
             logger.log("[DynaSend] Ephemeral can only be used with the 'reply' SendMethod");
+            _options.ephemeral = false;
+        }
+
+        // Interaction "editReply" fallback
+        if (handler instanceof BaseInteraction && _options.sendMethod === "reply" && handler.replied)
+            _options.sendMethod = "editReply";
     } else throw new TypeError("[DynaSend] Invalid SendMethod", { cause: "'sendMethod' cannot be null or undefined" });
 
-    if (options.deleteAfter && (options.deleteAfter as number) < 1000)
+    if (_options.deleteAfter && (_options.deleteAfter as number) < 1000)
         logger.debug("[DynaSend] 'deleteAfter' is less than 1 second; is this intentional?");
+
+    /* - - - - - { Send the Message } - - - - - */
+    let message: Message | null = null;
+
+    // Create the send data object
+    let sendData = {
+        content: _options.content,
+        embeds: _options.embeds.map(e => e.toJSON()),
+        components: _options.components,
+        allowedMentions: _options.allowedMentions,
+        ephemeral: _options.ephemeral
+    };
+
+    // Send the message based on the sendMethod
+    switch (_options.sendMethod) {
+        case "reply":
+            let _reply = await (handler as RepliableInteraction)
+                .reply(sendData)
+                .catch(err =>
+                    logger.error(
+                        "$_TIMESTAMP [DYNASEND]",
+                        `REPLY_TO_INTERACTION | SendMethod: '${_options.sendMethod}'`,
+                        err
+                    )
+                );
+            message = _options.fetchReply && _reply ? await _reply.fetch() : null;
+            break;
+
+        case "editReply":
+            let _editReply = await (handler as RepliableInteraction).editReply(sendData);
+            message = _options.fetchReply && _editReply ? await _editReply.fetch() : null;
+            break;
+
+        case "followUp":
+            let _followUp = await (handler as RepliableInteraction).followUp({
+                ...sendData,
+                fetchReply: _options.fetchReply
+            });
+            message = _options.fetchReply && _followUp ? _followUp : null;
+            break;
+
+        case "sendToChannel":
+            break;
+
+        case "messageReply":
+            break;
+
+        case "messageEdit":
+            break;
+
+        default:
+            throw new TypeError("[DynaSend] Invalid SendMethod", { cause: "'sendMethod' is not defined" });
+    }
+
+    // Delete the message after the given delay
+    /* if (_options.deleteAfter && message)
+        deleteMessageAfter(message, _options.deleteAfter); */
+
+    return message;
 }
