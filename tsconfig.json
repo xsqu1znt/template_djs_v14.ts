@@ -40,7 +40,6 @@
 
         /* Type Checking */
         "strict": true,
-        // "exactOptionalPropertyTypes": true,
 
         /* Completeness */
         "skipLibCheck": true
