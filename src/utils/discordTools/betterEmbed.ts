@@ -310,7 +310,7 @@ export class BetterEmbed {
         }
 
         // Author > .hyperlink
-        if (_thisAuthor?.icon) {
+        if (_thisAuthor?.hyperlink) {
             try {
                 this.#embed.setAuthor({
                     name: this.#embed.data.author?.name || "", // NOT-USED
