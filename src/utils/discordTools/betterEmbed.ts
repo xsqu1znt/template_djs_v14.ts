@@ -1,6 +1,7 @@
 interface BetterEmbedData {
     /** Can be provided for automated context formatting. */
     context?: {
+        client?: Client | null;
         interaction?: RepliableInteraction | null;
         channel?: TextBasedChannel | null;
         message?: Message | null;
@@ -27,8 +28,8 @@ interface BetterEmbedData {
      * If set to `true`, will use the current time. */
     timestamp?: string | number | boolean | Date | null;
 
-    /** If `true`, will disable automatic context formatting for this `Embed`. */
-    disableAutomaticContext?: boolean;
+    /** If `false`, will disable auto-shorthand context formatting. */
+    acf?: boolean;
 }
 
 interface BetterEmbedAuthor {
@@ -66,7 +67,17 @@ interface BetterEmbedFooter {
     icon?: string | boolean | null;
 }
 
-import { APIEmbedField, EmbedBuilder, GuildMember, Message, RepliableInteraction, TextBasedChannel, User } from "discord.js";
+import {
+    APIEmbed,
+    APIEmbedField,
+    Client,
+    EmbedBuilder,
+    GuildMember,
+    Message,
+    RepliableInteraction,
+    TextBasedChannel,
+    User
+} from "discord.js";
 import { dynaSend } from "./dynaSend";
 import * as logger from "@utils/logger";
 import * as jt from "@utils/jsTools";
@@ -76,33 +87,40 @@ import * as config from "@configs";
 
 import { IS_DEV_MODE } from "@index";
 
-/** A better version of the classic `EmbedBuilder`.
+/** A powerful wrapper of `EmbedBuilder` that provides additional features.
  *
- * /// Author:
- * - __`$USER`__: *author's mention (@xsqu1znt)*
- * - __`$USER_NAME`__: *author's username*
- * - __`$DISPLAY_NAME`__: *author's display name (requires `GuildMember` context)*
- * - __`$USER_AVATAR`__: *author's avatar*
+ * Auto-shorthand context formatting (_ACF_) is enabled by default.
  *
- * /// General:
- * - __`$BOT_AVATAR`__: *bot's avatar (requires `RepliableInteraction` or `Message` context)*
- * - __`$INVIS`__: *invisible character for fields*
+ * All functions utilize _ACF_ unless `BetterEmbed.acf` is set to `false`.
  *
- * - __`$YEAR`__: *YYYY*
- * - __`$MONTH`__: *MM*
- * - __`$DAY`__: *DD*
- * - __`$year`__: *YY*
- * - __`$month`__: *M or MM*
- * - __`$day`__: *D or DD*
+ * ___Use blackslash___ `\` ___to escape any context.___
  *
- * All functions utilize automatic context formatting, unless `disableAutomaticContext` is set to `true`.
+ * \- - - Author Context - - -
+ * - __`$USER`__: _author's mention (@xsqu1znt)_
+ * - __`$USER_NAME`__: _author's username_
+ * - __`$DISPLAY_NAME`__: _author's display name (requires `GuildMember` context)_
+ * - __`$USER_AVATAR`__: _author's avatar_
  *
- * __NOTE__: Use a blackslash `\` to escape any context. */
+ * \- - - Client Context - - -
+ *
+ * - __`$BOT_AVATAR`__: _bot's avatar_
+ *
+ * \- - - Shorthand Context - - -
+ * - __`$INVIS`__: _invisible character_
+ *
+ * - __`$YEAR`__: _YYYY_
+ * - __`$MONTH`__: _MM_
+ * - __`$DAY`__: _DD_
+ * - __`$year`__: _YY_
+ * - __`$month`__: _M or MM_
+ * - __`$day`__: _D or DD_
+ *
+ * ___NOTE___: `Client` is also included in `RepliedInteraction` and `Message` contexts. */
 export class BetterEmbed {
     #embed = new EmbedBuilder();
 
     #dataInit: BetterEmbedData = {
-        context: { interaction: null, channel: null, message: null },
+        context: { client: null, interaction: null, channel: null, message: null },
         author: { context: null, text: "", icon: null, hyperlink: null },
         title: { text: "", hyperlink: null },
         thumbnailURL: null,
@@ -112,11 +130,11 @@ export class BetterEmbed {
         color: jt.choice(IS_DEV_MODE ? EMBED_COLOR_DEV : EMBED_COLOR) || null,
         timestamp: null,
         fields: [],
-        disableAutomaticContext: false
+        acf: true
     };
 
     data: BetterEmbedData = {
-        context: { interaction: null, channel: null, message: null },
+        context: { client: null, interaction: null, channel: null, message: null },
         author: { context: null, text: "", icon: null, hyperlink: null },
         title: { text: "", hyperlink: null },
         thumbnailURL: null,
@@ -126,12 +144,12 @@ export class BetterEmbed {
         color: jt.choice(IS_DEV_MODE ? EMBED_COLOR_DEV : EMBED_COLOR) || null,
         timestamp: null,
         fields: [],
-        disableAutomaticContext: false
+        acf: true
     };
 
     #applyContextFormatting(str: string): string {
         if (!str) return "";
-        if (!str.includes("$")) return str;
+        if (!str.includes("$") || !this.data.acf) return str;
 
         let user: User | null = null;
         let guildMember: GuildMember | null = null;
@@ -224,7 +242,7 @@ export class BetterEmbed {
             this.data.author.context = _messageContext?.member || _messageContext?.author;
 
         /* - - - - - { Automatic Context Formatting } - - - - - */
-        if (!this.data.disableAutomaticContext) {
+        if (this.data.acf) {
             this.data.author.text = this.#applyContextFormatting(this.data.author.text);
             this.data.title.text = this.#applyContextFormatting(this.data.title.text);
             this.data.description = this.#applyContextFormatting(this.data.description || "");
@@ -273,12 +291,12 @@ export class BetterEmbed {
     }
 
     /** Serializes this builder to API-compatible JSON data. */
-    toJSON() {
+    toJSON(): APIEmbed {
         return this.#embed.toJSON();
     }
 
     /** Set the embed's author. */
-    setAuthor(author: BetterEmbedAuthor = this.data.author as BetterEmbedAuthor) {
+    setAuthor(author: BetterEmbedAuthor | null = this.data.author as BetterEmbedAuthor): this {
         let _thisAuthor = this.data.author as BetterEmbedAuthor;
 
         // prettier-ignore
@@ -322,6 +340,51 @@ export class BetterEmbed {
             }
         }
 
+        return this;
+    }
+
+    /** Set the embed's title. */
+    setTitle(title: BetterEmbedTitle | null = this.data.title as BetterEmbedTitle): this {
+        let _thisTitle = this.data.title as BetterEmbedTitle;
+
+        // prettier-ignore
+        if (title === null)
+                this.data.author = structuredClone(this.#dataInit.title);
+            else if (typeof title === "string")
+                this.data.author = { ..._thisTitle, text: title };
+            else
+                this.data.author = { ..._thisTitle, ...title };
+
+        // Parse the updated author data
+        this.#parseData();
+
+        // Title > .text
+        this.#embed.setTitle(_thisTitle.text);
+
+        // Title > .hyperlink
+        if (_thisTitle?.hyperlink) {
+            try {
+                this.#embed.setURL(_thisTitle.hyperlink || null);
+            } catch (err) {
+                logger.error("$_TIMESTAMP [BetterEmbed]", `INVALID_TITLE_HYPERLINK | '${_thisTitle.hyperlink}'`, err);
+            }
+        }
+
+        return this;
+    }
+
+    /** Set the embed's thumbnail. */
+    setThumbnail(url: string | null = this.data.thumbnailURL as string | null): this {
+        if (url) url = this.#applyContextFormatting(url.trim());
+
+        try {
+            this.#embed.setThumbnail(url);
+        } catch (err) {
+            logger.error("$_TIMESTAMP [BetterEmbed]", `INVALID_THUMBNAIL_URL | '${this.data.thumbnailURL}'`);
+            return this;
+        }
+
+        this.data.thumbnailURL = url;
         return this;
     }
 }
