@@ -1,3 +1,5 @@
+import { SendHandler } from "./types";
+
 interface BetterEmbedData {
     /** Can be provided for Auto-shorthand context formatting (_ACF_). */
     context?: {
@@ -26,7 +28,7 @@ interface BetterEmbedData {
     /** The timestamp to be displayed to the right of the `Embed`'s footer.
      *
      * If set to `true`, will use the current time. */
-    timestamp?: string | number | boolean | Date | null;
+    timestamp?: number | boolean | Date | null;
 
     /** If `false`, will disable auto-shorthand context formatting. */
     acf?: boolean;
@@ -80,13 +82,11 @@ import {
     TextBasedChannel,
     User
 } from "discord.js";
-import { dynaSend } from "./dynaSend";
+import { dynaSend, DynaSendOptions } from "./dynaSend";
 import * as logger from "@utils/logger";
 import * as jt from "@utils/jsTools";
 
 import { INVIS_CHAR, EMBED_COLOR, EMBED_COLOR_DEV } from "./config.json";
-import * as config from "@configs";
-
 import { IS_DEV_MODE } from "@index";
 
 /** A powerful wrapper for `EmbedBuilder` that introduces useful features.
@@ -507,7 +507,7 @@ export class BetterEmbed {
     }
 
     /** Set the embed's color. */
-    setColor(color: ColorResolvable | ColorResolvable[] = this.data.color as ColorResolvable) {
+    setColor(color: ColorResolvable | ColorResolvable[] = this.data.color as ColorResolvable): this {
         let _color = Array.isArray(color) ? jt.choice(color) : color;
 
         try {
@@ -519,5 +519,40 @@ export class BetterEmbed {
 
         this.data.color = _color;
         return this;
+    }
+
+    /** Set the embed's timestamp. */
+    setTimestamp(timestamp: number | boolean | Date | null = this.data.timestamp as number | Date | null): this {
+        if (timestamp === true) timestamp = Date.now();
+
+        try {
+            this.#embed.setTimestamp(timestamp as Date | number | null);
+        } catch {
+            logger.error("$_TIMESTAMP [BetterEmbed]", `INVALID_TIMESTAMP | '${this.data.timestamp}'`);
+            return this;
+        }
+
+        this.data.timestamp = timestamp || null;
+        return this;
+    }
+
+    /** Send the embed. */
+    async send(handler: SendHandler, options?: DynaSendOptions, data?: BetterEmbedData) {
+        let _embed: BetterEmbed = this;
+        this.#parseData();
+
+        if (data) {
+            // Clone the embed
+            _embed = this.clone(data);
+        } else {
+            // Configure the embed before sending
+            this.#configure();
+        }
+
+        // Send the message
+        return await dynaSend(handler, {
+            ...options,
+            embeds: [_embed, ...(options?.embeds ? jt.forceArray(options?.embeds) : [])]
+        });
     }
 }

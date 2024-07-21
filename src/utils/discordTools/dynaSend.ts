@@ -1,6 +1,6 @@
-import { SendHandler, SendMethod } from "./types";
+import { EmbedResolveable, SendHandler, SendMethod } from "./types";
 
-interface DynaSendOptions {
+export interface DynaSendOptions {
     /** The method used to send the message.
      *
      * Defaults based on the `handler` type:
@@ -14,7 +14,7 @@ interface DynaSendOptions {
     /** Text content to send in the message. */
     content?: string;
     /** Embeds to send with the message. */
-    embeds?: EmbedBuilder | EmbedBuilder[] /* | BetterEmbed | BetterEmbed[] */;
+    embeds?: EmbedResolveable | EmbedResolveable[];
     /** Components to send with the message. */
     components?: ActionRowBuilder<MessageActionRowComponentBuilder> | ActionRowBuilder<MessageActionRowComponentBuilder>[];
     /** Mention types allowed for the message. */
@@ -33,7 +33,6 @@ import {
     ActionRowBuilder,
     BaseChannel,
     BaseInteraction,
-    EmbedBuilder,
     Message,
     MessageActionRowComponentBuilder,
     MessageMentionOptions,
@@ -41,7 +40,6 @@ import {
     TextBasedChannel
 } from "discord.js";
 import { deleteMessageAfter } from "./deleteMessageAfter";
-// import { BetterEmbed } from "./betterEmbed";
 import * as logger from "@utils/logger";
 import * as jt from "@utils/jsTools";
 
