@@ -1,5 +1,5 @@
 interface BetterEmbedData {
-    /** Can be provided for automated context formatting. */
+    /** Can be provided for Auto-shorthand context formatting (_ACF_). */
     context?: {
         client?: Client | null;
         interaction?: RepliableInteraction | null;
@@ -33,7 +33,7 @@ interface BetterEmbedData {
 }
 
 interface BetterEmbedAuthor {
-    /** A user that will be used for automatic context formatting.
+    /** A user that will be used for Auto-shorthand context formatting (_ACF_).
      *
      * __NOTE:__ There is no reason to provide this unless:
      *
@@ -87,7 +87,7 @@ import * as config from "@configs";
 
 import { IS_DEV_MODE } from "@index";
 
-/** A powerful wrapper of `EmbedBuilder` that provides additional features.
+/** A powerful wrapper for `EmbedBuilder` that introduces useful features.
  *
  * Auto-shorthand context formatting (_ACF_) is enabled by default.
  *
