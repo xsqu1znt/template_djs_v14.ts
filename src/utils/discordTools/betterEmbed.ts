@@ -20,9 +20,9 @@ interface BetterEmbedData {
     /** Footer to be displayed at the bottom of the `Embed`. */
     footer?: string | BetterEmbedFooter | null;
     /** Fields of the `Embed`. */
-    fields?: APIEmbedField[] | null;
+    fields?: APIEmbedField[] | [];
     /** Color of the `Embed`. */
-    color?: string | string[] | null;
+    color?: ColorResolvable | ColorResolvable[] | null;
     /** The timestamp to be displayed to the right of the `Embed`'s footer.
      *
      * If set to `true`, will use the current time. */
@@ -71,8 +71,10 @@ import {
     APIEmbed,
     APIEmbedField,
     Client,
+    ColorResolvable,
     EmbedBuilder,
     GuildMember,
+    HexColorString,
     Message,
     RepliableInteraction,
     TextBasedChannel,
@@ -127,7 +129,7 @@ export class BetterEmbed {
         imageURL: null,
         description: null,
         footer: { text: "", icon: null },
-        color: jt.choice(IS_DEV_MODE ? EMBED_COLOR_DEV : EMBED_COLOR) || null,
+        color: (jt.choice(IS_DEV_MODE ? EMBED_COLOR_DEV : EMBED_COLOR) as HexColorString) || null,
         timestamp: null,
         fields: [],
         acf: true
@@ -141,7 +143,7 @@ export class BetterEmbed {
         imageURL: null,
         description: null,
         footer: { text: "", icon: null },
-        color: jt.choice(IS_DEV_MODE ? EMBED_COLOR_DEV : EMBED_COLOR) || null,
+        color: (jt.choice(IS_DEV_MODE ? EMBED_COLOR_DEV : EMBED_COLOR) as HexColorString) || null,
         timestamp: null,
         fields: [],
         acf: true
@@ -168,40 +170,40 @@ export class BetterEmbed {
         // prettier-ignore
         // User specific context
         if (user) str = str
-			.replace(/(?<!\\)\$USER\b/g, user.toString())
-			.replace(/(?<!\\)\$USER_NAME\b/g, user.username)
-			.replace(/(?<!\\)\$USER_AVATAR\b/g, user.avatarURL() || "USER_HAS_NO_AVATAR");
+            .replace(/(?<!\\)\$USER\b/g, user.toString())
+            .replace(/(?<!\\)\$USER_NAME\b/g, user.username)
+            .replace(/(?<!\\)\$USER_AVATAR\b/g, user.avatarURL() || "USER_HAS_NO_AVATAR");
 
         // prettier-ignore
         // GuildMember specific context
         if (guildMember) str = str
-			.replace(/(?<!\\)\$DISPLAY_NAME\b/g, guildMember.displayName);
+            .replace(/(?<!\\)\$DISPLAY_NAME\b/g, guildMember.displayName);
 
         /* - - - - - { General Context } - - - - - */
         let _interactionOrMessageContext = this.data.context?.interaction || this.data.context?.message;
 
         // prettier-ignore
         if (_interactionOrMessageContext) str = str
-			.replace(/(?<!\\)\$BOT_AVATAR\b/g, _interactionOrMessageContext.client.user.avatarURL() || "BOT_HAS_NO_AVATAR");
+            .replace(/(?<!\\)\$BOT_AVATAR\b/g, _interactionOrMessageContext.client.user.avatarURL() || "BOT_HAS_NO_AVATAR");
 
         // prettier-ignore
         str = str
-			.replace(/(?<!\\)\$INVIS\b/g, INVIS_CHAR)
+            .replace(/(?<!\\)\$INVIS\b/g, INVIS_CHAR)
 
-			// User mentions
-			.replace(/(?<!\\|<)@[0-9]+(?!>)/g, s => `<@${s.substring(1)}>`)
-			// Role mentions
-			.replace(/(?<!\\|<)@&[0-9]+(?!>)/g, s => `<@&${s.substring(2)}>`)
-			// Channel mentions
-			.replace(/(?<!\\|<)#[0-9]+(?!>)/g, s => `<#${s.substring(1)}>`)
+            // User mentions
+            .replace(/(?<!\\|<)@[0-9]+(?!>)/g, s => `<@${s.substring(1)}>`)
+            // Role mentions
+            .replace(/(?<!\\|<)@&[0-9]+(?!>)/g, s => `<@&${s.substring(2)}>`)
+            // Channel mentions
+            .replace(/(?<!\\|<)#[0-9]+(?!>)/g, s => `<#${s.substring(1)}>`)
 
-			/// Dates
-			.replace(/(?<!\\)\$YEAR/g, date.getFullYear().toString())
-			.replace(/(?<!\\)\$MONTH/g, `0${date.getMonth() + 1}`.slice(-2))
-			.replace(/(?<!\\)\$DAY/g, `0${date.getDate()}`.slice(-2))
-			.replace(/(?<!\\)\$year/g, `${date.getFullYear()}`.substring(2))
-			.replace(/(?<!\\)\$month/g, `0${date.getMonth() + 1}`.slice(-2))
-			.replace(/(?<!\\)\$day/g, `0${date.getDate()}`.slice(-2))
+            /// Dates
+            .replace(/(?<!\\)\$YEAR/g, date.getFullYear().toString())
+            .replace(/(?<!\\)\$MONTH/g, `0${date.getMonth() + 1}`.slice(-2))
+            .replace(/(?<!\\)\$DAY/g, `0${date.getDate()}`.slice(-2))
+            .replace(/(?<!\\)\$year/g, `${date.getFullYear()}`.substring(2))
+            .replace(/(?<!\\)\$month/g, `0${date.getMonth() + 1}`.slice(-2))
+            .replace(/(?<!\\)\$day/g, `0${date.getDate()}`.slice(-2))
 
         // Return the formatted string
         return str;
@@ -211,21 +213,21 @@ export class BetterEmbed {
         /* - - - - - { Cleanup Shorthand Configurations } - - - - - */
         // prettier-ignore
         if (typeof this.data.author === "string")
-			this.data.author = { context: null, text: this.data.author, icon: null, hyperlink: null };
-		else if (!this.data.author)
-			this.data.author = { context: null, text: "", icon: null, hyperlink: null };
+            this.data.author = { context: null, text: this.data.author, icon: null, hyperlink: null };
+        else if (!this.data.author)
+            this.data.author = { context: null, text: "", icon: null, hyperlink: null };
 
         // prettier-ignore
         if (typeof this.data.title === "string")
-			this.data.title = { text: this.data.title, hyperlink: null };
-		else if (!this.data.title)
-			this.data.title = { text: "", hyperlink: null };
+            this.data.title = { text: this.data.title, hyperlink: null };
+        else if (!this.data.title)
+            this.data.title = { text: "", hyperlink: null };
 
         // prettier-ignore
         if (typeof this.data.footer === "string")
-			this.data.footer = { text: this.data.footer, icon: null };
-		else if (!this.data.footer)
-			this.data.footer = { text: "", icon: null };
+            this.data.footer = { text: this.data.footer, icon: null };
+        else if (!this.data.footer)
+            this.data.footer = { text: "", icon: null };
 
         // Timestamp
         if (this.data.timestamp === true) this.data.timestamp = Date.now();
@@ -255,7 +257,7 @@ export class BetterEmbed {
 
                 // prettier-ignore
                 if (this.data.author.context instanceof User)
-					this.data.author.icon = this.data.author.context.avatarURL();
+                    this.data.author.icon = this.data.author.context.avatarURL();
             }
             // string case
             else if (typeof this.data.author.icon === "string")
@@ -301,10 +303,10 @@ export class BetterEmbed {
 
         // prettier-ignore
         if (author === null)
-			this.data.author = structuredClone(this.#dataInit.author);
-		else if (typeof author === "string")
-			this.data.author = { ..._thisAuthor, text: author };
-		else
+            this.data.author = structuredClone(this.#dataInit.author);
+        else if (typeof author === "string")
+            this.data.author = { ..._thisAuthor, text: author };
+        else
             this.data.author = { ..._thisAuthor, ...author };
 
         // Parse the updated author data
@@ -349,11 +351,11 @@ export class BetterEmbed {
 
         // prettier-ignore
         if (title === null)
-                this.data.author = structuredClone(this.#dataInit.title);
-            else if (typeof title === "string")
-                this.data.author = { ..._thisTitle, text: title };
-            else
-                this.data.author = { ..._thisTitle, ...title };
+            this.data.author = structuredClone(this.#dataInit.title);
+        else if (typeof title === "string")
+            this.data.author = { ..._thisTitle, text: title };
+        else
+            this.data.author = { ..._thisTitle, ...title };
 
         // Parse the updated author data
         this.#parseData();
@@ -385,6 +387,137 @@ export class BetterEmbed {
         }
 
         this.data.thumbnailURL = url;
+        return this;
+    }
+
+    /** Set the embed's description. */
+    setDescription(description: string | null = this.data.description as string): this {
+        if (description) description = this.#applyContextFormatting(description);
+        this.#embed.setDescription(description);
+        this.data.description = description;
+        return this;
+    }
+
+    /** Set the embed's image. */
+    setImage(url: string | null = this.data.imageURL as string): this {
+        if (url) url = this.#applyContextFormatting(url.trim());
+
+        try {
+            this.#embed.setImage(url);
+        } catch {
+            logger.error("$_TIMESTAMP [BetterEmbed]", `INVALID_IMAGE_URL | '${this.data.imageURL}'`);
+            return this;
+        }
+
+        this.data.imageURL = url;
+        return this;
+    }
+
+    /** Set the embed's footer. */
+    setFooter(footer: BetterEmbedFooter | string | null = this.data.footer as BetterEmbedFooter): this {
+        let _thisFooter = this.data.footer as BetterEmbedFooter;
+
+        // prettier-ignore
+        if (footer === null)
+			this.data.footer = structuredClone(this.#dataInit.footer);
+		else if (typeof footer === "string")
+			this.data.footer = { ..._thisFooter, text: footer };
+		else
+            this.data.footer = { ..._thisFooter, ...footer };
+
+        // Parse the updated footer data
+        this.#parseData();
+
+        // Footer > .text
+        this.#embed.setFooter({ text: _thisFooter.text });
+
+        // Footer > .icon
+        if (_thisFooter.icon) {
+            try {
+                this.#embed.setFooter({
+                    text: this.#embed.data.footer?.text || "", // NOT-USED
+                    iconURL: (_thisFooter.icon as string) || undefined
+                });
+            } catch (err) {
+                logger.error("$_TIMESTAMP [BetterEmbed]", `INVALID_FOOTER_ICON | '${_thisFooter.icon}'`, err);
+            }
+        }
+
+        return this;
+    }
+
+    /** Add or replace the embed's fields.
+     *
+     * ___NOTE___: You can only have a MAX of 25 fields per `Embed`. */
+    addFields(fieldData: APIEmbedField[] | null = this.data.fields as APIEmbedField[], replaceAll: boolean = false): this {
+        let _thisFields = this.data.fields as APIEmbedField[];
+
+        // Clear all fields
+        if (replaceAll && !fieldData?.length) {
+            this.data.fields = [];
+            this.#embed.spliceFields(0, this.#embed.data.fields?.length || 0);
+            return this;
+        }
+
+        // what are we supposed to do with an empty array here?
+        if (!fieldData) return this;
+
+        /* - - - - - { Validate Fields } - - - - - */
+        if (fieldData.length > 25) {
+            let _trimLength = fieldData.length - 25;
+            // Trim the array
+            fieldData = fieldData.slice(0, 25);
+            // prettier-ignore
+            logger.log(`$_TIMESTAMP [BetterEmbed] You can only have a MAX of 25 fields. ${_trimLength} ${_trimLength === 1 ? "field has" : "fields have"} been trimmed`);
+        }
+
+        // Apply ACF
+        if (this.data.acf) {
+            for (let i = 0; i < fieldData.length; i++) {
+                fieldData[i].name = this.#applyContextFormatting(fieldData[i].name);
+                fieldData[i].value = this.#applyContextFormatting(fieldData[i].value);
+            }
+        }
+
+        if (replaceAll) {
+            this.data.fields = fieldData;
+            this.#embed.setFields(fieldData);
+        } else {
+            _thisFields.push(...fieldData);
+            this.#embed.addFields(fieldData);
+        }
+
+        return this;
+    }
+
+    /** Delete or replace the embed's fields.
+     *
+     * - **NOTE**: You can only have a MAX of 25 fields per `Embed`. */
+    spliceFields(index: number, deleteCount: number, fieldData?: APIEmbedField[]): this {
+        let _thisFields = this.data.fields as APIEmbedField[];
+
+        // prettier-ignore
+        // Splice the field data
+        if (fieldData)
+            _thisFields.splice(index, deleteCount, ...fieldData);
+        else
+            _thisFields.splice(index, deleteCount);
+
+        return this.addFields(fieldData, true);
+    }
+
+    /** Set the embed's color. */
+    setColor(color: ColorResolvable | ColorResolvable[] = this.data.color as ColorResolvable) {
+        let _color = Array.isArray(color) ? jt.choice(color) : color;
+
+        try {
+            this.#embed.setColor(_color || null);
+        } catch {
+            logger.error("$_TIMESTAMP [BetterEmbed]", `INVALID_COLOR | '${this.data.color}'`);
+            return this;
+        }
+
+        this.data.color = _color;
         return this;
     }
 }
