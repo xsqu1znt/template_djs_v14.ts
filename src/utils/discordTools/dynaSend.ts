@@ -5,7 +5,7 @@ interface DynaSendOptions {
      *
      * Defaults based on the `handler` type:
      *
-     * ___1.___ `BaseInteraction`: "reply" _(uses "editReply" if an interaction cannot be replied)_
+     * ___1.___ `RepliableInteraction`: "reply" _(uses "editReply" if an interaction cannot be replied)_
      *
      * ___2.___ `TextBasedChannel`: "sendInChannel"
      *
