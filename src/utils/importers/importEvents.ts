@@ -1,4 +1,4 @@
-import { EventModule } from "@customTypes/events";
+import { BaseEventModule } from "@customTypes/events";
 
 import { Client } from "discord.js";
 import * as logger from "@utils/logger";
@@ -20,7 +20,7 @@ async function importEventModules() {
             let _path = path.join(__dirname, EVENT_MODULE_RELATIVE_PATH, fn);
             let _logPath = path.join(EVENT_MODULE_LOG_PATH, fn);
             let _module = await import(_path)
-                .then(m => m.default as EventModule)
+                .then(m => m.default as BaseEventModule)
                 .catch(err => {
                     // Log the error to the console
                     logger.error("$_TIMESTAMP $_IMPORT_EVENT", `Failed to import event module at '${_logPath}'`, err);
@@ -32,7 +32,7 @@ async function importEventModules() {
     );
 
     // Filter out modules that failed to import and return
-    return modules.filter(m => m.module) as { module: EventModule; path: string }[];
+    return modules.filter(m => m.module) as { module: BaseEventModule; path: string }[];
 }
 
 export default async function (client: Client): Promise<void> {

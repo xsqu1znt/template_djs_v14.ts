@@ -6,17 +6,26 @@
     "MONGO_URI_DEV": "",
     "DEV_MODE": false,
 
-    "PREFIX": "s!",
+    "PREFIX": "!!",
 
-    "OWNER_ID": "",
-    "ADMIN_IDS": [""],
-    "admin_bypass": [{ "COMMAND_NAME": "", "USER_IDS": [] }],
+    "staff": {
+        "OWNER_ID": "",
+        "MEMBERS": [],
+        "BYPASSED": [{ "COMMAND_NAME": "", "USER_IDS": [] }],
+        "IGNORES_GUILD_ADMIN": {
+            "AllStaff": false,
+            "Owner": false,
+            "Members": false,
+            "Bypassed": false
+        }
+    },
 
     "support_server": {
         "INVITE_URL": "https://discord.gg/your_server",
+        "INVITE_ON_COMMAND_ERROR": true,
         "GUILD_ID": "",
         "channels": {
-            "WELCOME": "1234"
+            "WELCOME": "0123456789"
         }
     },
 

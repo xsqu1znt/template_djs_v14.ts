@@ -29,6 +29,7 @@ const _client = (): string => chalk.bold.gray("[CLIENT]");
 const _importer = (): string => chalk.bold.gray("[IMPORTER]");
 const _import_event = (): string => chalk.bold.gray("[IMPORT/EVENT]");
 const _import_command = (): string => chalk.bold.gray("[IMPORT/COMMAND]");
+const _command = (): string => chalk.bold.gray("[COMMAND]");
 
 const _timestamp = (): string => `[${new Date().toLocaleTimeString()}]`;
 
@@ -43,7 +44,8 @@ function contextFormatter(str: string): string {
         .replace("$_CLIENT", _client())
         .replace("$_IMPORTER", _importer())
         .replace("$_IMPORT_EVENT", _import_event())
-        .replace("$_IMPORT_COMMAND", _import_command());
+        .replace("$_IMPORT_COMMAND", _import_command())
+        .replace("$_COMMAND", _command());
 }
 
 export function debug(msg: string): void {

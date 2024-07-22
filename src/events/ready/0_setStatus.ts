@@ -1,4 +1,4 @@
-import { EventModule } from "@customTypes/events";
+import { BaseEventModule } from "@customTypes/events";
 import { ActivityData, ClientActivity } from "@customTypes/misc";
 
 import { Client, Events, ActivityType } from "discord.js";
@@ -94,4 +94,4 @@ export default {
         // Set the client's status
         return await setStatus();
     }
-} as EventModule;
+} as BaseEventModule;

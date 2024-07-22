@@ -4,7 +4,7 @@ import {
     CommandInteraction,
     ContextMenuCommandBuilder,
     Message,
-    PermissionFlags,
+    PermissionResolvable,
     SlashCommandBuilder
 } from "discord.js";
 
@@ -36,14 +36,16 @@ export interface BaseCommandOptions {
     emoji?: string;
     /** Only allow this command to be used in guilds. */
     guildOnly?: boolean;
-    /** Only allow bot staff to use this command. */
-    botAdminOnly?: boolean;
+    /** Only allow staff members of this bot's team to use this command.
+     *
+     * @see `config_client.json` `.staff` */
+    botStaffOnly?: boolean;
     /** Only allow guild admins to use this command. */
     guildAdminOnly?: boolean;
     /** Require the user to have certain permissions in the current guild. */
-    specialBotPerms?: PermissionFlags | PermissionFlags[];
-    /** Require the bot to have certain permissions in the current guild. */
-    specialUserPerms?: PermissionFlags | PermissionFlags[];
+    requiredUserPerms?: PermissionResolvable[];
+    /** Require the client to have certain permissions in the current guild. */
+    requiredClientPerms?: PermissionResolvable[];
     /** Hide this command from the help command list. */
     hidden?: boolean;
 }
@@ -51,8 +53,12 @@ export interface BaseCommandOptions {
 export interface SlashCommandOptions extends BaseCommandOptions {
     /** Defer the interaction.
      *
-     * ***Required if the Slash Command can take longer than 3 seconds to execute.*** */
+     * ___NOTE___: Required if the Slash Command can take longer than 3 seconds to execute. */
     deferReply?: boolean;
+    /** Defer the interaction ephemerally.
+     *
+     * ___NOTE___: Required if the Slash Command can take longer than 3 seconds to execute. */
+    deferReplyEphemeral?: boolean;
 }
 
 export interface PrefixCommandOptions extends BaseCommandOptions {}

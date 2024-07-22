@@ -1,4 +1,4 @@
-import { EventModule } from "@customTypes/events";
+import { BaseEventModule } from "@customTypes/events";
 
 import { Client, Events } from "discord.js";
 import * as logger from "@utils/logger";
@@ -10,4 +10,4 @@ export default {
     execute: async (client: Client) => {
         logger.client.online();
     }
-} as EventModule;
+} as BaseEventModule;
