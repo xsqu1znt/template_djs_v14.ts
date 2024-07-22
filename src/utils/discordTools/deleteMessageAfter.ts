@@ -1,5 +1,5 @@
 import { Message } from "discord.js";
-import * as jt from "@utils/jsTools";
+import jt from "@utils/jsTools";
 
 import { timeouts } from "./config.json";
 

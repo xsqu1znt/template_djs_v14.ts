@@ -1,11 +1,11 @@
 /** @file Reusable functions for using `console.log()`, but in 4k ultra HD retrocolor. */
 
 import { Shard } from "discord.js";
-import * as jt from "@utils/jsTools";
+import jt from "@utils/jsTools";
 import chalk from "chalk";
 
 import { name as PROJECT } from "@pkgJSON";
-import * as config from "@configs";
+import config from "@configs";
 
 const STARTUP_MESSAGES = [
     "Initalizing...",
@@ -130,4 +130,14 @@ export const importer = {
                 .replace("$IMPORT_COMMAND", _import_command())
         );
     }
+};
+
+export default {
+    debug,
+    error,
+    log,
+    success,
+
+    client,
+    importer
 };

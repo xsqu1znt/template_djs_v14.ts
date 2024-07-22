@@ -7,15 +7,13 @@ import {
     CommandInteraction,
     Events,
     GuildMember,
-    MessageActionRowComponent,
     MessageActionRowComponentBuilder,
     PermissionResolvable
 } from "discord.js";
 import { BetterEmbed } from "@utils/discordTools";
-import * as logger from "@utils/logger";
-import * as jt from "@utils/jsTools";
+import logger from "@utils/logger";
 
-import * as config from "@configs";
+import config from "@configs";
 
 function getStaffGuildAdminBypass(commandName: string): string[] {
     let _staff = config.client.staff;

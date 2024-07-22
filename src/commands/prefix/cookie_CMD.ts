@@ -1,7 +1,7 @@
 import { PrefixCommand } from "@customTypes/commands";
 
 // import { BetterEmbed } from "@utils/discordTools";
-// import * as jt from "@utils/jsTools";
+// import jt from "@utils/jsTools";
 
 export default {
     name: "cookie",

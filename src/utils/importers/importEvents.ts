@@ -1,8 +1,8 @@
 import { BaseEventModule } from "@customTypes/events";
 
 import { Client } from "discord.js";
-import * as logger from "@utils/logger";
-import * as jt from "@utils/jsTools";
+import logger from "@utils/logger";
+import jt from "@utils/jsTools";
 import * as path from "path";
 
 const EVENT_MODULE_RELATIVE_PATH = "../../events";

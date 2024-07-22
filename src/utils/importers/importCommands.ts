@@ -1,8 +1,8 @@
 import { SlashCommand, PrefixCommand, InteractionCommand } from "@customTypes/commands";
 
 import { Client } from "discord.js";
-import * as logger from "@utils/logger";
-import * as jt from "@utils/jsTools";
+import logger from "@utils/logger";
+import jt from "@utils/jsTools";
 import * as path from "path";
 
 const MODULE_RELATIVE_PATHS = {

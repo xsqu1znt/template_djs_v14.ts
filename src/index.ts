@@ -4,12 +4,12 @@ import dotenv from "dotenv";
 dotenv.config();
 
 import { Client, Collection, GatewayIntentBits, Partials } from "discord.js";
-// import * as slashCommandManager from "@utils/slashCommandManager";
-import * as importers from "@utils/importers";
-import * as logger from "@utils/logger";
+// import slashCommandManager from "@utils/slashCommandManager";
+import importers from "@utils/importers";
+import logger from "@utils/logger";
 // import * as mongo from "@utils/mongo";
 
-import * as config from "@configs";
+import config from "@configs";
 
 const TOKEN: string = process.env.TOKEN || config.client.TOKEN;
 const TOKEN_DEV: string = process.env.TOKEN_DEV || config.client.TOKEN_DEV;
@@ -73,7 +73,7 @@ client.commands = {
 /* - - - - - { Import & Connect } - - - - - */
 async function init(): Promise<void> {
     // Run Importers
-    await importers.init(client);
+    await importers(client);
 
     // Log the next step to console
     logger.client.conecting();

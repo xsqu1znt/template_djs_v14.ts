@@ -83,8 +83,8 @@ import {
     User
 } from "discord.js";
 import { dynaSend, DynaSendOptions } from "./dynaSend";
-import * as logger from "@utils/logger";
-import * as jt from "@utils/jsTools";
+import logger from "@utils/logger";
+import jt from "@utils/jsTools";
 
 import { INVIS_CHAR, EMBED_COLOR, EMBED_COLOR_DEV } from "./config.json";
 import { IS_DEV_MODE } from "@index";

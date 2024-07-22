@@ -2,9 +2,9 @@ import { BaseEventModule } from "@customTypes/events";
 import { ActivityData, ClientActivity } from "@customTypes/misc";
 
 import { Client, Events, ActivityType } from "discord.js";
-import * as jt from "@utils/jsTools";
+import jt from "@utils/jsTools";
 
-import * as config from "@configs";
+import config from "@configs";
 
 const DEV_MODE: boolean = process.env.DEV_MODE === "true" ? true : config.client.DEV_MODE;
 
