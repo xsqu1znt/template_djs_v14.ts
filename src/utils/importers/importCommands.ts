@@ -39,7 +39,6 @@ type ImportedCommandModule<T> = T extends "slash"
     : never;
 
 async function importCommandModules<T extends CommandType>(commandType: T): Promise<ImportedCommandModule<T>[]> {
-    let _moduleRelativePath: string = "";
     let _moduleDirectory: string = "";
     let _moduleLogPath: string = "";
     let _moduleNameMatch: string = "";
@@ -47,21 +46,18 @@ async function importCommandModules<T extends CommandType>(commandType: T): Prom
     // Determine the operation variables
     switch (commandType) {
         case "slash":
-            _moduleRelativePath = MODULE_RELATIVE_PATHS.slash;
             _moduleDirectory = MODULE_DIRECTORIES.slash;
             _moduleLogPath = MODULE_LOG_PATHS.slash;
             _moduleNameMatch = MODULE_NAME_MATCH.slash;
             break;
 
         case "prefix":
-            _moduleRelativePath = MODULE_RELATIVE_PATHS.prefix;
             _moduleDirectory = MODULE_DIRECTORIES.prefix;
             _moduleLogPath = MODULE_LOG_PATHS.prefix;
             _moduleNameMatch = MODULE_NAME_MATCH.prefix;
             break;
 
         case "interaction":
-            _moduleRelativePath = MODULE_RELATIVE_PATHS.interaction;
             _moduleDirectory = MODULE_DIRECTORIES.interaction;
             _moduleLogPath = MODULE_LOG_PATHS.interaction;
             _moduleNameMatch = MODULE_NAME_MATCH.interaction;

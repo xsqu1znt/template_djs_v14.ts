@@ -95,7 +95,7 @@ import { IS_DEV_MODE } from "@index";
  *
  * All functions utilize _ACF_ unless `BetterEmbed.acf` is set to `false`.
  *
- * ___Use blackslash___ `\` ___to escape any context.___
+ * ___Use a blackslash___ `\` ___to escape any context.___
  *
  * \- - - Author Context - - -
  * - __`$USER`__: _author's mention (@xsqu1znt)_

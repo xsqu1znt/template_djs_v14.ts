@@ -11,6 +11,10 @@ export interface BaseEventModule {
     execute: (client: Client, ...args: any[]) => Promise<Message | void | null>;
 }
 
+export interface MessageCreateEventModule extends BaseEventModule {
+    execute: (client: Client, message: Message) => Promise<Message | void | null>;
+}
+
 export interface InteractionEventModule extends BaseEventModule {
     execute: (client: Client, interaction: BaseInteraction) => Promise<Message | void | null>;
 }

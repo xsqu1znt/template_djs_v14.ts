@@ -60,7 +60,8 @@ export default {
     execute: async (client, interaction) => {
         if (!interaction.isCommand()) return;
 
-        let slashCommand = await client.commands.slash.all.get(interaction.commandName);
+        // Get the command from the client, if it exists
+        let slashCommand = client.commands.slash.all.get(interaction.commandName);
 
         // Command doesn't exist
         if (!slashCommand) {
@@ -153,7 +154,7 @@ export default {
         /* - - - - - { Execute the Command } - - - - - */
         try {
             return await slashCommand.execute(client, interaction).then(async message => {
-                // TODO: run code here after the command is finished
+                /* TODO: run code here after the command finished executing... */
             });
         } catch (err) {
             let _configSupport = config.client.support_server;
@@ -194,7 +195,7 @@ export default {
             // Log the error to the console
             return logger.error(
                 `$_TIMESTAMP $_COMMAND`,
-                `name: /${interaction.commandName} | guild: '${interaction.guild?.id || "n/a"}' | user: '${interaction.user.id}'`,
+                `name: /${interaction.commandName} | guild: '${interaction.guildId || "n/a"}' | user: '${interaction.user.id}'`,
                 err
             );
         }
