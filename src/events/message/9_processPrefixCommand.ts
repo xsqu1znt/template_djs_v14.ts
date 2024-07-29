@@ -55,12 +55,18 @@ function hasRequiredPermissions(member: GuildMember, required: PermissionResolva
     return { has, missing, passed: has.length === required.length };
 }
 
-function getOptionFromMessageContent(content: string, flagPrefix: string, flagName: string, allowSpaces: boolean = false) {
+function getOptionFromMessageContent(content: string, prefix: string, flagName: string, allowSpaces: boolean = false) {
+    let match: RegExpMatchArray | null;
+
     if (allowSpaces) {
-        let match = content.match(new RegExp(`${flagName} (.[^${flagPrefix}]*)`));
+        /* NOTE: matches until the first occurrence of the flagPrefix */
+        match = content.match(new RegExp(`${flagName} (.[^${prefix}]*)`));
     } else {
-        let match = content.match(new RegExp(`${flagName} (.)`));
+        /* NOTE: matches until the first occurrence of a space */
+        match = content.match(new RegExp(`${flagName} (.)`));
     }
+
+    return match ? match[0] : null;
 }
 
 export default {
@@ -166,8 +172,8 @@ export default {
                 prefix,
                 commandName,
                 cleanContent,
-                getCommandOption: (flagPrefix: string, flagName: string, allowSpaces: boolean = false) =>
-                    getOptionFromMessageContent(cleanContent, flagPrefix, flagName, allowSpaces)
+                getCommandOption: (prefix: string, name: string, allowSpaces: boolean = false) =>
+                    getOptionFromMessageContent(cleanContent, prefix, name, allowSpaces)
             };
 
             return await prefixCommand.execute(client, message, extra).then(async message => {
