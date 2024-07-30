@@ -29,7 +29,7 @@ interface ForceArrayOptions {
 export function forceArray<T>(item: T, options?: ForceArrayOptions) {
     let _item: T[] = [];
 
-    if (Array.isArray(item)) _item.push(item);
+    if (Array.isArray(item)) return item;
 
     if (options?.filterFalsey) _item = _item.filter(i => i);
     if (options?.copy) _item = structuredClone(_item);

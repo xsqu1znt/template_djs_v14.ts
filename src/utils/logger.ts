@@ -30,6 +30,7 @@ const _importer = (): string => chalk.bold.gray("[IMPORTER]");
 const _import_event = (): string => chalk.bold.gray("[IMPORT/EVENT]");
 const _import_command = (): string => chalk.bold.gray("[IMPORT/COMMAND]");
 const _command = (): string => chalk.bold.gray("[COMMAND]");
+const _event = (): string => chalk.bold.gray("[EVENT]");
 
 const _timestamp = (): string => `[${new Date().toLocaleTimeString()}]`;
 
@@ -45,23 +46,24 @@ function contextFormatter(str: string): string {
         .replace("$_IMPORTER", _importer())
         .replace("$_IMPORT_EVENT", _import_event())
         .replace("$_IMPORT_COMMAND", _import_command())
-        .replace("$_COMMAND", _command());
+        .replace("$_COMMAND", _command())
+        .replace("$_EVENT", _event());
 }
 
 export function debug(msg: string): void {
-    console.log(colors.debug.italic(contextFormatter(msg)));
+    console.log(colors.debug.italic(contextFormatter(chalk`${msg}`)));
 }
 
 export function error(header: string, msg: string, err: any = ""): void {
-    console.error(contextFormatter(`${chalk.bgRed.white("ERROR!")} ${chalk.bold.red(header)} ${msg}`), err);
+    console.error(contextFormatter(chalk`${chalk.bgRed.white("ERROR!")} ${chalk.bold.red(header)} ${msg}\n${err}`));
 }
 
 export function log(msg: string): void {
-    console.log(colors.log.italic(msg));
+    console.log(colors.log.italic(chalk`${msg}`));
 }
 
 export function success(msg: string): void {
-    console.log(chalk.greenBright(msg));
+    console.log(chalk.greenBright(chalk`${msg}`));
 }
 
 export const client = {

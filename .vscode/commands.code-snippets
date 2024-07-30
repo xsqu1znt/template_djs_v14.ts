@@ -20,12 +20,13 @@
             "    execute: async (client, interaction) => {",
             "        // Create an array of responses",
             "        let choices = [",
-            "            \"What's up, **$USER_NAME**! Have a cookie! :cookie:\",",
-            "            \"Hey, **$USER_NAME**! Have a glass of milk! :milk:\"",
+            "            \"What's up, **\\$USER_NAME**! Have a cookie! :cookie:\",",
+            "            \"Hey, **\\$USER_NAME**! Have a glass of milk! :milk:\"",
             "        ];\n",
 
             "        // Create the embed ( Cookie )",
             "        let embed_${1:cookie} = new BetterEmbed({",
+            "            context: { interaction },",
             "            description: jt.choice(choices)",
             "        });\n",
 
@@ -54,12 +55,13 @@
             "    execute: async (client, message) => {",
             "        // Create an array of responses",
             "        let choices = [",
-            "            \"What's up, **$USER_NAME**! Have a cookie! :cookie:\",",
-            "            \"Hey, **$USER_NAME**! Have a glass of milk! :milk:\"",
+            "            \"What's up, **\\$USER_NAME**! Have a cookie! :cookie:\",",
+            "            \"Hey, **\\$USER_NAME**! Have a glass of milk! :milk:\"",
             "        ];\n",
         
             "        // Create the embed ( Cookie )",
             "        let embed_${1:cookie} = new BetterEmbed({",
+            "            context: { message },",
             "            description: jt.choice(choices)",
             "        });\n",
         

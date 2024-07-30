@@ -12,12 +12,13 @@ export default {
     execute: async (client, message) => {
         // Create an array of responses
         let choices = [
-            "What's up, **USER_NAME**! Have a cookie! :cookie:",
-            "Hey, **USER_NAME**! Have a glass of milk! :milk:"
+            "What's up, **$DISPLAY_NAME**! Have a cookie! :cookie:",
+            "Hey, **$DISPLAY_NAME**! Have a glass of milk! :milk:"
         ];
 
         // Create the embed ( Cookie )
         let embed_cookie = new BetterEmbed({
+            context: { message },
             description: jt.choice(choices)
         });
 

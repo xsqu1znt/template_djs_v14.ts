@@ -1,4 +1,4 @@
-import { CommandInteraction, EmbedBuilder, Message, RepliableInteraction, TextBasedChannel } from "discord.js";
+import { CacheType, CommandInteraction, EmbedBuilder, Message, RepliableInteraction, TextBasedChannel } from "discord.js";
 import { BetterEmbed } from "./BetterEmbed";
 
 export type SendHandler = CommandInteraction | RepliableInteraction | TextBasedChannel | Message;
@@ -9,3 +9,5 @@ export type SendMethodMessageBased = "messageReply" | "messageEdit";
 export type SendMethod = SendMethodInteractionBased | SendMethodChannelBased | SendMethodMessageBased;
 
 export type EmbedResolveable = EmbedBuilder | BetterEmbed;
+
+export type InteractionResolveable = CommandInteraction | RepliableInteraction;

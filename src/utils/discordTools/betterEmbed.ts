@@ -1,10 +1,10 @@
-import { SendHandler } from "./types";
+import { SendHandler, InteractionResolveable } from "./types";
 
 interface BetterEmbedData {
     /** Can be provided for Auto-shorthand context formatting (_ACF_). */
     context?: {
         client?: Client | null;
-        interaction?: RepliableInteraction | null;
+        interaction?: InteractionResolveable | null;
         channel?: TextBasedChannel | null;
         message?: Message | null;
     } | null;
@@ -74,6 +74,7 @@ import {
     APIEmbedField,
     Client,
     ColorResolvable,
+    CommandInteraction,
     EmbedBuilder,
     GuildMember,
     HexColorString,
@@ -268,17 +269,16 @@ export class BetterEmbed {
         }
     }
 
-    #configure(options?: BetterEmbedData): void {
-        // if (options) return this.clone({ ...this.data, ...options });
-        // this.setAuthor();
-        // this.setTitle();
-        // this.setThumbnail();
-        // this.setDescription();
-        // this.setImage();
-        // this.setFooter();
-        // this.addFields(this.data.fields, true);
-        // this.setColor();
-        // this.setTimestamp();
+    #configure(): void {
+        this.setAuthor();
+        this.setTitle();
+        this.setThumbnail();
+        this.setDescription();
+        this.setImage();
+        this.setFooter();
+        this.addFields(this.data.fields, true);
+        this.setColor();
+        this.setTimestamp();
     }
 
     constructor(data: BetterEmbedData) {
@@ -314,7 +314,9 @@ export class BetterEmbed {
         this.#parseData();
 
         // Author > .text
-        this.#embed.setAuthor({ name: _thisAuthor.text });
+        if (_thisAuthor.text) {
+            this.#embed.setAuthor({ name: _thisAuthor.text });
+        }
 
         // Author > .icon
         if (_thisAuthor?.icon) {
@@ -361,7 +363,9 @@ export class BetterEmbed {
         this.#parseData();
 
         // Title > .text
-        this.#embed.setTitle(_thisTitle.text);
+        if (_thisTitle.text) {
+            this.#embed.setTitle(_thisTitle.text);
+        }
 
         // Title > .hyperlink
         if (_thisTitle?.hyperlink) {
@@ -429,7 +433,9 @@ export class BetterEmbed {
         this.#parseData();
 
         // Footer > .text
-        this.#embed.setFooter({ text: _thisFooter.text });
+        if (_thisFooter.text) {
+            this.#embed.setFooter({ text: _thisFooter.text });
+        }
 
         // Footer > .icon
         if (_thisFooter.icon) {
@@ -541,13 +547,8 @@ export class BetterEmbed {
         let _embed: BetterEmbed = this;
         this.#parseData();
 
-        if (data) {
-            // Clone the embed
-            _embed = this.clone(data);
-        } else {
-            // Configure the embed before sending
-            this.#configure();
-        }
+        // Clone the embed
+        if (data) _embed = this.clone(data);
 
         // Send the message
         return await dynaSend(handler, {
