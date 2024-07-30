@@ -55,7 +55,7 @@ export function debug(msg: string): void {
 }
 
 export function error(header: string, msg: string, err: any = ""): void {
-    console.error(contextFormatter(chalk`${chalk.bgRed.white("ERROR!")} ${chalk.bold.red(header)} ${msg}\n${err}`));
+    console.error(contextFormatter(chalk`${chalk.bgRed.white("ERROR!")} ${chalk.bold.red(header)} ${msg}`), err);
 }
 
 export function log(msg: string): void {
