@@ -11,8 +11,10 @@ import logger from "@utils/logger";
 
 import config from "@configs";
 
-const TOKEN: string = process.env.TOKEN || config.client.TOKEN;
-const TOKEN_DEV: string = process.env.TOKEN_DEV || config.client.TOKEN_DEV;
+export const TOKEN: string = process.env.TOKEN || config.client.TOKEN;
+export const TOKEN_DEV: string = process.env.TOKEN_DEV || config.client.TOKEN_DEV;
+export const MONGO_URI: string = process.env.MONGO_URI || config.client.MONGO_URI;
+export const MONGO_URI_DEV: string = process.env.MONGO_URI_DEV || config.client.MONGO_URI_DEV;
 export const IS_DEV_MODE: boolean = process.env.DEV_MODE === "true" ? true : config.client.DEV_MODE;
 
 /* - - - - - { Check for TOKEN } - - - - - */

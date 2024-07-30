@@ -4,11 +4,14 @@
         "scope": "typescript",
         "body": [
             "import { Schema, model } from \"mongoose\";\n",
-        
-            "const schema = new Schema({",
-            "    _id: { type: String, required: true }$0",
-            "});\n",
-        
+
+            "const schema = new Schema(",
+            "    {",
+            "        _id: { type: String, required: true }$0",
+            "    },",
+            "    { collection: \"${1:${TM_FILENAME_BASE}s}\" }",
+            ");\n",
+
             "export default { schema, model: model(\"${1:${TM_FILENAME_BASE}s}\", schema) };\n"
         ]
     }

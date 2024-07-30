@@ -18,7 +18,7 @@
 
             "@configs": ["./src/configs"],
             "@events/*": ["./src/events/*"],
-            "@models/*": ["./src/models/*"],
+            "@models": ["./src/models"],
 
             "@slashCommands/*": ["./src/commands/slash/*"],
             "@prefixCommands/*": ["./src/commands/prefix/*"],

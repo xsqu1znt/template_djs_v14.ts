@@ -31,6 +31,7 @@ const _import_event = (): string => chalk.bold.gray("[IMPORT/EVENT]");
 const _import_command = (): string => chalk.bold.gray("[IMPORT/COMMAND]");
 const _command = (): string => chalk.bold.gray("[COMMAND]");
 const _event = (): string => chalk.bold.gray("[EVENT]");
+const _mongo = (): string => chalk.bold.gray("[MONGO]");
 
 const _timestamp = (): string => `[${new Date().toLocaleTimeString()}]`;
 
@@ -47,7 +48,8 @@ function contextFormatter(str: string): string {
         .replace("$_IMPORT_EVENT", _import_event())
         .replace("$_IMPORT_COMMAND", _import_command())
         .replace("$_COMMAND", _command())
-        .replace("$_EVENT", _event());
+        .replace("$_EVENT", _event())
+        .replace("$_MONGO", _mongo());
 }
 
 export function debug(msg: string): void {
