@@ -11,19 +11,26 @@ import mongo from "@utils/mongo";
 
 import config from "@configs";
 
-export const TOKEN: string = process.env.TOKEN || config.client.TOKEN;
-export const TOKEN_DEV: string = process.env.TOKEN_DEV || config.client.TOKEN_DEV;
-export const MONGO_URI: string = process.env.MONGO_URI || config.client.MONGO_URI;
-export const MONGO_URI_DEV: string = process.env.MONGO_URI_DEV || config.client.MONGO_URI_DEV;
+// Environment
 export const IS_DEV_MODE: boolean = process.env.DEV_MODE === "true" ? true : config.client.DEV_MODE;
 
+/// Discord Token
+const TOKEN_PROD: string = process.env.TOKEN || config.client.TOKEN;
+const TOKEN_DEV: string = process.env.TOKEN_DEV || config.client.TOKEN_DEV;
+export const TOKEN: string = IS_DEV_MODE ? TOKEN_DEV : TOKEN_PROD;
+
+/// Mongo URI
+const MONGO_URI_PROD: string = process.env.MONGO_URI || config.client.MONGO_URI;
+const MONGO_URI_DEV: string = process.env.MONGO_URI_DEV || config.client.MONGO_URI_DEV;
+export const MONGO_URI: string = IS_DEV_MODE ? MONGO_URI_DEV : MONGO_URI_PROD;
+
 /* - - - - - { Check for TOKEN } - - - - - */
-if (IS_DEV_MODE && !TOKEN_DEV) {
+if (IS_DEV_MODE && !TOKEN) {
     logger.error("TOKEN Missing", "DEV_MODE is enabled, but TOKEN_DEV is not set");
     process.exit(0);
 }
 
-if (!TOKEN && !TOKEN_DEV) {
+if (!TOKEN) {
     logger.error("TOKEN Missing", "TOKEN is not set");
     process.exit(0);
 }
@@ -82,7 +89,7 @@ async function init(): Promise<void> {
 
     // prettier-ignore
     // Connect the client to Discord
-    client.login(IS_DEV_MODE ? TOKEN_DEV : TOKEN).then(async () => {
+    client.login(TOKEN).then(async () => {
     	// Register slash commands to a specific server :: { LOCAL }
     	// await slashCommandManager.push(client, { ids: "your_id_here" });
 

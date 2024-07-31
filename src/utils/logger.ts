@@ -26,9 +26,11 @@ export const colors = {
 
 /* - - - - - { Shorthand } - - - - - */
 const _client = (): string => chalk.bold.gray("[CLIENT]");
+
 const _importer = (): string => chalk.bold.gray("[IMPORTER]");
 const _import_event = (): string => chalk.bold.gray("[IMPORT/EVENT]");
 const _import_command = (): string => chalk.bold.gray("[IMPORT/COMMAND]");
+
 const _command = (): string => chalk.bold.gray("[COMMAND]");
 const _event = (): string => chalk.bold.gray("[EVENT]");
 const _mongo = (): string => chalk.bold.gray("[MONGO]");

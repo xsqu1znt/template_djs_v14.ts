@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import logger from "@utils/logger";
 
-import { MONGO_URI, MONGO_URI_DEV, IS_DEV_MODE } from "@index";
+import { MONGO_URI, IS_DEV_MODE } from "@index";
 
 // Export models
 export * as models from "@models";
@@ -14,10 +14,10 @@ export { guildManager };
 
 /* - - - - - { Meta Functions } - - - - - */
 /** Connect to MongoDB. */
-export async function connect(uri: string = IS_DEV_MODE ? MONGO_URI_DEV : MONGO_URI): Promise<void> {
+export async function connect(uri: string = MONGO_URI): Promise<void> {
     /* - - - - - { Check for MONGO_URI } - - - - - */
     if (!uri) return logger.error("$_TIMESTAMP $_MONGO", "MONGO_URI is not set");
-    if (IS_DEV_MODE && !MONGO_URI_DEV) {
+    if (IS_DEV_MODE && !MONGO_URI) {
         return logger.error("$_TIMESTAMP $_MONGO", "DEV_MODE is enabled, but MONGO_URI_DEV is not set");
     }
 

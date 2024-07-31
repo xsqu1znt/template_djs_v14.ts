@@ -1,6 +1,6 @@
 import { EmbedResolveable, SendHandler, SendMethod } from "./types";
 
-interface DynaSendOptions {
+export interface DynaSendOptions {
     /** The method used to send the message.
      *
      * Defaults based on the `handler` type:

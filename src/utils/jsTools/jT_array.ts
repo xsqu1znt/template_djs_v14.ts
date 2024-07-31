@@ -1,3 +1,5 @@
+type ForcedArray<T> = T extends any[] ? T : T[];
+
 import * as _o from "./jT_object";
 
 /** Filter out items that are not unique within an array.
@@ -26,13 +28,11 @@ interface ForceArrayOptions {
 }
 
 /** Check if the given item is an array, return the item in an array if it isn't. */
-export function forceArray<T>(item: T, options?: ForceArrayOptions) {
-    let _item: T[] = [];
+export function forceArray<T>(item: T, options?: ForceArrayOptions): ForcedArray<T> {
+    let _items = Array.isArray(item) ? item : [item];
 
-    if (Array.isArray(item)) return item;
+    if (options?.filterFalsey) _items = _items.filter(i => i);
+    if (options?.copy) _items = structuredClone(_items);
 
-    if (options?.filterFalsey) _item = _item.filter(i => i);
-    if (options?.copy) _item = structuredClone(_item);
-
-    return _item as T extends any[] ? T : T[];
+    return _items as ForcedArray<T>;
 }
