@@ -1,7 +1,13 @@
-import { Schema, model } from "mongoose";
-import config from "@configs";
+import { Schema, model as Model } from "mongoose";
+import config from "../configs";
 
-const schema = new Schema(
+export interface iSchema {
+    _id: string;
+    prefix: string;
+    timestamp_joined: Date;
+}
+
+export const schema = new Schema<iSchema>(
     {
         _id: { type: String, required: true },
         prefix: { type: String, default: config.client.PREFIX },
@@ -10,4 +16,4 @@ const schema = new Schema(
     { collection: "guilds" }
 );
 
-export default { schema, model: model("guilds", schema) };
+export const model = Model<iSchema>("guilds", schema);

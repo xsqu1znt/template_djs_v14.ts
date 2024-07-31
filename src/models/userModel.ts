@@ -1,6 +1,11 @@
-import { Schema, model } from "mongoose";
+import { Schema, model as Model } from "mongoose";
 
-const schema = new Schema(
+export interface iSchema {
+    _id: string;
+    timestamp_started: Date;
+}
+
+export const schema = new Schema<iSchema>(
     {
         _id: { type: String, required: true },
         timestamp_started: { type: Date, default: Date.now() }
@@ -8,4 +13,4 @@ const schema = new Schema(
     { collection: "users" }
 );
 
-export default { schema, model: model("users", schema) };
+export const model = Model<iSchema>("users", schema);

@@ -7,7 +7,7 @@ import { Client, Collection, GatewayIntentBits, Partials } from "discord.js";
 // import slashCommandManager from "@utils/slashCommandManager";
 import importers from "@utils/importers";
 import logger from "@utils/logger";
-// import * as mongo from "@utils/mongo";
+import mongo from "@utils/mongo";
 
 import config from "@configs";
 
@@ -95,7 +95,7 @@ async function init(): Promise<void> {
     	// Remove commands (does nothing if commands were registered locally) :: { GLOBAL }
     	// await slashCommandManager.remove(client, { global: true });
 
-        // await mongo.connect();
+        await mongo.connect();
 
         logger.client.ready();
     });

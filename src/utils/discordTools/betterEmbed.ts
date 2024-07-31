@@ -74,12 +74,10 @@ import {
     APIEmbedField,
     Client,
     ColorResolvable,
-    CommandInteraction,
     EmbedBuilder,
     GuildMember,
     HexColorString,
     Message,
-    RepliableInteraction,
     TextBasedChannel,
     User
 } from "discord.js";
