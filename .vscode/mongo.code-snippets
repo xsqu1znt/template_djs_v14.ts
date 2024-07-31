@@ -5,18 +5,14 @@
         "body": [
             "import { Schema, model as Model } from \"mongoose\";\n",
 
-            "export interface iSchema {",
-            "    _id: string;$0",
-            "}\n",
-
-            "export const schema = new Schema<iSchema>(",
+            "export const schema = new Schema(",
             "    {",
-            "        _id: { type: String, required: true }",
+            "        _id: { type: String, required: true }$0",
             "    },",
             "    { collection: \"${1:${TM_FILENAME_BASE}s}\" }",
             ");\n",
 
-            "export const model = Model<iSchema>(\"${1:${TM_FILENAME_BASE}s}\", schema);\n"
+            "export const model = Model(\"${1:${TM_FILENAME_BASE}s}\", schema);\n"
         ]
     }
 }
