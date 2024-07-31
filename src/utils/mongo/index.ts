@@ -3,12 +3,16 @@ import logger from "@utils/logger";
 
 import { MONGO_URI, MONGO_URI_DEV, IS_DEV_MODE } from "@index";
 
-import models from "@models";
-export * from "@models";
+// Export models
+export * as models from "@models";
 
-// import guildManager from "./guildManager";
-// import userManager from "./userManager";
+/* - - - - - { Managers } - - - - - */
+import guildManager from "./guildManager";
 
+// Export managers
+export { guildManager };
+
+/* - - - - - { Meta Functions } - - - - - */
 /** Connect to MongoDB. */
 export async function connect(uri: string = IS_DEV_MODE ? MONGO_URI_DEV : MONGO_URI): Promise<void> {
     /* - - - - - { Check for MONGO_URI } - - - - - */
@@ -44,12 +48,4 @@ export async function ping(): Promise<string> {
     return (after - before).toString();
 }
 
-export default {
-    models,
-
-    // guildManager,
-    // userManager,
-
-    connect,
-    ping
-};
+export default { connect, ping };

@@ -1,4 +1,5 @@
 import { MessageCreateEventModule } from "@customTypes/events";
+import { PrefixCommandParams } from "@customTypes/commands";
 
 import {
     ActionRowBuilder,
@@ -12,10 +13,10 @@ import {
     userMention
 } from "discord.js";
 import { BetterEmbed } from "@utils/discordTools";
+import { guildManager } from "@utils/mongo";
 import logger from "@utils/logger";
 
 import config from "@configs";
-import { PrefixCommandParams } from "@customTypes/commands";
 
 function getStaffGuildAdminBypass(commandName: string): string[] {
     let _staff = config.client.staff;
@@ -82,8 +83,7 @@ export default {
         /* - - - - - { Command Prefix } - - - - - */
         let _messageLowerCase = message.content.toLowerCase();
 
-        // let prefix = await guildManager.fetchPrefix(message.guildId);
-        let prefix = config.client.PREFIX;
+        let prefix = await guildManager.fetchPrefix(message.guildId);
 
         // Check if the message starts with the prefix
         let startsWithPrefix = _messageLowerCase.startsWith(prefix);
