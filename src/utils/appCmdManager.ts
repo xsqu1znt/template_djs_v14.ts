@@ -2,27 +2,17 @@
 
 import { InteractionCommand, SlashCommand } from "@customTypes/commands";
 
-type PushableCommand = Array<SlashCommand | InteractionCommand>;
-
-interface PushOptions {
-    /** Specifc commands to push. */
-    commands?: Array<SlashCommand | InteractionCommand>;
-    /** Whether commands should register globally. */
-    global?: boolean;
-}
+type RegisterableCommand = SlashCommand | InteractionCommand;
 
 import { Client, Guild, REST, Routes } from "discord.js";
 import logger from "./logger";
-import jt from "./jsTools";
 
 import { TOKEN } from "@constants";
 
 // Create an instance of the REST API
 const rest = new REST().setToken(TOKEN);
 
-async function registerToLocal(client: Client, guildIDs: string | string[], commands?: PushableCommand) {
-    guildIDs = jt.forceArray(guildIDs, { filterFalsey: true });
-
+async function registerToLocal(client: Client, guildIDs: string[], commands?: RegisterableCommand[]): Promise<void> {
     // If no commands are provided, use all public and interaction commands from the client
     commands = commands?.length
         ? commands
@@ -58,10 +48,13 @@ async function registerToLocal(client: Client, guildIDs: string | string[], comm
     return await Promise.all(
         guilds.map(({ id }) =>
             // Rest API request
-            rest.put(Routes.applicationGuildCommands(client.user?.id || "", id), { body: command_data }).catch(err => {
-                logger.error("$_TIMESTAMP $_CMD_MNGR_LOCAL", `Failed to register app commands | guildID: '${id}'`, err);
-                return null;
-            })
+            rest
+                .put(Routes.applicationGuildCommands(client.user?.id || "", id), { body: command_data })
+                .then(() => logger.log(`$_TIMESTAMP $_CMD_MNGR_LOCAL Registered to guild ('${id}')`))
+                .catch(err => {
+                    logger.error("$_TIMESTAMP $_CMD_MNGR_LOCAL", `Failed to register app commands to guild ('${id}')`, err);
+                    return null;
+                })
         )
     ).then(resolved => {
         let successful = resolved.filter(Boolean).length;
@@ -74,7 +67,46 @@ async function registerToLocal(client: Client, guildIDs: string | string[], comm
     });
 }
 
-async function registerToGlobal(client: Client, commands?: PushableCommand) {
+async function removeFromLocal(client: Client, guildIDs: string[]): Promise<void> {
+    // Fetch the guilds from the client using the provided guild IDs
+    let guilds = (await Promise.all(guildIDs.map(id => client.guilds.fetch(id).catch(() => null))))
+        // Filter out falsey values
+        .filter(Boolean) as Guild[];
+
+    /* error */
+    if (!guilds.length) {
+        return logger.error(
+            "$_TIMESTAMP $_CMD_MNGR_LOCAL",
+            "Failed to register app commands",
+            "No guilds found with the provided IDs"
+        );
+    }
+
+    /* - - - - - - { Remove } - - - - -  */
+    logger.log("$_TIMESTAMP $_CMD_MNGR_LOCAL ⏳ Removing app commands...");
+
+    // Iterate through each guild ID and register the commands
+    return await Promise.all(
+        guilds.map(({ id }) =>
+            // Rest API request
+            rest
+                .put(Routes.applicationGuildCommands(client.user?.id || "", id), { body: [] })
+                .then(() => logger.log(`$_TIMESTAMP $_CMD_MNGR_LOCAL Successfully removed from guild ('${id}')`))
+                .catch(err => {
+                    logger.error("$_TIMESTAMP $_CMD_MNGR_LOCAL", `Failed to remove app commands from guild ('${id}')`, err);
+                    return null;
+                })
+        )
+    ).then(resolved => {
+        let successful = resolved.filter(Boolean).length;
+        // Log the number of guilds that we've successfully removed the commands from
+        logger.log(
+            `$_TIMESTAMP $_CMD_MNGR_LOCAL ✅ Removed app commands for ${successful} ${successful === 1 ? "guild" : "guilds"}`
+        );
+    });
+}
+
+async function registerToGlobal(client: Client, commands?: RegisterableCommand[]): Promise<void> {
     // If no commands are provided, use all public and interaction commands from the client
     commands ||= [...client.commands.slash.public.values(), ...client.commands.interaction.all.values()];
 
@@ -82,82 +114,29 @@ async function registerToGlobal(client: Client, commands?: PushableCommand) {
     if (!commands.length) {
         return logger.error("$_TIMESTAMP $_CMD_MNGR_GLOBAL", "No commands found to register");
     }
+
+    /* - - - - - - { Register } - - - - -  */
+    let command_data = commands.map(cmd =>
+        cmd.builder ? (cmd as SlashCommand).builder.toJSON() : (cmd as InteractionCommand).raw
+    );
+
+    logger.log("$_TIMESTAMP $_CMD_MNGR_GLOBAL ⏳ Registering app commands...");
+
+    // Rest API request
+    return await rest
+        .put(Routes.applicationCommands(client.user?.id || ""), { body: command_data })
+        .then(() => logger.log("$_TIMESTAMP $_CMD_MNGR_GLOBAL ✅ Registered app commands"))
+        .catch(err => logger.error("$_TIMESTAMP $_CMD_MNGR_GLOBAL", "Failed to register app commands", err));
 }
 
-export default {
-    push: async (client: Client, guildIDs: string | string[], options?: PushOptions) => {
-        /* error */
-        if (!client.user) {
-            return logger.error("$_TIMESTAMP $_CLIENT", "Failed to register app commands", "Client has no user property");
-        }
+async function removeFromGlobal(client: Client): Promise<void> {
+    logger.log("$_TIMESTAMP $_CMD_MNGR_GLOBAL ⏳ Removing app commands...");
 
-        let guildsToPushTo = jt.forceArray(guildIDs, { filterFalsey: true });
-        let global = options?.global ?? false;
-        let commands = options?.commands?.length
-            ? options.commands
-            : [...client.commands.slash.public.values(), ...client.commands.interaction.all.values()];
+    // Rest API request
+    return await rest
+        .put(Routes.applicationCommands(client.user?.id || ""), { body: [] })
+        .then(() => logger.log("$_TIMESTAMP $_CMD_MNGR_GLOBAL ✅ Removed app commands"))
+        .catch(err => logger.error("$_TIMESTAMP $_CMD_MNGR_GLOBAL", "Failed to remove app commands", err));
+}
 
-        /* error */
-        if (!commands.length) {
-            return logger.error(
-                "$_TIMESTAMP $_CLIENT",
-                "Failed to register app commands",
-                `No commands found! | op: ${global ? "GLOBAL" : "LOCAL"}`
-            );
-        }
-
-        // Create an array of only api-serialized JSON data for each command
-        let command_data = commands.map(cmd => {
-            let _data = (cmd as SlashCommand)?.builder || (cmd as InteractionCommand).raw;
-            return Object.hasOwn(_data, "builder") ? _data.toJSON() : _data;
-        });
-
-        /* - - - - - { Register Global } - - - - - */
-        if (global) {
-            logger.log("$_TIMESTAMP $_CLIENT ⏳ Registering app commands... | op: GLOBAL");
-
-            return await rest
-                .put(Routes.applicationCommands(client.user.id), { body: command_data })
-                .then(() => logger.log("$_TIMESTAMP $_CLIENT ✅ Registered app commands | op: GLOBAL"))
-                .catch(err => logger.error("$_TIMESTAMP $_CLIENT", "Failed to register app commands | op: GLOBAL", err));
-        }
-
-        /* - - - - - { Register Local } - - - - - */
-        let guilds = (await Promise.all(guildsToPushTo.map(id => client.guilds.fetch(id).catch(() => null))))
-            // Filter out guilds that don't exist
-            .filter(Boolean);
-
-        /* error */
-        if (!guilds.length) {
-            return logger.error(
-                "$_TIMESTAMP $_CLIENT",
-                "Failed to register app commands",
-                "No guilds found with the given IDs"
-            );
-        }
-
-        logger.log("$_TIMESTAMP $_CLIENT ⏳ Registering app commands... | op: LOCAL");
-
-        // Iterate through each guild ID and register the commands
-        return await Promise.all(
-            (guilds as Guild[]).map(({ id }) =>
-                rest
-                    .put(Routes.applicationGuildCommands(client.user?.id || "", id), { body: command_data })
-                    .catch(err =>
-                        logger.error(
-                            `$_TIMESTAMP $_CLIENT", "Failed to register app commands | guildID: ${id} | op: LOCAL`,
-                            err
-                        )
-                    )
-            )
-        ).then(successful => {
-            // Get the number of guilds that were successfully registered
-            let successCount = successful.filter(Boolean).length;
-            logger.log(
-                `$_TIMESTAMP $_CLIENT ✅ Registered app commands for ${successCount} ${
-                    successCount === 1 ? "guild" : "guilds"
-                } | op: LOCAL`
-            );
-        });
-    }
-};
+export default { registerToLocal, removeFromLocal, registerToGlobal, removeFromGlobal };
