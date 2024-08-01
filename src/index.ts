@@ -4,7 +4,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 import { Client, Collection, GatewayIntentBits, Partials } from "discord.js";
-// import slashCommandManager from "@utils/slashCommandManager";
+import AppCommandManager from "@utils/AppCommandManager";
 import importers from "@utils/importers";
 import logger from "@utils/logger";
 import mongo from "@utils/mongo";
@@ -77,17 +77,21 @@ async function init(): Promise<void> {
     // prettier-ignore
     // Connect the client to Discord
     client.login(TOKEN).then(async () => {
-    	// Register slash commands to a specific server :: { LOCAL }
-    	// await slashCommandManager.push(client, { ids: "your_id_here" });
+        const commandManager = new AppCommandManager(client);
 
-    	// Register slash commands :: { GLOBAL }
-    	// await slashCommandManager.push(client, { global: true });
+        // Register commands to specific servers ( Local )
+        // await commandManager.registerToLocal(["guild_id"]);
 
-    	// Remove commands (does nothing if commands were registered globally) :: { LOCAL }
-    	// await slashCommandManager.remove(client, { ids: "your_id_here" });
-
-    	// Remove commands (does nothing if commands were registered locally) :: { GLOBAL }
-    	// await slashCommandManager.remove(client, { global: true });
+        // Remove commands from specific servers ( Local )
+        /* NOTE: does nothing if commands were registered globally */
+        // await commandManager.removeFromLocal(["guild_id"]);
+        
+        // Register commands to all servers and users ( Global )
+        // await commandManager.registerToGlobal();
+        
+        // Remove commands from all servers and users ( Global )
+        /* NOTE: does nothing if commands were registered locally */
+        // await commandManager.removeFromGlobal();
 
         await mongo.connect();
 
