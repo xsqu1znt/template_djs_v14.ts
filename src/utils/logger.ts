@@ -28,7 +28,8 @@ export const colors = {
 const _TIMESTAMP = (): string => `[${new Date().toLocaleTimeString()}]`;
 
 const _CLIENT = (): string => chalk.bold.gray("[CLIENT]");
-const _APP_CMD_MNGR = (): string => chalk.bold.gray("[APP_CMD_MNGR]");
+const _CMD_MNGR_LOCAL = (): string => chalk.bold.gray("[CMD_MNGR/LOCAL]");
+const _CMD_MNGR_GLOBAL = (): string => chalk.bold.gray("[CMD_MNGR/GLOBAL]");
 
 const _IMPORTER = (): string => chalk.bold.gray("[IMPORTER]");
 const _IMPORT_EVENT = (): string => chalk.bold.gray("[IMPORT/EVENT]");
@@ -48,7 +49,8 @@ function contextFormatter(str: string): string {
         .replace("$_TIMESTAMP", _TIMESTAMP())
 
         .replace("$_CLIENT", _CLIENT())
-        .replace("$_APP_CMD_MNGR", _APP_CMD_MNGR())
+        .replace("$_CMD_MNGR_LOCAL", _CMD_MNGR_LOCAL())
+        .replace("$_CMD_MNGR_GLOBAL", _CMD_MNGR_GLOBAL())
 
         .replace("$_IMPORTER", _IMPORTER())
         .replace("$_IMPORT_EVENT", _IMPORT_EVENT())
