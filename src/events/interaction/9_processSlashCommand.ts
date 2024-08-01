@@ -66,7 +66,7 @@ export default {
         // Command doesn't exist
         if (!slashCommand) {
             return await interaction
-                .reply({ content: `'${interaction.commandName}' is not a command.`, ephemeral: true })
+                .reply({ content: `**/\`${interaction.commandName}\`** is not a command.`, ephemeral: true })
                 .catch(err => logger.error("$_TIMESTAMP $_COMMAND", `'/${interaction.commandName}' is not a command.`, err));
         }
 

@@ -62,7 +62,7 @@ function contextFormatter(str: string): string {
 }
 
 export function debug(msg: string): void {
-    console.log(colors.debug.italic(contextFormatter(chalk`${msg}`)));
+    console.log(contextFormatter(colors.debug.italic(chalk`${msg}`)));
 }
 
 export function error(header: string, msg: string, err: any = ""): void {
@@ -70,11 +70,11 @@ export function error(header: string, msg: string, err: any = ""): void {
 }
 
 export function log(msg: string): void {
-    console.log(colors.log.italic(chalk`${msg}`));
+    console.log(contextFormatter(colors.log.italic(chalk`${msg}`)));
 }
 
 export function success(msg: string): void {
-    console.log(chalk.greenBright(chalk`${msg}`));
+    console.log(contextFormatter(chalk.greenBright(chalk`${msg}`)));
 }
 
 export const client = {

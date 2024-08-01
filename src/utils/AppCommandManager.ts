@@ -56,7 +56,10 @@ export default class AppCommandManager {
                 // Rest API request
                 rest
                     .put(Routes.applicationGuildCommands(this.client.user?.id || "", id), { body: command_data })
-                    .then(() => logger.log(`$_TIMESTAMP $_CMD_MNGR_LOCAL Registered to guild ('${id}')`))
+                    .then(() => {
+                        logger.log(`$_TIMESTAMP $_CMD_MNGR_LOCAL Registered to guild ('${id}')`);
+                        return true;
+                    })
                     .catch(err => {
                         logger.error(
                             "$_TIMESTAMP $_CMD_MNGR_LOCAL",
@@ -104,7 +107,10 @@ export default class AppCommandManager {
                 // Rest API request
                 rest
                     .put(Routes.applicationGuildCommands(this.client.user?.id || "", id), { body: [] })
-                    .then(() => logger.log(`$_TIMESTAMP $_CMD_MNGR_LOCAL Successfully removed from guild ('${id}')`))
+                    .then(() => {
+                        logger.log(`$_TIMESTAMP $_CMD_MNGR_LOCAL Successfully removed from guild ('${id}')`);
+                        return true;
+                    })
                     .catch(err => {
                         logger.error(
                             "$_TIMESTAMP $_CMD_MNGR_LOCAL",

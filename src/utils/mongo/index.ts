@@ -30,7 +30,7 @@ export async function connect(uri: string = MONGO_URI): Promise<void> {
     });
 
     // Log the success if connected
-    if (connection) return logger.success("Successfully connected to MongoDB");
+    if (connection) return logger.success("$_TIMESTAMP $_MONGO Successfully connected to MongoDB");
 
     // Log the error if the connection failed
     logger.error("$_TIMESTAMP $_MONGO", "Couldn't connect to MongoDB", connection);
