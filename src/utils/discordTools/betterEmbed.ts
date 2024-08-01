@@ -86,7 +86,7 @@ import logger from "@utils/logger";
 import jt from "@utils/jsTools";
 
 import { INVIS_CHAR, EMBED_COLOR, EMBED_COLOR_DEV } from "./config.json";
-import { IS_DEV_MODE } from "@index";
+import { IS_DEV_MODE } from "@constants";
 
 /** A powerful wrapper for `EmbedBuilder` that introduces useful features.
  *

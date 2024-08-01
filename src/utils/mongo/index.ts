@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import logger from "@utils/logger";
 
-import { MONGO_URI, IS_DEV_MODE } from "@index";
+import { MONGO_URI, IS_DEV_MODE } from "@constants";
 
 // Export models
 export * as models from "@models";

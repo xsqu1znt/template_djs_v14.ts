@@ -25,33 +25,38 @@ export const colors = {
 };
 
 /* - - - - - { Shorthand } - - - - - */
-const _client = (): string => chalk.bold.gray("[CLIENT]");
+const _TIMESTAMP = (): string => `[${new Date().toLocaleTimeString()}]`;
 
-const _importer = (): string => chalk.bold.gray("[IMPORTER]");
-const _import_event = (): string => chalk.bold.gray("[IMPORT/EVENT]");
-const _import_command = (): string => chalk.bold.gray("[IMPORT/COMMAND]");
+const _CLIENT = (): string => chalk.bold.gray("[CLIENT]");
+const _APP_CMD_MNGR = (): string => chalk.bold.gray("[APP_CMD_MNGR]");
 
-const _command = (): string => chalk.bold.gray("[COMMAND]");
-const _event = (): string => chalk.bold.gray("[EVENT]");
-const _mongo = (): string => chalk.bold.gray("[MONGO]");
+const _IMPORTER = (): string => chalk.bold.gray("[IMPORTER]");
+const _IMPORT_EVENT = (): string => chalk.bold.gray("[IMPORT/EVENT]");
+const _IMPORT_COMMAND = (): string => chalk.bold.gray("[IMPORT/COMMAND]");
 
-const _timestamp = (): string => `[${new Date().toLocaleTimeString()}]`;
+const _COMMAND = (): string => chalk.bold.gray("[COMMAND]");
+const _EVENT = (): string => chalk.bold.gray("[EVENT]");
+const _MONGO = (): string => chalk.bold.gray("[MONGO]");
 
-const _dynamic_shard = (shards: Shard[]): string =>
+const _DYNAMIC_SHARD = (shards: Shard[]): string =>
     shards?.length ? chalk.gray`(${shards.length === 1 ? "Shard:" : "Shards:"} ${shards.join(", ")})` : "";
-const _shard_count = (count: number): string => `${count ? chalk.gray(`Shards running: ${count}`) : ""}`;
+const _SHARD_COUNT = (count: number): string => `${count ? chalk.gray(`Shards running: ${count}`) : ""}`;
 
 /* - - - - - { Exports } - - - - - */
 function contextFormatter(str: string): string {
     return str
-        .replace("$_TIMESTAMP", _timestamp())
-        .replace("$_CLIENT", _client())
-        .replace("$_IMPORTER", _importer())
-        .replace("$_IMPORT_EVENT", _import_event())
-        .replace("$_IMPORT_COMMAND", _import_command())
-        .replace("$_COMMAND", _command())
-        .replace("$_EVENT", _event())
-        .replace("$_MONGO", _mongo());
+        .replace("$_TIMESTAMP", _TIMESTAMP())
+
+        .replace("$_CLIENT", _CLIENT())
+        .replace("$_APP_CMD_MNGR", _APP_CMD_MNGR())
+
+        .replace("$_IMPORTER", _IMPORTER())
+        .replace("$_IMPORT_EVENT", _IMPORT_EVENT())
+        .replace("$_IMPORT_COMMAND", _IMPORT_COMMAND())
+
+        .replace("$_COMMAND", _COMMAND())
+        .replace("$_EVENT", _EVENT())
+        .replace("$_MONGO", _MONGO());
 }
 
 export function debug(msg: string): void {
@@ -74,35 +79,35 @@ export const client = {
     initializing: (shards?: Shard[]): void => {
         console.log(
             `$_TIMESTAMP $_CLIENT ⏳ ${chalk.italic(jt.choice(STARTUP_MESSAGES))} $_DYNAMIC_SHARD`
-                .replace("$_TIMESTAMP", _timestamp())
-                .replace("$_CLIENT", _client())
-                .replace("$_DYNAMIC_SHARD", _dynamic_shard(shards || []))
+                .replace("$_TIMESTAMP", _TIMESTAMP())
+                .replace("$_CLIENT", _CLIENT())
+                .replace("$_DYNAMIC_SHARD", _DYNAMIC_SHARD(shards || []))
         );
     },
 
     conecting: (shards?: Shard[]): void => {
         console.log(
             `$_TIMESTAMP $_CLIENT ⏳ ${chalk.italic("Connecting to Discord...")} $_DYNAMIC_SHARD`
-                .replace("$_TIMESTAMP", _timestamp())
-                .replace("$_CLIENT", _client())
-                .replace("$_DYNAMIC_SHARD", _dynamic_shard(shards || []))
+                .replace("$_TIMESTAMP", _TIMESTAMP())
+                .replace("$_CLIENT", _CLIENT())
+                .replace("$_DYNAMIC_SHARD", _DYNAMIC_SHARD(shards || []))
         );
     },
 
     online: (shardCount = 0): void => {
         console.log(
             `$_TIMESTAMP $_CLIENT ✅ ${chalk.green("Successfuly connected to Discord!")} $_SHARD_COUNT`
-                .replace("$_TIMESTAMP", _timestamp())
-                .replace("$_CLIENT", _client())
-                .replace("$_SHARD_COUNT", _shard_count(shardCount))
+                .replace("$_TIMESTAMP", _TIMESTAMP())
+                .replace("$_CLIENT", _CLIENT())
+                .replace("$_SHARD_COUNT", _SHARD_COUNT(shardCount))
         );
     },
 
     ready: (shards?: Shard[]): void => {
         console.log(
             `$_TIMESTAMP ${chalk`{bold {greenBright ${PROJECT}} is up and running!}`} 🎉 $_DYNAMIC_SHARD`
-                .replace("$_TIMESTAMP", _timestamp())
-                .replace("$_DYNAMIC_SHARD", _dynamic_shard(shards || []))
+                .replace("$_TIMESTAMP", _TIMESTAMP())
+                .replace("$_DYNAMIC_SHARD", _DYNAMIC_SHARD(shards || []))
         );
     }
 };
@@ -115,8 +120,8 @@ export const importer = {
                     ? `${colors.eventName.bold(name)} ${chalk.italic.gray(path)}`
                     : chalk.strikethrough(`${chalk.bold.dim(name)} ${chalk.italic.gray(path)}`)
             }`
-                .replace("$_TIMESTAMP", _timestamp())
-                .replace("$IMPORT_EVENT", _import_event())
+                .replace("$_TIMESTAMP", _TIMESTAMP())
+                .replace("$IMPORT_EVENT", _IMPORT_EVENT())
         );
     },
 
@@ -132,8 +137,8 @@ export const importer = {
 
         console.log(
             `$_TIMESTAMP $IMPORT_COMMAND ${colors.commandName.bold(`${prefix}${name}`)} ${chalk.italic.gray(path)}`
-                .replace("$_TIMESTAMP", _timestamp())
-                .replace("$IMPORT_COMMAND", _import_command())
+                .replace("$_TIMESTAMP", _TIMESTAMP())
+                .replace("$IMPORT_COMMAND", _IMPORT_COMMAND())
         );
     }
 };
