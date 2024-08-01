@@ -77,21 +77,21 @@ async function init(): Promise<void> {
     // prettier-ignore
     // Connect the client to Discord
     client.login(TOKEN).then(async () => {
-        const commandManager = new AppCommandManager(client);
+        const acm = new AppCommandManager(client);
 
         // Register commands to specific servers ( Local )
-        // await commandManager.registerToLocal(["guild_id"]);
+        // await acm.registerToLocal(["guild_id"]);
 
         // Remove commands from specific servers ( Local )
         /* NOTE: does nothing if commands were registered globally */
-        // await commandManager.removeFromLocal(["guild_id"]);
+        // await acm.removeFromLocal(["guild_id"]);
         
         // Register commands to all servers and users ( Global )
-        // await commandManager.registerToGlobal();
+        // await acm.registerToGlobal();
         
         // Remove commands from all servers and users ( Global )
         /* NOTE: does nothing if commands were registered locally */
-        // await commandManager.removeFromGlobal();
+        // await acm.removeFromGlobal();
 
         await mongo.connect();
 
