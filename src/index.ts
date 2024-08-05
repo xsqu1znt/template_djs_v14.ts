@@ -80,11 +80,11 @@ async function init(): Promise<void> {
         const acm = new AppCommandManager(client);
 
         // Register commands to specific servers ( Local )
-        // await acm.registerToLocal(["guild_id"]);
+        await acm.registerToLocal(["1052726201086656612"]);
 
         // Remove commands from specific servers ( Local )
         /* NOTE: does nothing if commands were registered globally */
-        // await acm.removeFromLocal(["1052726201086656612"]);
+        // await acm.removeFromLocal(["guild_id"]);
         
         // Register commands to all servers and users ( Global )
         // await acm.registerToGlobal();

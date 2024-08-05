@@ -24,9 +24,9 @@ const MODULE_LOG_PATHS = {
 };
 
 const MODULE_NAME_MATCH = {
-    slash: "SLSH",
-    prefix: "CMD",
-    interaction: "INT"
+    slash: ["SLSH"],
+    prefix: ["CMD"],
+    interaction: ["CTX", "UI"]
 };
 
 type CommandType = "slash" | "prefix" | "interaction";
@@ -41,7 +41,7 @@ type ImportedCommandModule<T> = T extends "slash"
 async function importCommandModules<T extends CommandType>(commandType: T): Promise<ImportedCommandModule<T>[]> {
     let _moduleDirectory: string = "";
     let _moduleLogPath: string = "";
-    let _moduleNameMatch: string = "";
+    let _moduleNameMatch: string[] = [];
 
     // Determine the operation variables
     switch (commandType) {
@@ -66,7 +66,7 @@ async function importCommandModules<T extends CommandType>(commandType: T): Prom
 
     let files = jt
         .readDir(_moduleDirectory, { recursive: true })
-        .filter(fn => fn.includes(_moduleNameMatch) && (fn.endsWith(".js") || fn.endsWith(".ts")));
+        .filter(fn => _moduleNameMatch.find(m => fn.includes(m)) && (fn.endsWith(".js") || fn.endsWith(".ts")));
 
     // Import the modules found in the given directory
     let modules: ImportedCommandModule<T>[] = await Promise.all(

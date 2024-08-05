@@ -22,7 +22,7 @@
 
     "support_server": {
         "INVITE_URL": "https://discord.gg/your_server",
-        "INVITE_ON_COMMAND_ERROR": true,
+        "INVITE_ON_COMMAND_ERROR": false,
         "GUILD_ID": "",
         "channels": {
             "WELCOME": "0123456789"
