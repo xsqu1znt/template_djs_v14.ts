@@ -28,8 +28,8 @@ export const colors = {
 const _TIMESTAMP = (): string => `[${new Date().toLocaleTimeString()}]`;
 
 const _CLIENT = (): string => chalk.bold.gray("[CLIENT]");
-const _CMD_MNGR_LOCAL = (): string => chalk.bold.gray("[CMD_MNGR/LOCAL]");
-const _CMD_MNGR_GLOBAL = (): string => chalk.bold.gray("[CMD_MNGR/GLOBAL]");
+const _CMD_MNGR_LOCAL = (): string => chalk.bold.gray("[ACM/LOCAL]");
+const _CMD_MNGR_GLOBAL = (): string => chalk.bold.gray("[ACM/GLOBAL]");
 
 const _IMPORTER = (): string => chalk.bold.gray("[IMPORTER]");
 const _IMPORT_EVENT = (): string => chalk.bold.gray("[IMPORT/EVENT]");

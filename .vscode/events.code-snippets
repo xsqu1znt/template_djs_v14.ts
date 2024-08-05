@@ -1,0 +1,20 @@
+{
+    "Interaction Create Event": {
+        "prefix": "event-ic",
+        "scope": "typescript",
+        "body": [
+            "import { InteractionEventModule } from \"@customTypes/events\";\n",
+
+            "import { Events } from \"discord.js\";\n",
+
+            "export default {",
+            "    name: \"${1:interactionEventModule}\",",
+            "    eventType: Events.InteractionCreate,\n",
+
+            "    execute(client, interaction) {",
+            "        /* TODO: code to run once the event is triggered... */$0",
+            "    }",
+            "} as InteractionEventModule;\n"
+        ]
+    }
+}

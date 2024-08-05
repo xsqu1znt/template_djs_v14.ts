@@ -1,11 +1,15 @@
 import {
+    BaseInteraction,
     Client,
     ClientEvents,
     CommandInteraction,
     ContextMenuCommandBuilder,
+    ContextMenuCommandInteraction,
     Message,
+    MessageContextMenuCommandInteraction,
     PermissionResolvable,
-    SlashCommandBuilder
+    SlashCommandBuilder,
+    UserContextMenuCommandInteraction
 } from "discord.js";
 
 /* - - - - - { Types } - - - - - */
@@ -13,7 +17,7 @@ export interface SlashCommand {
     /** The category to place the command inside the help command. */
     category?: string;
     /** Extra options for this command. */
-    options?: SlashCommandOptions;
+    options?: InteractionBasedCommandOptions;
     /** Slash command builder. */
     builder: SlashCommandBuilder;
     /** Executed when the command is used. */
@@ -37,56 +41,47 @@ export interface PrefixCommand {
     execute: (client: Client, message: Message, extra: PrefixCommandParams) => Promise<Message | void | null>;
 }
 
-export interface InteractionCommand {
-    /** Raw command data instead of a command builder. */
-    raw?: RawCommandData;
-    /** Command builder. */
-    builder?: ContextMenuCommandBuilder;
+export interface UserInstallCommand {
+    /** Raw command data instead of a command builder.
+     *
+     * __NOTE__: A builder isn't available yet for `UserInstall` commands. */
+    raw: RawCommandData;
     /** The category to place the command inside the help command list. */
     category?: string;
     /** Extra options for this command. */
-    options?: BaseCommandOptions;
+    options?: Omit<InteractionBasedCommandOptions, "emoji" | "hidden">;
     /** Executed when the command is used. */
     execute: (client: Client, interaction: CommandInteraction) => Promise<Message | void | null>;
 }
 
+export interface ContextMenuCommand {
+    /** Context menu builder. */
+    builder: ContextMenuCommandBuilder;
+    /** The category to place the command inside the help command list. */
+    category?: string;
+    /** Extra options for this command. */
+    options?: Omit<InteractionBasedCommandOptions, "emoji" | "hidden" | "guildOnly">;
+    /** Executed when the command is used. */
+    execute: (
+        client: Client,
+        interaction: UserContextMenuCommandInteraction | MessageContextMenuCommandInteraction
+    ) => Promise<Message | void | null>;
+}
+
+export interface BaseInteractionCommand {
+    /** Raw command data instead of a command builder.
+     *
+     * __NOTE__: A builder isn't available yet for `UserInstall` commands. */
+    raw: RawCommandData;
+    /** Context menu builder. */
+    builder: ContextMenuCommandBuilder;
+    /** Extra options for this command. */
+    options?: InteractionBasedCommandOptions;
+    /** Executed when the command is used. */
+    execute: (client: Client, interaction: BaseInteraction) => Promise<Message | void | null>;
+}
+
 /* - - - - - { Options } - - - - - */
-interface BaseCommandOptions {
-    /** The emoji to show in the help command list. Can also be a custom emoji.
-     *
-     * `<:Emoji_Name:Emoji_ID>` - for custom emojis.
-     *
-     * `<a:Emoji_Name:Emoji_ID>` - for animated custom emojis. */
-    emoji?: string;
-    /** Only allow this command to be used in guilds. */
-    guildOnly?: boolean;
-    /** Only allow staff members of this bot's team to use this command.
-     *
-     * @see `config_client.json` `.staff` */
-    botStaffOnly?: boolean;
-    /** Only allow guild admins to use this command. */
-    guildAdminOnly?: boolean;
-    /** Require the user to have certain permissions in the current guild. */
-    requiredUserPerms?: PermissionResolvable[];
-    /** Require the client to have certain permissions in the current guild. */
-    requiredClientPerms?: PermissionResolvable[];
-    /** Hide this command from the help command list. */
-    hidden?: boolean;
-}
-
-interface SlashCommandOptions extends BaseCommandOptions {
-    /** Defer the interaction.
-     *
-     * ___NOTE___: Required if the Slash Command can take longer than 3 seconds to execute. */
-    deferReply?: boolean;
-    /** Defer the interaction ephemerally.
-     *
-     * ___NOTE___: Required if the Slash Command can take longer than 3 seconds to execute. */
-    deferReplyEphemeral?: boolean;
-}
-
-interface PrefixCommandOptions extends BaseCommandOptions {}
-
 interface RawCommandData {
     /** Name of the command. */
     name: string;
@@ -114,6 +109,42 @@ interface RawCommandData {
      * - `2` `PRIVATE_CHANNEL` */
     contexts: 0 | 1 | 2;
 }
+
+interface BaseCommandOptions {
+    /** The emoji to show in the help command list. Can also be a custom emoji.
+     *
+     * `<:Emoji_Name:Emoji_ID>` - for custom emojis.
+     *
+     * `<a:Emoji_Name:Emoji_ID>` - for animated custom emojis. */
+    emoji?: string;
+    /** Only allow this command to be used in guilds. */
+    guildOnly?: boolean;
+    /** Only allow staff members of this bot's team to use this command.
+     *
+     * @see `config_client.json` `.staff` */
+    botStaffOnly?: boolean;
+    /** Only allow guild admins to use this command. */
+    guildAdminOnly?: boolean;
+    /** Require the user to have certain permissions in the current guild. */
+    requiredUserPerms?: PermissionResolvable[];
+    /** Require the client to have certain permissions in the current guild. */
+    requiredClientPerms?: PermissionResolvable[];
+    /** Hide this command from the help command list. */
+    hidden?: boolean;
+}
+
+interface InteractionBasedCommandOptions extends BaseCommandOptions {
+    /** Defer the interaction.
+     *
+     * ___NOTE___: Required if the Slash Command can take longer than 3 seconds to execute. */
+    deferReply?: boolean;
+    /** Defer the interaction ephemerally.
+     *
+     * ___NOTE___: Required if the Slash Command can take longer than 3 seconds to execute. */
+    deferReplyEphemeral?: boolean;
+}
+
+interface PrefixCommandOptions extends BaseCommandOptions {}
 
 /* - - - - - { Callback Parameters } - - - - - */
 interface PrefixCommandParams {

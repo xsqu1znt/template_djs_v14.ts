@@ -1,7 +1,7 @@
 {
     "Slash Command": {
-        "scope": "typescript",
         "prefix": "cmd-slash",
+        "scope": "typescript",
         "body": [
             "import { SlashCommand } from \"@customTypes/commands\";\n",
 
@@ -38,8 +38,8 @@
     },
 
     "Prefix Command": {
-        "scope": "typescript",
         "prefix": "cmd-prefix",
+        "scope": "typescript",
         "body": [
             "import { PrefixCommand } from \"@customTypes/commands\";\n",
         

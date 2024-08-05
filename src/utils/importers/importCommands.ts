@@ -1,4 +1,4 @@
-import { SlashCommand, PrefixCommand, InteractionCommand } from "@customTypes/commands";
+import { SlashCommand, PrefixCommand, BaseInteractionCommand } from "@customTypes/commands";
 
 import { Client } from "discord.js";
 import logger from "@utils/logger";
@@ -35,7 +35,7 @@ type ImportedCommandModule<T> = T extends "slash"
     : T extends "prefix"
     ? { module: PrefixCommand | null; path: string }
     : T extends "interaction"
-    ? { module: InteractionCommand | null; path: string }
+    ? { module: BaseInteractionCommand | null; path: string }
     : never;
 
 async function importCommandModules<T extends CommandType>(commandType: T): Promise<ImportedCommandModule<T>[]> {

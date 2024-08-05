@@ -54,36 +54,38 @@ function hasRequiredPermissions(member: GuildMember, required: PermissionResolva
 }
 
 export default {
-    name: "processSlashCommand",
+    name: "processInteractionCommand",
     eventType: Events.InteractionCreate,
 
     execute: async (client, interaction) => {
-        if (!interaction.isCommand()) return;
+        if (!interaction.isCommand() || !interaction.isContextMenuCommand()) return;
 
         // Get the command from the client, if it exists
-        let slashCommand = client.commands.slash.all.get(interaction.commandName);
+        let interactionCommand =
+            client.commands.slash.all.get(interaction.commandName) ||
+            client.commands.interaction.all.get(interaction.commandName);
 
         // Command doesn't exist
-        if (!slashCommand) {
+        if (!interactionCommand) {
             return await interaction
                 .reply({ content: `**/\`${interaction.commandName}\`** is not a command.`, ephemeral: true })
                 .catch(err => logger.error("$_TIMESTAMP $_COMMAND", `'/${interaction.commandName}' is not a command.`, err));
         }
 
         // Check if the command is guild only, and if the interaction was not used in a guild
-        if (slashCommand.options?.guildOnly === false && !interaction.inGuild()) {
+        if (interactionCommand.options?.guildOnly === false && !interaction.inGuild()) {
             return await interaction
                 .reply({ content: "This command can only be used inside of a server.", ephemeral: true })
                 .catch(() => null);
         }
 
         /* - - - - - { Parse Command Options } - - - - - */
-        if (slashCommand.options) {
-            let _botStaffOnly = slashCommand.options.botStaffOnly;
-            let _guildAdminOnly = slashCommand.options.guildAdminOnly;
+        if (interactionCommand.options) {
+            let _botStaffOnly = interactionCommand.options.botStaffOnly;
+            let _guildAdminOnly = interactionCommand.options.guildAdminOnly;
 
-            let _requiredUserPerms = slashCommand.options.requiredUserPerms;
-            let _requiredClientPerms = slashCommand.options.requiredClientPerms;
+            let _requiredUserPerms = interactionCommand.options.requiredUserPerms;
+            let _requiredClientPerms = interactionCommand.options.requiredClientPerms;
 
             // @config.client.staff
             // Check if the command requires the user to be part of the bot's admin team
@@ -144,16 +146,16 @@ export default {
             }
 
             // Defer the interaction
-            if (slashCommand.options.deferReply) {
+            if (interactionCommand.options.deferReply) {
                 await interaction.deferReply().catch(() => null);
-            } else if (slashCommand.options.deferReplyEphemeral) {
+            } else if (interactionCommand.options.deferReplyEphemeral) {
                 await interaction.deferReply({ ephemeral: true }).catch(() => null);
             }
         }
 
         /* - - - - - { Execute the Command } - - - - - */
         try {
-            return await slashCommand.execute(client, interaction).then(async message => {
+            return await interactionCommand.execute(client, interaction).then(async message => {
                 /* TODO: run code here after the command finished executing... */
             });
         } catch (err) {
