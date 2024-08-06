@@ -87,7 +87,7 @@ async function init(): Promise<void> {
         // await acm.removeFromLocal(["guild_id"]);
         
         // Register commands to all servers and users ( Global )
-        // await acm.registerToGlobal();
+        await acm.registerToGlobal();
         
         // Remove commands from all servers and users ( Global )
         /* NOTE: does nothing if commands were registered locally */

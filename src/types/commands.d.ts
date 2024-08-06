@@ -87,6 +87,15 @@ export interface UserInstallCommand {
     execute: (client: Client, interaction: CommandInteraction) => Promise<Message | void | null>;
 }
 
+export interface BaseInteractionCommand {
+    builder: SlashCommandBuilder | ContextMenuCommandBuilder;
+    type: 1 | 2 | 3;
+    integration_types: Array<0 | 1>;
+    contexts: Array<0 | 1 | 2>;
+    options?: InteractionBasedCommandOptions;
+    execute: (client: Client, interaction: BaseInteraction) => Promise<Message | void | null>;
+}
+
 /* - - - - - { Options } - - - - - */
 interface RawCommandData {
     /** Name of the command. */
