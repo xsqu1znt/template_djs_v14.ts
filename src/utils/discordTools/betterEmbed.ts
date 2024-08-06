@@ -395,7 +395,7 @@ export class BetterEmbed {
     /** Set the embed's description. */
     setDescription(description: string | null = this.data.description as string): this {
         if (description) description = this.#applyContextFormatting(description);
-        this.#embed.setDescription(description);
+        this.#embed.setDescription(description || null);
         this.data.description = description;
         return this;
     }

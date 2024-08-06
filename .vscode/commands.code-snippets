@@ -42,33 +42,66 @@
         "scope": "typescript",
         "body": [
             "import { PrefixCommand } from \"@customTypes/commands\";\n",
-        
+
             "import { BetterEmbed } from \"@utils/discordTools\";",
             "import jt from \"@utils/jsTools\";\n",
-        
+
             "export default {",
             "    name: \"${1:cookie}\",",
             "    description: \"${2:Get a cookie or a glass of milk.}\",",
             "    category: \"Fun\",",
             "    options: { emoji: \"🍪\" },\n",
-        
+
             "    execute: async (client, message) => {",
             "        // Create an array of responses",
             "        let choices = [",
             "            \"What's up, **\\$USER_NAME**! Have a cookie! :cookie:\",",
             "            \"Hey, **\\$USER_NAME**! Have a glass of milk! :milk:\"",
             "        ];\n",
-        
+
             "        // Create the embed ( Cookie )",
             "        let embed_${1:cookie} = new BetterEmbed({",
             "            context: { message },",
             "            description: jt.choice(choices)",
             "        });\n",
-        
+
             "        // Reply to the message with the embed",
             "        return await embed_${1:cookie}.send(message, { allowedMentions: { repliedUser: false } });$0",
             "    }",
             "} as PrefixCommand;\n"
+        ]
+    },
+
+    "Context Menu Command": {
+        "prefix": "cmd-ctx",
+        "scope": "typescript",
+        "body": [
+            "import { ContextMenuCommand } from \"@customTypes/commands\";\n",
+
+            "import { ApplicationCommandType, ContextMenuCommandBuilder } from \"discord.js\";",
+            "import { BetterEmbed } from \"@utils/discordTools\";\n",
+
+            "export default {",
+            "    category: \"Fun\",\n",
+
+            "    // prettier-ignore",
+            "    builder: new ContextMenuCommandBuilder().setName(\"${1:View Avatar}\")",
+            "        .setType(ApplicationCommandType.${2|User,Message|}),\n",
+
+            "    execute: async (client, interaction) => {",
+            "        // Defines the type of context menu command",
+            "        if (!interaction.is${2|User,Message|}ContextMenuCommand()) return;\n",
+
+            "        // Create the embed ( Avatar )",
+            "        let embed_${4:avatar} = new BetterEmbed({",
+            "            title: `${interaction.${3|targetUser,targetMessage.member?.user|}.username}'s Avatar`,",
+            "            imageURL: interaction.${3|targetUser,targetMessage.member?.user|}.displayAvatarURL({ size: 4096 })",
+            "        });\n",
+
+            "        // Reply to the interaction with the embed",
+            "        return await embed_${4:avatar}.send(interaction);$0",
+            "    }",
+            "} as ContextMenuCommand;\n"
         ]
     }
 }

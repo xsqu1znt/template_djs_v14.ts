@@ -183,7 +183,7 @@ export default {
             let embed_executeError = new BetterEmbed({
                 color: "Red",
                 title: "⛔ Error",
-                description: `An error occurred while using **/\`${interaction.commandName}\`**.`
+                description: `An error occurred while using **\`/${interaction.commandName}\`**.`
             });
 
             // Let the user know an error occurred
