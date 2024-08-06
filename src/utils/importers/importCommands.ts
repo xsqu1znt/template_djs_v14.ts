@@ -1,6 +1,7 @@
-import { SlashCommand, PrefixCommand, BaseInteractionCommand } from "@customTypes/commands";
+import { SlashCommand, PrefixCommand, ContextMenuCommand, UserInstallCommand } from "@customTypes/commands";
 
 import { Client } from "discord.js";
+import AppCommandManager from "@utils/AppCommandManager";
 import logger from "@utils/logger";
 import jt from "@utils/jsTools";
 import * as path from "path";
@@ -29,13 +30,15 @@ const MODULE_NAME_MATCH = {
     interaction: ["CTX", "UI"]
 };
 
-type CommandType = "slash" | "prefix" | "interaction";
+type CommandType = "slash" | "prefix" | "contextMenu" | "userInstall";
 type ImportedCommandModule<T> = T extends "slash"
     ? { module: SlashCommand | null; path: string }
     : T extends "prefix"
     ? { module: PrefixCommand | null; path: string }
-    : T extends "interaction"
-    ? { module: BaseInteractionCommand | null; path: string }
+    : T extends "contextMenu"
+    ? { module: ContextMenuCommand | null; path: string }
+    : T extends "userInstall"
+    ? { module: UserInstallCommand | null; path: string }
     : never;
 
 async function importCommandModules<T extends CommandType>(commandType: T): Promise<ImportedCommandModule<T>[]> {
@@ -57,7 +60,8 @@ async function importCommandModules<T extends CommandType>(commandType: T): Prom
             _moduleNameMatch = MODULE_NAME_MATCH.prefix;
             break;
 
-        case "interaction":
+        case "contextMenu":
+        case "userInstall":
             _moduleDirectory = MODULE_DIRECTORIES.interaction;
             _moduleLogPath = MODULE_LOG_PATHS.interaction;
             _moduleNameMatch = MODULE_NAME_MATCH.interaction;
@@ -156,26 +160,35 @@ async function importPrefixCommands() {
 
 async function importInteractionCommands() {
     let importedCommands = {
-        contextMenu: [] as ImportedCommandModule<"interaction">[],
-        userInstall: [] as ImportedCommandModule<"interaction">[]
+        contextMenu: [] as ImportedCommandModule<"contextMenu">[],
+        userInstall: [] as ImportedCommandModule<"userInstall">[]
     };
 
     // Import the command modules
-    let modules = await importCommandModules("interaction");
+    let modules = {
+        contextMenu: await importCommandModules("contextMenu"),
+        userInstall: await importCommandModules("userInstall")
+    };
 
-    // Filter the imported modules
-    for (let module of modules) {
-        if (!module.module) continue;
+    // Filter the imported interaction command modules ( Context Menu )
+    for (let ctx of modules.contextMenu) {
+        if (!ctx.module) continue;
 
-        let _filename = module.path.split(".").shift();
+        let _filename = ctx.path.split(".").shift();
 
-        // Interaction Commands :: { CONTEXT MENU }
         if (_filename?.endsWith("_CTX")) {
-            importedCommands.contextMenu.push(module);
+            importedCommands.contextMenu.push(ctx);
         }
-        // Interaction Commands :: { USER INSTALL }
-        else if (_filename?.endsWith("_UI")) {
-            importedCommands.userInstall.push(module);
+    }
+
+    // Filter the imported interaction command modules ( UserInstall )
+    for (let ui of modules.userInstall) {
+        if (!ui.module) continue;
+
+        let _filename = ui.path.split(".").shift();
+
+        if (_filename?.endsWith("_UI")) {
+            importedCommands.userInstall.push(ui);
         }
     }
 
@@ -226,13 +239,14 @@ export default async function (client: Client): Promise<void> {
         for (let command of v) {
             if (!command.module) continue;
 
-            let _name = command.module.raw?.name || command.module.builder?.name;
-            if (!_name) continue;
+            client.commands.interaction.all.set(command.module.builder.name, command.module);
+            if (AppCommandManager.isContextMenuCommand(command.module)) {
+                client.commands.interaction[k as "contextMenu"].set(command.module.builder.name, command.module);
+            } else if (AppCommandManager.isUserInstallCommand(command.module)) {
+                client.commands.interaction[k as "userInstall"].set(command.module.builder.name, command.module);
+            }
 
-            client.commands.interaction.all.set(_name, command.module);
-            client.commands.interaction[k as "contextMenu" | "userInstall"].set(_name, command.module);
-
-            logger.importer.commandImport(_name, command.path, "interaction");
+            logger.importer.commandImport(command.module.builder.name, command.path, "interaction");
         }
     }
 }

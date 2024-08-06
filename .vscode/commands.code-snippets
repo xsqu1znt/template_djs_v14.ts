@@ -13,8 +13,8 @@
             "    category: \"Fun\",",
             "    options: { emoji: \"🍪\" },\n",
 
-            "    // prettier-ignore",
-            "    builder: new SlashCommandBuilder().setName(\"${1:cookie}\")",
+            "    builder: new SlashCommandBuilder()",
+            "        .setName(\"${1:cookie}\")",
             "        .setDescription(\"${2:Get a cookie or a glass of milk.}\"),\n",
 
             "    execute: async (client, interaction) => {",

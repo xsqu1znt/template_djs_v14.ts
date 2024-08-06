@@ -26,7 +26,7 @@ declare module "discord.js" {
             };
 
             interaction: {
-                all: Collection<string, BaseInteractionCommand>;
+                all: Collection<string, ContextMenuCommand | UserInstallCommand>;
                 contextMenu: Collection<string, ContextMenuCommand>;
                 userInstall: Collection<string, UserInstallCommand>;
             };

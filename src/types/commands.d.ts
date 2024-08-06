@@ -14,12 +14,12 @@ import {
 
 /* - - - - - { Types } - - - - - */
 export interface SlashCommand {
+    /** Slash command builder. */
+    builder: SlashCommandBuilder;
     /** The category to place the command inside the help command. */
     category?: string;
     /** Extra options for this command. */
     options?: InteractionBasedCommandOptions;
-    /** Slash command builder. */
-    builder: SlashCommandBuilder;
     /** Executed when the command is used. */
     execute: (client: Client, interaction: CommandInteraction) => Promise<Message | void | null>;
 }
@@ -41,19 +41,6 @@ export interface PrefixCommand {
     execute: (client: Client, message: Message, extra: PrefixCommandParams) => Promise<Message | void | null>;
 }
 
-export interface UserInstallCommand {
-    /** Raw command data instead of a command builder.
-     *
-     * __NOTE__: A builder isn't available yet for `UserInstall` commands. */
-    raw: RawCommandData;
-    /** The category to place the command inside the help command list. */
-    category?: string;
-    /** Extra options for this command. */
-    options?: Omit<InteractionBasedCommandOptions, "emoji" | "hidden">;
-    /** Executed when the command is used. */
-    execute: (client: Client, interaction: CommandInteraction) => Promise<Message | void | null>;
-}
-
 export interface ContextMenuCommand {
     /** Context menu builder. */
     builder: ContextMenuCommandBuilder;
@@ -68,17 +55,36 @@ export interface ContextMenuCommand {
     ) => Promise<Message | void | null>;
 }
 
-export interface BaseInteractionCommand {
-    /** Raw command data instead of a command builder.
+export interface UserInstallCommand {
+    /** Slash command builder. */
+    builder: SlashCommandBuilder;
+    /** Type of command.
+     * - `1` `CHAT_INPUT`
      *
-     * __NOTE__: A builder isn't available yet for `UserInstall` commands. */
-    raw: RawCommandData;
-    /** Context menu builder. */
-    builder: ContextMenuCommandBuilder;
+     * - `2` `USER` - ui-based
+     *
+     * - `3` `MESSAGE` - ui-based */
+    type: 1 | 2 | 3;
+    /** Type of integrations.
+     *
+     * - `0` `GUILD_INSTALL`
+     *
+     * - `1` `USER_INSTALL` */
+    integration_types: Array<0 | 1>;
+    /** Context of the integration.
+     *
+     * - `0` `GUILD`
+     *
+     * - `1` `BOT_DM`
+     *
+     * - `2` `PRIVATE_CHANNEL` */
+    contexts: Array<0 | 1 | 2>;
+    /** The category to place the command inside the help command list. */
+    category?: string;
     /** Extra options for this command. */
-    options?: InteractionBasedCommandOptions;
+    options?: Omit<InteractionBasedCommandOptions, "emoji" | "hidden">;
     /** Executed when the command is used. */
-    execute: (client: Client, interaction: BaseInteraction) => Promise<Message | void | null>;
+    execute: (client: Client, interaction: CommandInteraction) => Promise<Message | void | null>;
 }
 
 /* - - - - - { Options } - - - - - */
@@ -99,7 +105,7 @@ interface RawCommandData {
      * - `0` `GUILD_INSTALL`
      *
      * - `1` `USER_INSTALL` */
-    integration_types: 0 | 1;
+    integration_types: Array<0 | 1>;
     /** Context of the integration.
      *
      * - `0` `GUILD`
@@ -107,7 +113,7 @@ interface RawCommandData {
      * - `1` `BOT_DM`
      *
      * - `2` `PRIVATE_CHANNEL` */
-    contexts: 0 | 1 | 2;
+    contexts: Array<0 | 1 | 2>;
 }
 
 interface BaseCommandOptions {

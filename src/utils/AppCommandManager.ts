@@ -1,10 +1,10 @@
 /** @file Push or remove slash commands to/from guilds. */
 
-import { BaseInteractionCommand, ContextMenuCommand, SlashCommand, UserInstallCommand } from "@customTypes/commands";
+import { ContextMenuCommand, SlashCommand, UserInstallCommand } from "@customTypes/commands";
 
-type RegisterableCommand = SlashCommand | BaseInteractionCommand;
+type RegisterableCommand = SlashCommand | ContextMenuCommand | UserInstallCommand;
 
-import { Client, Guild, REST, Routes } from "discord.js";
+import { Client, ContextMenuCommandBuilder, Guild, REST, Routes, SlashCommandBuilder } from "discord.js";
 import logger from "./logger";
 
 import { TOKEN } from "@constants";
@@ -15,6 +15,18 @@ const rest = new REST().setToken(TOKEN);
 export default class AppCommandManager {
     constructor(public client: Client) {}
 
+    static isSlashCommand(cmd: any): cmd is SlashCommand {
+        return "builder" in cmd && "type"! in cmd && cmd.builder instanceof SlashCommandBuilder;
+    }
+
+    static isContextMenuCommand(cmd: any): cmd is ContextMenuCommand {
+        return "builder" in cmd && cmd.builder instanceof ContextMenuCommandBuilder;
+    }
+
+    static isUserInstallCommand(cmd: any): cmd is UserInstallCommand {
+        return "type" in cmd && "integration_types" in cmd && "contexts" in cmd;
+    }
+
     /** Register app commands to one or more specific servers.
      *
      * __NOTE__: This ___does not___ add `UserInstall` commands to user accounts. */
@@ -23,7 +35,7 @@ export default class AppCommandManager {
         commands = commands?.length
             ? commands
             : [...this.client.commands.slash.public.values(), ...this.client.commands.interaction.all.values()];
-        
+
         /* error */
         if (!commands.length) {
             return logger.error("$_TIMESTAMP $_ACM_LOCAL", "No commands found to register");
@@ -44,9 +56,22 @@ export default class AppCommandManager {
         }
 
         /* - - - - - - { Register } - - - - -  */
-        let command_data = commands.map(cmd =>
-            cmd.builder ? (cmd as SlashCommand | ContextMenuCommand).builder.toJSON() : (cmd as UserInstallCommand).raw
-        );
+        let command_data = commands.map(cmd => {
+            if (AppCommandManager.isSlashCommand(cmd)) {
+                return cmd.builder.toJSON();
+            } else if (AppCommandManager.isContextMenuCommand(cmd)) {
+                return cmd.builder.toJSON();
+            } else if (AppCommandManager.isUserInstallCommand(cmd)) {
+                return {
+                    ...cmd.builder.toJSON(),
+                    type: cmd.type,
+                    integration_types: cmd.integration_types,
+                    context: cmd.contexts
+                };
+            } else {
+                throw new TypeError("Unknown interaction command type", { cause: cmd });
+            }
+        });
 
         logger.log("$_TIMESTAMP $_ACM_LOCAL ⏳ Registering app commands...");
 
@@ -61,11 +86,7 @@ export default class AppCommandManager {
                         return true;
                     })
                     .catch(err => {
-                        logger.error(
-                            "$_TIMESTAMP $_ACM_LOCAL",
-                            `Failed to register app commands to guild ('${id}')`,
-                            err
-                        );
+                        logger.error("$_TIMESTAMP $_ACM_LOCAL", `Failed to register app commands to guild ('${id}')`, err);
                         return null;
                     })
             )
@@ -112,11 +133,7 @@ export default class AppCommandManager {
                         return true;
                     })
                     .catch(err => {
-                        logger.error(
-                            "$_TIMESTAMP $_ACM_LOCAL",
-                            `Failed to remove app commands from guild ('${id}')`,
-                            err
-                        );
+                        logger.error("$_TIMESTAMP $_ACM_LOCAL", `Failed to remove app commands from guild ('${id}')`, err);
                         return null;
                     })
             )
@@ -124,9 +141,7 @@ export default class AppCommandManager {
             let successful = resolved.filter(Boolean).length;
             // Log the number of guilds that we've successfully removed the commands from
             logger.log(
-                `$_TIMESTAMP $_ACM_LOCAL ✅ Removed app commands for ${successful} ${
-                    successful === 1 ? "guild" : "guilds"
-                }`
+                `$_TIMESTAMP $_ACM_LOCAL ✅ Removed app commands for ${successful} ${successful === 1 ? "guild" : "guilds"}`
             );
         });
     }
@@ -145,10 +160,22 @@ export default class AppCommandManager {
             return logger.error("$_TIMESTAMP $_ACM_GLOBAL", "No commands found to register");
         }
 
-        /* - - - - - - { Register } - - - - -  */
-        let command_data = commands.map(cmd =>
-            cmd.builder ? (cmd as SlashCommand | ContextMenuCommand).builder.toJSON() : (cmd as UserInstallCommand).raw
-        );
+        let command_data = commands.map(cmd => {
+            if (AppCommandManager.isSlashCommand(cmd)) {
+                return cmd.builder.toJSON();
+            } else if (AppCommandManager.isContextMenuCommand(cmd)) {
+                return cmd.builder.toJSON();
+            } else if (AppCommandManager.isUserInstallCommand(cmd)) {
+                return {
+                    ...cmd.builder.toJSON(),
+                    type: cmd.type,
+                    integration_types: cmd.integration_types,
+                    context: cmd.contexts
+                };
+            } else {
+                throw new TypeError("Unknown interaction command type", { cause: cmd });
+            }
+        });
 
         logger.log("$_TIMESTAMP $_ACM_GLOBAL ⏳ Registering app commands...");
 

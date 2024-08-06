@@ -8,8 +8,8 @@ export default {
     category: "Fun",
     options: { emoji: "🍪" },
 
-    // prettier-ignore
-    builder: new SlashCommandBuilder().setName("cookie")
+    builder: new SlashCommandBuilder()
+        .setName("cookie")
         .setDescription("Get a cookie or a glass of milk."),
 
     execute: async (client, interaction) => {
