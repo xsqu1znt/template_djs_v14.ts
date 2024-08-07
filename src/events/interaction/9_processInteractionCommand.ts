@@ -1,12 +1,16 @@
+import { InteractionBasedCommandOptions } from "@customTypes/commands";
 import { InteractionEventModule } from "@customTypes/events";
 
 import {
     ActionRowBuilder,
+    BaseInteraction,
     ButtonBuilder,
     ButtonStyle,
+    Client,
     CommandInteraction,
     Events,
     GuildMember,
+    Message,
     MessageActionRowComponentBuilder,
     PermissionResolvable
 } from "discord.js";
@@ -58,13 +62,13 @@ export default {
     eventType: Events.InteractionCreate,
 
     execute: async (client, interaction) => {
-        if (!interaction.isCommand() || !interaction.isContextMenuCommand()) return;
+        if (!interaction.isCommand() && !interaction.isContextMenuCommand()) return;
 
         // Get the command from the client, if it exists
         let interactionCommand =
             client.commands.slash.all.get(interaction.commandName) ||
             client.commands.interaction.all.get(interaction.commandName);
-
+        
         // Command doesn't exist
         if (!interactionCommand) {
             return await interaction
@@ -72,20 +76,22 @@ export default {
                 .catch(err => logger.error("$_TIMESTAMP $_COMMAND", `'/${interaction.commandName}' is not a command.`, err));
         }
 
+        /* - - - - - { Parse Command Options } - - - - - */
+        let _commandOptions: InteractionBasedCommandOptions = { ...interactionCommand.options };
+
         // Check if the command is guild only, and if the interaction was not used in a guild
-        if (interactionCommand.options?.guildOnly === false && !interaction.inGuild()) {
+        if (_commandOptions?.guildOnly === false && !interaction.inGuild()) {
             return await interaction
                 .reply({ content: "This command can only be used inside of a server.", ephemeral: true })
                 .catch(() => null);
         }
 
-        /* - - - - - { Parse Command Options } - - - - - */
-        if (interactionCommand.options) {
-            let _botStaffOnly = interactionCommand.options.botStaffOnly;
-            let _guildAdminOnly = interactionCommand.options.guildAdminOnly;
+        if (_commandOptions) {
+            let _botStaffOnly = _commandOptions.botStaffOnly;
+            let _guildAdminOnly = _commandOptions.guildAdminOnly;
 
-            let _requiredUserPerms = interactionCommand.options.requiredUserPerms;
-            let _requiredClientPerms = interactionCommand.options.requiredClientPerms;
+            let _requiredUserPerms = _commandOptions.requiredUserPerms;
+            let _requiredClientPerms = _commandOptions.requiredClientPerms;
 
             // @config.client.staff
             // Check if the command requires the user to be part of the bot's admin team
@@ -146,16 +152,20 @@ export default {
             }
 
             // Defer the interaction
-            if (interactionCommand.options.deferReply) {
+            if (_commandOptions.deferReply) {
                 await interaction.deferReply().catch(() => null);
-            } else if (interactionCommand.options.deferReplyEphemeral) {
+            } else if (_commandOptions.deferReplyEphemeral) {
                 await interaction.deferReply({ ephemeral: true }).catch(() => null);
             }
         }
 
         /* - - - - - { Execute the Command } - - - - - */
+        /* NOTE: we're defining a separate variable for execute here to ignore context specific Interaction types */
+        /* as it doesn't matter what type of Interaction gets passed to .execute() */
+        let _execute: (...args: any[]) => Promise<Message | void | null> = interactionCommand.execute.bind(null) as any;
+
         try {
-            return await interactionCommand.execute(client, interaction).then(async message => {
+            return await _execute(client, interaction).then(async message => {
                 /* TODO: run code here after the command finished executing... */
             });
         } catch (err) {

@@ -110,9 +110,9 @@ export default {
         let prefixCommand = client.commands.prefix.all.get(commandName);
         if (!prefixCommand) return;
 
+        /* - - - - - { Parse Command Options } - - - - - */
         /* NOTE: prefixCommand.options?.guildOnly is obsolete as prefix commands can't be used outside of guilds */
 
-        /* - - - - - { Parse Command Options } - - - - - */
         if (prefixCommand.options) {
             let _botStaffOnly = prefixCommand.options.botStaffOnly;
             let _guildAdminOnly = prefixCommand.options.guildAdminOnly;

@@ -125,21 +125,24 @@ export async function dynaSend(handler: SendHandler, options: DynaSendOptions): 
             let _reply = await (handler as RepliableInteraction)
                 .reply(sendData)
                 .catch(err => logger.error("$_TIMESTAMP [DYNASEND]", "REPLY_TO_INTERACTION | SendMethod: 'reply'", err));
-            message = _options.fetchReply && _reply ? await _reply.fetch() : null;
+            let _replyInGuild = (handler as RepliableInteraction).inGuild();
+            message = _options.fetchReply && _replyInGuild && _reply ? await _reply.fetch() : null;
             break;
 
         case "editReply":
             let _editReply = await (handler as RepliableInteraction)
                 .editReply(sendData)
                 .catch(err => logger.error("$_TIMESTAMP [DYNASEND]", "EDIT_INTERACTION | SendMethod: 'editReply'", err));
-            message = _options.fetchReply && _editReply ? await _editReply.fetch() : null;
+            let _editReplyInGuild = (handler as RepliableInteraction).inGuild();
+            message = _options.fetchReply && _editReplyInGuild && _editReply ? await _editReply.fetch() : null;
             break;
 
         case "followUp":
             let _followUp = await (handler as RepliableInteraction)
                 .followUp({ ...sendData, fetchReply: _options.fetchReply })
                 .catch(err => logger.error("$_TIMESTAMP [DYNASEND]", "FOLLOW_UP_INTERACTION | SendMethod: 'followUp'", err));
-            message = _options.fetchReply && _followUp ? _followUp : null;
+            let _followUpInGuild = (handler as RepliableInteraction).inGuild();
+            message = _options.fetchReply && _followUpInGuild && _followUp ? _followUp : null;
             break;
 
         case "sendInChannel":

@@ -55,16 +55,16 @@ export interface ContextMenuCommand {
     ) => Promise<Message | void | null>;
 }
 
-export interface UserInstallCommand {
+export interface UserInstallableCommand {
     /** Slash command builder. */
     builder: SlashCommandBuilder;
-    /** Type of command.
+    /** Type of command. Can only be `CHAT_INPUT` for user installable commands.
      * - `1` `CHAT_INPUT`
      *
      * - `2` `USER` - ui-based
      *
      * - `3` `MESSAGE` - ui-based */
-    type: 1 | 2 | 3;
+    type: 1;
     /** Type of integrations.
      *
      * - `0` `GUILD_INSTALL`
@@ -85,15 +85,6 @@ export interface UserInstallCommand {
     options?: Omit<InteractionBasedCommandOptions, "emoji" | "hidden">;
     /** Executed when the command is used. */
     execute: (client: Client, interaction: CommandInteraction) => Promise<Message | void | null>;
-}
-
-export interface BaseInteractionCommand {
-    builder: SlashCommandBuilder | ContextMenuCommandBuilder;
-    type: 1 | 2 | 3;
-    integration_types: Array<0 | 1>;
-    contexts: Array<0 | 1 | 2>;
-    options?: InteractionBasedCommandOptions;
-    execute: (client: Client, interaction: BaseInteraction) => Promise<Message | void | null>;
 }
 
 /* - - - - - { Options } - - - - - */

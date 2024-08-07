@@ -62,7 +62,7 @@ client.commands = {
     interaction: {
         all: new Collection(),
         contextMenu: new Collection(),
-        userInstall: new Collection()
+        userInstallable: new Collection()
     }
 };
 
@@ -80,20 +80,20 @@ async function init(): Promise<void> {
         const acm = new AppCommandManager(client);
 
         // Register commands to specific servers ( Local )
-        // await acm.registerToLocal(["1052726201086656612"]);
+        // await acm.registerToLocal(["guild_id"]);
 
         // Remove commands from specific servers ( Local )
         /* NOTE: does nothing if commands were registered globally */
         // await acm.removeFromLocal(["guild_id"]);
         
         // Register commands to all servers and users ( Global )
-        await acm.registerToGlobal();
+        // await acm.registerToGlobal();
         
         // Remove commands from all servers and users ( Global )
         /* NOTE: does nothing if commands were registered locally */
         // await acm.removeFromGlobal();
 
-        await mongo.connect();
+        // await mongo.connect();
 
         logger.client.ready();
     });

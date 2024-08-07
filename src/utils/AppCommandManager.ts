@@ -1,8 +1,8 @@
 /** @file Push or remove slash commands to/from guilds. */
 
-import { ContextMenuCommand, SlashCommand, UserInstallCommand } from "@customTypes/commands";
+import { ContextMenuCommand, SlashCommand, UserInstallableCommand } from "@customTypes/commands";
 
-type RegisterableCommand = SlashCommand | ContextMenuCommand | UserInstallCommand;
+type RegisterableCommand = SlashCommand | ContextMenuCommand | UserInstallableCommand;
 
 import { Client, ContextMenuCommandBuilder, Guild, REST, Routes, SlashCommandBuilder } from "discord.js";
 import logger from "./logger";
@@ -16,14 +16,14 @@ export default class AppCommandManager {
     constructor(public client: Client) {}
 
     static isSlashCommand(cmd: any): cmd is SlashCommand {
-        return "builder" in cmd && "type"! in cmd && cmd.builder instanceof SlashCommandBuilder;
+        return "builder" in cmd && !("type" in cmd) && cmd.builder instanceof SlashCommandBuilder;
     }
 
     static isContextMenuCommand(cmd: any): cmd is ContextMenuCommand {
         return "builder" in cmd && cmd.builder instanceof ContextMenuCommandBuilder;
     }
 
-    static isUserInstallCommand(cmd: any): cmd is UserInstallCommand {
+    static isUserInstallCommand(cmd: any): cmd is UserInstallableCommand {
         return "type" in cmd && "integration_types" in cmd && "contexts" in cmd;
     }
 
@@ -66,7 +66,7 @@ export default class AppCommandManager {
                     ...cmd.builder.toJSON(),
                     type: cmd.type,
                     integration_types: cmd.integration_types,
-                    context: cmd.contexts
+                    contexts: cmd.contexts
                 };
             } else {
                 throw new TypeError("Unknown interaction command type", { cause: cmd });
@@ -170,7 +170,7 @@ export default class AppCommandManager {
                     ...cmd.builder.toJSON(),
                     type: cmd.type,
                     integration_types: cmd.integration_types,
-                    context: cmd.contexts
+                    contexts: cmd.contexts
                 };
             } else {
                 throw new TypeError("Unknown interaction command type", { cause: cmd });

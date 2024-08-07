@@ -103,5 +103,45 @@
             "    }",
             "} as ContextMenuCommand;\n"
         ]
+    },
+
+    "User Installable Command": {
+        "prefix": "cmd-ui",
+        "scope": "typescript",
+        "body": [
+            "import { UserInstallableCommand } from \"@customTypes/commands\";\n",
+        
+            "import { SlashCommandBuilder } from \"discord.js\";",
+            "import { BetterEmbed } from \"@utils/discordTools\";",
+            "import jt from \"@utils/jsTools\";\n",
+        
+            "export default {",
+            "    builder: new SlashCommandBuilder()",
+            "        .setName(\"${1:pick}\")",
+            "        .setDescription(\"${2:Have me make that decision for you. Separate by comma.}\")\n",
+        
+            "        .addStringOption(option =>",
+            "            option.setName(\"choices\").setDescription(\"Choices to choose from (separate by comma).\").setRequired(true)",
+            "        ),\n",
+        
+            "    type: 1,",
+            "    integration_types: [0, 1],",
+            "    contexts: [0, 1, 2],\n",
+        
+            "    execute: async (client, interaction) => {",
+            "        // Get the user's choices from the interaction",
+            "        let choices = interaction.options.get(\"choices\", true).value as string;\n",
+        
+            "        // Create the embed ( Pick )",
+            "        let embed_${1:pick} = new BetterEmbed({",
+            "            context: { interaction },",
+            "            description: jt.choice(choices.split(\",\")).trim()",
+            "        });\n",
+        
+            "        // Reply to the interaction with the embed",
+            "        return await embed_${1:pick}.send(interaction);$0",
+            "    }",
+            "} as UserInstallableCommand;\n"
+        ]
     }
 }

@@ -1,4 +1,4 @@
-import { SlashCommand, PrefixCommand, ContextMenuCommand, UserInstallCommand } from "@customTypes/commands";
+import { SlashCommand, PrefixCommand, ContextMenuCommand, UserInstallableCommand } from "@customTypes/commands";
 
 import { Client } from "discord.js";
 import AppCommandManager from "@utils/AppCommandManager";
@@ -38,7 +38,7 @@ type ImportedCommandModule<T> = T extends "slash"
     : T extends "contextMenu"
     ? { module: ContextMenuCommand | null; path: string }
     : T extends "userInstall"
-    ? { module: UserInstallCommand | null; path: string }
+    ? { module: UserInstallableCommand | null; path: string }
     : never;
 
 async function importCommandModules<T extends CommandType>(commandType: T): Promise<ImportedCommandModule<T>[]> {
@@ -243,7 +243,7 @@ export default async function (client: Client): Promise<void> {
             if (AppCommandManager.isContextMenuCommand(command.module)) {
                 client.commands.interaction[k as "contextMenu"].set(command.module.builder.name, command.module);
             } else if (AppCommandManager.isUserInstallCommand(command.module)) {
-                client.commands.interaction[k as "userInstall"].set(command.module.builder.name, command.module);
+                client.commands.interaction[k as "userInstallable"].set(command.module.builder.name, command.module);
             }
 
             logger.importer.commandImport(command.module.builder.name, command.path, "interaction");

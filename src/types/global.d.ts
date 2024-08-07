@@ -1,10 +1,4 @@
-import {
-    BaseInteractionCommand,
-    ContextMenuCommand,
-    PrefixCommand,
-    SlashCommand,
-    UserInstallCommand
-} from "@customTypes/commands";
+import { ContextMenuCommand, PrefixCommand, SlashCommand, UserInstallableCommand } from "@customTypes/commands";
 
 import { Client, Collection, SlashCommandBuilder } from "discord.js";
 
@@ -26,9 +20,9 @@ declare module "discord.js" {
             };
 
             interaction: {
-                all: Collection<string, ContextMenuCommand | UserInstallCommand>;
+                all: Collection<string, ContextMenuCommand | UserInstallableCommand>;
                 contextMenu: Collection<string, ContextMenuCommand>;
-                userInstall: Collection<string, UserInstallCommand>;
+                userInstallable: Collection<string, UserInstallableCommand>;
             };
         };
     }
