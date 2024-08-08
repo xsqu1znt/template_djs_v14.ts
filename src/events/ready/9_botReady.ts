@@ -1,13 +1,12 @@
 import { BaseEventModule } from "@customTypes/events";
 
-import { Client, Events } from "discord.js";
 import logger from "@utils/logger";
 
 export default {
     name: "clientReady",
-    eventType: Events.ClientReady,
+    event: "ready",
 
-    execute: async (client: Client) => {
+    execute: async (client) => {
         logger.client.online();
     }
 } as BaseEventModule;

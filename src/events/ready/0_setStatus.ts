@@ -1,19 +1,18 @@
 import { BaseEventModule } from "@customTypes/events";
 import { ActivityData, ClientActivity } from "@customTypes/misc";
 
-import { Client, Events, ActivityType } from "discord.js";
+import { ActivityType } from "discord.js";
 import jt from "@utils/jsTools";
 
+import { IS_DEV_MODE } from "@constants";
 import config from "@configs";
-
-const DEV_MODE: boolean = process.env.DEV_MODE === "true" ? true : config.client.DEV_MODE;
 
 export default {
     name: "setClientActivity",
-    eventType: Events.ClientReady,
+    event: "ready",
 
-    execute: async (client: Client) => {
-        let clientActivity: ClientActivity = DEV_MODE
+    execute: async client => {
+        let clientActivity: ClientActivity = IS_DEV_MODE
             ? config.client.client_activity.dev
             : config.client.client_activity.default;
 

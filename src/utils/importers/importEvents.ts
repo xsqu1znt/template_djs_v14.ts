@@ -44,10 +44,10 @@ export default async function (client: Client): Promise<void> {
     }
 
     // Get an array of every EventType imported
-    let eventTypes = jt.unique(events.map(e => e.module.eventType));
+    let eventTypes = jt.unique(events.map(e => e.module.event));
 
     // Group events by EventType
-    let eventsGrouped = eventTypes.map(type => events.filter(e => e.module.eventType === type));
+    let eventsGrouped = eventTypes.map(type => events.filter(e => e.module.event === type));
 
     // Iterate through grouped events
     for (let group of eventsGrouped) {
@@ -60,7 +60,7 @@ export default async function (client: Client): Promise<void> {
             }
 
             // Bind it to the appropriate listener
-            client.on(event.module.eventType, async (...args) => {
+            client.on(event.module.event, async (...args) => {
                 try {
                     // Execute the event
                     await event.module.execute.apply(null, [client, ...args]);
@@ -68,7 +68,7 @@ export default async function (client: Client): Promise<void> {
                     // Log the error to the console
                     logger.error(
                         "$_TIMESTAMP $_EVENT",
-                        `Failed to execute '{bold ${event.module.name}}' on event '{bold {blueBright ${event.module.eventType}}}'`,
+                        `Failed to execute '{bold ${event.module.name}}' on event '{bold {blueBright ${event.module.event}}}'`,
                         err
                     );
                 }

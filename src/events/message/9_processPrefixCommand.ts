@@ -5,7 +5,6 @@ import {
     ActionRowBuilder,
     ButtonBuilder,
     ButtonStyle,
-    Events,
     GuildMember,
     Message,
     MessageActionRowComponentBuilder,
@@ -72,7 +71,7 @@ function getOptionFromMessageContent(content: string, prefix: string, flagName: 
 
 export default {
     name: "processPrefixCommand",
-    eventType: Events.MessageCreate,
+    event: "messageCreate",
 
     execute: async (client, message) => {
         if (!message.inGuild() || !message.author || message.author.bot || !message.content) return;

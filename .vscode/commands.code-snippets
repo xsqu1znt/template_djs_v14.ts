@@ -1,7 +1,8 @@
 {
-    "Slash Command": {
-        "prefix": "cmd-slash",
+    "DJS Command (SLSH)": {
         "scope": "typescript",
+        "prefix": "cmd-slash",
+        "description": "A slash command template.",
         "body": [
             "import { SlashCommand } from \"@customTypes/commands\";\n",
 
@@ -37,9 +38,10 @@
         ]
     },
 
-    "Prefix Command": {
-        "prefix": "cmd-prefix",
+    "DJS Command (CMD)": {
         "scope": "typescript",
+        "prefix": "cmd-prefix",
+        "description": "A prefix command template.",
         "body": [
             "import { PrefixCommand } from \"@customTypes/commands\";\n",
 
@@ -72,9 +74,10 @@
         ]
     },
 
-    "Context Menu Command": {
-        "prefix": "cmd-ctx",
+    "DJS Command (CTX)": {
         "scope": "typescript",
+        "prefix": "cmd-ctx",
+        "description": "A context menu command template.",
         "body": [
             "import { ContextMenuCommand } from \"@customTypes/commands\";\n",
 
@@ -105,39 +108,40 @@
         ]
     },
 
-    "User Installable Command": {
-        "prefix": "cmd-ui",
+    "DJS Command (UI)": {
         "scope": "typescript",
+        "prefix": "cmd-ui",
+        "description": "A user installable command template.",
         "body": [
             "import { UserInstallableCommand } from \"@customTypes/commands\";\n",
-        
+
             "import { SlashCommandBuilder } from \"discord.js\";",
             "import { BetterEmbed } from \"@utils/discordTools\";",
             "import jt from \"@utils/jsTools\";\n",
-        
+
             "export default {",
             "    builder: new SlashCommandBuilder()",
             "        .setName(\"${1:pick}\")",
             "        .setDescription(\"${2:Have me make that decision for you. Separate by comma.}\")\n",
-        
+
             "        .addStringOption(option =>",
             "            option.setName(\"choices\").setDescription(\"Choices to choose from (separate by comma).\").setRequired(true)",
             "        ),\n",
-        
+
             "    type: 1,",
             "    integration_types: [0, 1],",
             "    contexts: [0, 1, 2],\n",
-        
+
             "    execute: async (client, interaction) => {",
             "        // Get the user's choices from the interaction",
             "        let choices = interaction.options.get(\"choices\", true).value as string;\n",
-        
+
             "        // Create the embed ( Pick )",
             "        let embed_${1:pick} = new BetterEmbed({",
             "            context: { interaction },",
             "            description: jt.choice(choices.split(\",\")).trim()",
             "        });\n",
-        
+
             "        // Reply to the interaction with the embed",
             "        return await embed_${1:pick}.send(interaction);$0",
             "    }",

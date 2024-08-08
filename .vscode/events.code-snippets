@@ -1,20 +1,55 @@
 {
-    "Interaction Create Event": {
-        "prefix": "event-ic",
+    "DJS Event": {
         "scope": "typescript",
+        "prefix": "event-base",
+        "description": "A template for client events that don't have a custom EventModule interface.",
+        "body": [
+            "import { BaseEventModule } from \"@customTypes/events\";\n",
+
+            "export default {",
+            "    name: \"${1:${TM_FILENAME_BASE}}\",",
+            "    event: \"${2:messageCreate}\",\n",
+
+            "    execute: async (client, ${3:message}) => {",
+            "        /* TODO: code to run once the event is triggered... */$0",
+            "    }",
+            "} as BaseEventModule;\n"
+        ]
+    },
+
+    "DJS Event (InteractionCreate)": {
+        "scope": "typescript",
+        "prefix": "event-ic",
+        "description": "A client.on(\"interactionCreate\") event template.",
         "body": [
             "import { InteractionEventModule } from \"@customTypes/events\";\n",
 
-            "import { Events } from \"discord.js\";\n",
-
             "export default {",
-            "    name: \"${1:interactionEventModule}\",",
-            "    eventType: Events.InteractionCreate,\n",
+            "    name: \"${1:${TM_FILENAME_BASE}}\",",
+            "    event: \"interactionCreate\",\n",
 
             "    execute(client, interaction) {",
             "        /* TODO: code to run once the event is triggered... */$0",
             "    }",
             "} as InteractionEventModule;\n"
+        ]
+    },
+
+    "DJS Event (MessageCreate)": {
+        "scope": "typescript",
+        "prefix": "event-mc",
+        "description": "A client.on(\"messageCreate\") event template.",
+        "body": [
+            "import { MessageCreateEventModule } from \"@customTypes/events\";\n",
+
+            "export default {",
+            "    name: \"${1:${TM_FILENAME_BASE}}\",",
+            "    event: \"messageCreate\",\n",
+
+            "    execute: async (client, message) => {",
+            "        /* TODO: code to run once the event is triggered... */$0",
+            "    }",
+            "} as MessageCreateEventModule;\n"
         ]
     }
 }

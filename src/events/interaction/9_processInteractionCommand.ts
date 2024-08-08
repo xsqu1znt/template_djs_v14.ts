@@ -6,9 +6,7 @@ import {
     BaseInteraction,
     ButtonBuilder,
     ButtonStyle,
-    Client,
     CommandInteraction,
-    Events,
     GuildMember,
     Message,
     MessageActionRowComponentBuilder,
@@ -59,7 +57,7 @@ function hasRequiredPermissions(member: GuildMember, required: PermissionResolva
 
 export default {
     name: "processInteractionCommand",
-    eventType: Events.InteractionCreate,
+    event: "interactionCreate",
 
     execute: async (client, interaction) => {
         if (!interaction.isCommand() && !interaction.isContextMenuCommand()) return;

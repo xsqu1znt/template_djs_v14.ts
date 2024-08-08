@@ -1,7 +1,8 @@
 {
-    "Mongo Model Template": {
-        "prefix": "mongo-model",
+    "Mongoose Model": {
         "scope": "typescript",
+        "prefix": "mongo-model",
+        "description": "A mongoose model/schema template.",
         "body": [
             "import { Schema, model as Model } from \"mongoose\";\n",
 
