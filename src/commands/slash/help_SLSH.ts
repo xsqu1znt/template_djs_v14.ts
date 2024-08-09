@@ -6,8 +6,11 @@ import jt from "@utils/jsTools";
 
 const categoryIcons: { [key: string]: string } = {
     Fun: "",
-    Utility: "⚙️",
-    Other: ""
+    Utility: "⚙️"
+};
+
+const config = {
+    maxPageLength: 10
 };
 
 export default {
@@ -26,13 +29,75 @@ export default {
         }
 
         // Parse command categories
-        let categoryNames = jt.unique(
-            commands.map(cmd => {
-                let _name = cmd?.category || "Other";
-                let _icon = _name in categoryIcons ? categoryIcons[_name] : null;
-                return { name: _name, icon: _icon };
-            }),
-            "name"
-        );
+        let categoryNames = jt
+            .unique(
+                commands.map(cmd => {
+                    let _name = cmd?.category || "";
+                    let _icon = _name in categoryIcons ? categoryIcons[_name] : null;
+                    return { name: _name, icon: _icon };
+                }),
+                "name"
+            )
+            // Sort names alphabetically
+            .sort((a, b) => a.name.localeCompare(b.name));
+
+        /* - - - - - { Format Commands into List } - - - - - */
+        let commandList = [];
+        let categoryEmbeds = [];
+
+        // Iterate through each command
+        for (let command of commands) {
+            let listEntry = "- $ICON**/$COMMAND_NAME**"
+                .replace("$ICON", command.options?.emoji ? command.options?.emoji : "")
+                .replace("$COMMAND_NAME", command.builder.name);
+
+            // Add the command description, if it exists
+            if (command.builder.description) {
+                listEntry += `\n - *${command.builder.description}*`;
+            }
+
+            // Append the list entry
+            commandList.push({
+                name: command.builder.name,
+                category: command.category,
+                builder: command.builder,
+                entry: listEntry
+            });
+        }
+
+        // Iterate through each category and make an embed for it
+        for (let category of categoryNames) {
+            // Get all the commands for the current category
+            let _commands = commandList.filter(cmd => cmd.category === category.name);
+
+            // Sort command names alphabetically
+            _commands.sort((a, b) => a.builder.name.localeCompare(b.builder.name));
+
+            // Split commands by max page length
+            let _command_groups = jt.chunk(_commands, config.maxPageLength);
+
+            /* - - - - - { Create the Embed Page } - - - - - */
+            let embeds = [];
+
+            // Iterate through each command group and create an embed for it
+            for (let i = 0; i < _command_groups.length; i++) {
+                let group = _command_groups[i];
+
+                // Create the embed ( Help Page )
+                let embed = new BetterEmbed({
+                    title: `Help | ${category.icon ? `${category.icon} ` : ""}${category.name}`,
+                    description: group.map(cmd => cmd.entry).join("\n"),
+                    footer: `Page ${i + 1} of ${_command_groups.length} | Total: ${_commands.length}`
+                });
+
+                // Append the page to the embeds array
+                embeds.push(embed);
+            }
+
+            // Append the array to the embed category array
+            if (embeds.length) categoryEmbeds.push(embeds);
+        }
+
+        /* - - - - - { Page Navigation } - - - - - */
     }
 } as SlashCommand;

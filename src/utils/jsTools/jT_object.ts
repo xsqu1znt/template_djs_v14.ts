@@ -1,5 +1,6 @@
 /** Return a nested property from a given object using the provided path.
  *
+ * @example
  * ```ts
  * // returns 5
  * let obj = { a: 5 };
@@ -9,13 +10,11 @@
  * let obj = { a: [{ content: "hello, world!" }] };
  * getProp(obj, "a[0].content");
  * ```
- *
  * @param obj The object.
- * @param path The path to a nested property within the object. */
+ * @param path Path to the nested property within the object. */
 export function getProp(obj: {}, path: string): any {
     if (typeof obj !== "object") throw new TypeError("You must provide a valid object");
     if (typeof path !== "string") throw new TypeError("You must provide a valid path string");
-    if (!path.trim()) return obj;
 
     let _obj: any = obj;
 
