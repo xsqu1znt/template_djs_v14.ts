@@ -54,7 +54,7 @@
             "    category: \"Fun\",",
             "    options: { emoji: \"🍪\" },\n",
 
-            "    execute: async (client, message) => {",
+            "    execute: async (client, message, { }) => {",
             "        // Create an array of responses",
             "        let choices = [",
             "            \"What's up, **\\$USER_NAME**! Have a cookie! :cookie:\",",

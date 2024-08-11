@@ -59,7 +59,7 @@ client.commands = {
         custom: new Collection()
     },
 
-    interaction: {
+    special: {
         all: new Collection(),
         contextMenu: new Collection(),
         userInstallable: new Collection()
@@ -93,7 +93,7 @@ async function init(): Promise<void> {
         /* NOTE: does nothing if commands were registered locally */
         // await acm.removeFromGlobal();
 
-        // await mongo.connect();
+        await mongo.connect();
 
         logger.client.ready();
     });

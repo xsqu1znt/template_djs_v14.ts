@@ -18,7 +18,7 @@ export default {
     category: "Utility",
     options: { hidden: true },
 
-    execute: async (client, message) => {
+    execute: async (client, message, { prefix }) => {
         // Get the current prefix commands and filter out ones that are set to be hidden
         let commands = [...client.commands.prefix.all.values()].filter(cmd => !cmd?.options?.hidden);
 
@@ -50,8 +50,9 @@ export default {
         // Iterate through each command
         /*! NOTE: the design of the commands in the list can be edited here */
         for (let command of commands) {
-            let listEntry = "- $ICON/**$NAME**"
+            let listEntry = "- $ICON**$PREFIX$NAME**"
                 .replace("$ICON", command.options?.emoji ? `${command.options?.emoji} ` : "")
+                .replace("$PREFIX", prefix)
                 .replace("$NAME", command.name);
 
             /* - - - - - { Extra Command Options } - - - - - */
@@ -99,11 +100,11 @@ export default {
                 // Create the embed ( Help Page )
                 /*! NOTE: the design of the embed can be edited here */
                 let embed = new BetterEmbed({
-                    title: `Help | $ICON$NAME`
-                        .replace("$ICON", category.icon ? `${category.icon} ` : "")
-                        .replace("$NAME", category.name),
+                    title: `Help`,
                     description: group.map(cmd => cmd.formatted).join("\n"),
-                    footer: `Page ${i + 1} of ${_command_groups.length}`
+                    footer: `Page ${i + 1} of ${_command_groups.length} • Category: $ICON$NAME`
+                        .replace("$ICON", category.icon ? `${category.icon} ` : "")
+                        .replace("$NAME", category.name)
                 });
 
                 // Append the page to the embeds array

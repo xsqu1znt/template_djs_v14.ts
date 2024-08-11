@@ -19,7 +19,7 @@ declare module "discord.js" {
                 custom: Collection<string, PrefixCommand>;
             };
 
-            interaction: {
+            special: {
                 all: Collection<string, ContextMenuCommand | UserInstallableCommand>;
                 contextMenu: Collection<string, ContextMenuCommand>;
                 userInstallable: Collection<string, UserInstallableCommand>;

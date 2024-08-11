@@ -65,7 +65,7 @@ export default {
         // Get the command from the client, if it exists
         let interactionCommand =
             client.commands.slash.all.get(interaction.commandName) ||
-            client.commands.interaction.all.get(interaction.commandName);
+            client.commands.special.all.get(interaction.commandName);
         
         // Command doesn't exist
         if (!interactionCommand) {

@@ -16,10 +16,11 @@ const STARTUP_MESSAGES = [
 ];
 
 /* - - - - - { Color Template } - - - - - */
-export const colors = {
+export const colorTemplates = {
     debug: chalk.hex("#C45AB3"),
     log: chalk.hex("#9F7F95"),
 
+    moduleName: chalk.bold.gray,
     eventName: chalk.hex("#9381FF"),
     commandName: chalk.hex("#EFCD1E")
 };
@@ -27,17 +28,17 @@ export const colors = {
 /* - - - - - { Shorthand } - - - - - */
 const _TIMESTAMP = (): string => `[${new Date().toLocaleTimeString()}]`;
 
-const _CLIENT = (): string => chalk.bold.gray("[CLIENT]");
-const _ACM_LOCAL = (): string => chalk.bold.gray("[ACM/LOCAL]");
-const _ACM_GLOBAL = (): string => chalk.bold.gray("[ACM/GLOBAL]");
+const _CLIENT = (): string => colorTemplates.moduleName("[CLIENT]");
+const _ACM_LOCAL = (): string => colorTemplates.moduleName("[ACM/LOCAL]");
+const _ACM_GLOBAL = (): string => colorTemplates.moduleName("[ACM/GLOBAL]");
 
-const _IMPORTER = (): string => chalk.bold.gray("[IMPORTER]");
-const _IMPORT_EVENT = (): string => chalk.bold.gray("[IMPORT/EVENT]");
-const _IMPORT_COMMAND = (): string => chalk.bold.gray("[IMPORT/COMMAND]");
+const _IMPORTER = (): string => colorTemplates.moduleName("[IMPORTER]");
+const _IMPORT_EVENT = (): string => colorTemplates.moduleName("[IMPORT/EVENT]");
+const _IMPORT_COMMAND = (): string => colorTemplates.moduleName("[IMPORT/COMMAND]");
 
-const _COMMAND = (): string => chalk.bold.gray("[COMMAND]");
-const _EVENT = (): string => chalk.bold.gray("[EVENT]");
-const _MONGO = (): string => chalk.bold.gray("[MONGO]");
+const _COMMAND = (): string => colorTemplates.moduleName("[COMMAND]");
+const _EVENT = (): string => colorTemplates.moduleName("[EVENT]");
+const _MONGO = (): string => colorTemplates.moduleName("[MONGO]");
 
 const _DYNAMIC_SHARD = (shards: Shard[]): string =>
     shards?.length ? chalk.gray`(${shards.length === 1 ? "Shard:" : "Shards:"} ${shards.join(", ")})` : "";
@@ -62,7 +63,7 @@ function contextFormatter(str: string): string {
 }
 
 export function debug(msg: string): void {
-    console.log(contextFormatter(colors.debug.italic(chalk`${msg}`)));
+    console.log(contextFormatter(colorTemplates.debug.italic(chalk`${msg}`)));
 }
 
 export function error(header: string, msg: string, err: any = ""): void {
@@ -70,7 +71,7 @@ export function error(header: string, msg: string, err: any = ""): void {
 }
 
 export function log(msg: string): void {
-    console.log(contextFormatter(colors.log.italic(chalk`${msg}`)));
+    console.log(contextFormatter(colorTemplates.log.italic(chalk`${msg}`)));
 }
 
 export function success(msg: string): void {
@@ -119,7 +120,7 @@ export const importer = {
         console.log(
             `$_TIMESTAMP $IMPORT_EVENT ${
                 enabled
-                    ? `${colors.eventName.bold(name)} ${chalk.italic.gray(path)}`
+                    ? `${colorTemplates.eventName.bold(name)} ${chalk.italic.gray(path)}`
                     : chalk.strikethrough(`${chalk.bold.dim(name)} ${chalk.italic.gray(path)}`)
             }`
                 .replace("$_TIMESTAMP", _TIMESTAMP())
@@ -127,18 +128,20 @@ export const importer = {
         );
     },
 
-    commandImport: (name: string, path: string, type: "prefix" | "slash" | "interaction"): void => {
+    commandImport: (name: string, path: string, type: "PRFX" | "SLSH" | "CTX" | "UI"): void => {
         let prefix = "";
 
         // prettier-ignore
         switch (type) {
-            case "prefix": prefix = config.client.PREFIX; break;
-            case "slash": prefix = "/"; break;
-            case "interaction": prefix = ""; break;
+            case "PRFX": prefix = config.client.PREFIX; break;
+            case "SLSH": prefix = "/"; break;
+            case "CTX": prefix = "[ContextMenu] "; break;
+            case "UI": prefix = "[UserInstallable] "; break;
         }
 
+        // prettier-ignore
         console.log(
-            `$_TIMESTAMP $IMPORT_COMMAND ${colors.commandName.bold(`${prefix}${name}`)} ${chalk.italic.gray(path)}`
+            `$_TIMESTAMP $IMPORT_COMMAND ${colorTemplates.commandName.bold(`${chalk.gray(prefix)}${name}`)} ${chalk.italic.gray(path)}`
                 .replace("$_TIMESTAMP", _TIMESTAMP())
                 .replace("$IMPORT_COMMAND", _IMPORT_COMMAND())
         );

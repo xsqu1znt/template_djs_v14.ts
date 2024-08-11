@@ -48,7 +48,7 @@ export default {
         // Iterate through each command
         /*! NOTE: the design of the commands in the list can be edited here */
         for (let command of commands) {
-            let listEntry = "- $ICON/**$NAME**"
+            let listEntry = "- $ICON**/$NAME**"
                 .replace("$ICON", command.options?.emoji ? `${command.options?.emoji} ` : "")
                 .replace("$NAME", command.builder.name);
 
@@ -86,11 +86,11 @@ export default {
                 // Create the embed ( Help Page )
                 /*! NOTE: the design of the embed can be edited here */
                 let embed = new BetterEmbed({
-                    title: `Help | $ICON$NAME`
-                        .replace("$ICON", category.icon ? `${category.icon} ` : "")
-                        .replace("$NAME", category.name),
+                    title: `Help`,
                     description: group.map(cmd => cmd.formatted).join("\n"),
-                    footer: `Page ${i + 1} of ${_command_groups.length}`
+                    footer: `Page ${i + 1} of ${_command_groups.length} • Category: $ICON$NAME`
+                        .replace("$ICON", category.icon ? `${category.icon} ` : "")
+                        .replace("$NAME", category.name)
                 });
 
                 // Append the page to the embeds array

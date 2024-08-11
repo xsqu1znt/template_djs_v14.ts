@@ -89,10 +89,10 @@ export default {
 
         /* fallback */
         if (!startsWithPrefix) {
-            let _clientMention = userMention(client.user?.id || "");
+            let _clientMention = client.user?.id ? `${userMention(client.user.id)} ` : null;
 
             // Check if the message starts by mentioning the bot
-            if (_messageLowerCase.startsWith(_clientMention)) {
+            if (_clientMention && _messageLowerCase.startsWith(_clientMention)) {
                 startsWithPrefix = true;
                 prefix = _clientMention;
             } else return; // Return since no valid prefix was used

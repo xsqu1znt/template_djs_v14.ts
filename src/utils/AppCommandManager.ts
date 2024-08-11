@@ -34,7 +34,7 @@ export default class AppCommandManager {
         // If no commands are provided, use all public and interaction commands from the client
         commands = commands?.length
             ? commands
-            : [...this.client.commands.slash.public.values(), ...this.client.commands.interaction.all.values()];
+            : [...this.client.commands.slash.public.values(), ...this.client.commands.special.all.values()];
 
         /* error */
         if (!commands.length) {
@@ -153,7 +153,7 @@ export default class AppCommandManager {
      * __NOTE__: This also adds `UserInstall` commands to user accounts. */
     async registerToGlobal(commands?: RegisterableCommand[]): Promise<void> {
         // If no commands are provided, use all public and interaction commands from the client
-        commands ||= [...this.client.commands.slash.public.values(), ...this.client.commands.interaction.all.values()];
+        commands ||= [...this.client.commands.slash.public.values(), ...this.client.commands.special.all.values()];
 
         /* error */
         if (!commands.length) {

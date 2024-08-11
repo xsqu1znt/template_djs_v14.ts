@@ -9,25 +9,25 @@ import * as path from "path";
 const MODULE_RELATIVE_PATHS = {
     slash: "../../commands/slash",
     prefix: "../../commands/prefix",
-    interaction: "../../commands/interaction"
+    special: "../../commands/special"
 };
 
 const MODULE_DIRECTORIES = {
     slash: path.join(__dirname, MODULE_RELATIVE_PATHS.slash),
     prefix: path.join(__dirname, MODULE_RELATIVE_PATHS.prefix),
-    interaction: path.join(__dirname, MODULE_RELATIVE_PATHS.interaction)
+    special: path.join(__dirname, MODULE_RELATIVE_PATHS.special)
 };
 
 const MODULE_LOG_PATHS = {
     slash: "commands/slash",
     prefix: "commands/prefix",
-    interaction: "commands/interaction"
+    special: "commands/special"
 };
 
 const MODULE_NAME_MATCH = {
     slash: ["SLSH"],
-    prefix: ["CMD"],
-    interaction: ["CTX", "UI"]
+    prefix: ["PRFX"],
+    special: ["CTX", "UI"]
 };
 
 type CommandType = "slash" | "prefix" | "contextMenu" | "userInstall";
@@ -62,9 +62,9 @@ async function importCommandModules<T extends CommandType>(commandType: T): Prom
 
         case "contextMenu":
         case "userInstall":
-            _moduleDirectory = MODULE_DIRECTORIES.interaction;
-            _moduleLogPath = MODULE_LOG_PATHS.interaction;
-            _moduleNameMatch = MODULE_NAME_MATCH.interaction;
+            _moduleDirectory = MODULE_DIRECTORIES.special;
+            _moduleLogPath = MODULE_LOG_PATHS.special;
+            _moduleNameMatch = MODULE_NAME_MATCH.special;
             break;
     }
 
@@ -209,7 +209,7 @@ export default async function (client: Client): Promise<void> {
             client.commands.slash.all.set(command.module.builder.name, command.module);
             client.commands.slash[k as "public" | "staff" | "custom"].set(command.module.builder.name, command.module);
 
-            logger.importer.commandImport(command.module.builder.name, command.path, "slash");
+            logger.importer.commandImport(command.module.builder.name, command.path, "SLSH");
         }
     }
 
@@ -220,7 +220,7 @@ export default async function (client: Client): Promise<void> {
             client.commands.prefix.all.set(command.module.name, command.module);
             client.commands.prefix[k as "public" | "staff" | "custom"].set(command.module.name, command.module);
 
-            logger.importer.commandImport(command.module.name, command.path, "prefix");
+            logger.importer.commandImport(command.module.name, command.path, "PRFX");
 
             // Apply aliases
             if (command.module.aliases) {
@@ -228,7 +228,7 @@ export default async function (client: Client): Promise<void> {
                     client.commands.prefix.all.set(alias, command.module);
                     client.commands.prefix[k as "public" | "staff" | "custom"].set(alias, command.module);
 
-                    logger.importer.commandImport(`${command.module.name} -> @${alias}`, "", "prefix");
+                    logger.importer.commandImport(`${command.module.name} -> @${alias}`, "", "PRFX");
                 }
             }
         }
@@ -239,14 +239,14 @@ export default async function (client: Client): Promise<void> {
         for (let command of v) {
             if (!command.module) continue;
 
-            client.commands.interaction.all.set(command.module.builder.name, command.module);
+            client.commands.special.all.set(command.module.builder.name, command.module);
             if (AppCommandManager.isContextMenuCommand(command.module)) {
-                client.commands.interaction.contextMenu.set(command.module.builder.name, command.module);
+                client.commands.special.contextMenu.set(command.module.builder.name, command.module);
+                logger.importer.commandImport(command.module.builder.name, command.path, "CTX");
             } else if (AppCommandManager.isUserInstallCommand(command.module)) {
-                client.commands.interaction.userInstallable.set(command.module.builder.name, command.module);
+                client.commands.special.userInstallable.set(command.module.builder.name, command.module);
+                logger.importer.commandImport(command.module.builder.name, command.path, "UI");
             }
-
-            logger.importer.commandImport(command.module.builder.name, command.path, "interaction");
         }
     }
 }
