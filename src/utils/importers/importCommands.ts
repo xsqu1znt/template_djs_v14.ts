@@ -241,9 +241,9 @@ export default async function (client: Client): Promise<void> {
 
             client.commands.interaction.all.set(command.module.builder.name, command.module);
             if (AppCommandManager.isContextMenuCommand(command.module)) {
-                client.commands.interaction[k as "contextMenu"].set(command.module.builder.name, command.module);
+                client.commands.interaction.contextMenu.set(command.module.builder.name, command.module);
             } else if (AppCommandManager.isUserInstallCommand(command.module)) {
-                client.commands.interaction[k as "userInstallable"].set(command.module.builder.name, command.module);
+                client.commands.interaction.userInstallable.set(command.module.builder.name, command.module);
             }
 
             logger.importer.commandImport(command.module.builder.name, command.path, "interaction");

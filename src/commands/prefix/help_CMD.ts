@@ -1,6 +1,5 @@
-import { SlashCommand } from "@customTypes/commands";
+import { PrefixCommand } from "@customTypes/commands";
 
-import { SlashCommandBuilder } from "discord.js";
 import { BetterEmbed } from "@utils/discordTools";
 import jt from "@utils/jsTools";
 
@@ -14,18 +13,21 @@ const config = {
 };
 
 export default {
+    name: "help",
+    description: "View a list of my commands.",
     category: "Utility",
     options: { hidden: true },
 
-    builder: new SlashCommandBuilder().setName("help").setDescription("View a list of my commands."),
-
-    execute: async (client, interaction) => {
-        // Get the current slash commands and filter out ones that are set to be hidden
-        let commands = [...client.commands.slash.all.values()].filter(cmd => !cmd?.options?.hidden);
+    execute: async (client, message) => {
+        // Get the current prefix commands and filter out ones that are set to be hidden
+        let commands = [...client.commands.prefix.all.values()].filter(cmd => !cmd?.options?.hidden);
 
         /* error */
         if (!commands.length) {
-            return await interaction.reply({ content: "There are no commands available.", ephemeral: true });
+            return await message.reply({
+                content: "There are no commands available.",
+                allowedMentions: { repliedUser: false }
+            });
         }
 
         // Parse command categories
@@ -50,16 +52,27 @@ export default {
         for (let command of commands) {
             let listEntry = "- $ICON/**$NAME**"
                 .replace("$ICON", command.options?.emoji ? `${command.options?.emoji} ` : "")
-                .replace("$NAME", command.builder.name);
+                .replace("$NAME", command.name);
+
+            /* - - - - - { Extra Command Options } - - - - - */
+            let extraDetails = [];
 
             // Add the command description, if it exists
-            if (command.builder.description) {
-                listEntry += `\n - *${command.builder.description}*`;
-            }
+            if (command?.description) extraDetails.push(` - *${command.description}*`);
+
+            // Add the command aliases, if any
+            if (command?.aliases?.length)
+                extraDetails.push(` - aliases: ${command.aliases.map(a => `\`${a}\``).join(", ")}`);
+
+            // Add an example of how the command's used, if provided
+            if (command?.usage) extraDetails.push(` - usage: \`${command.usage}\``);
+
+            // Append the extra details to the original string
+            if (extraDetails.length) listEntry += `\n${extraDetails.join("\n")}`;
 
             // Append the list entry
             commandList.push({
-                name: command.builder.name,
+                name: command.name,
                 category: command.category,
                 formatted: listEntry
             });
@@ -102,6 +115,6 @@ export default {
         }
 
         /* - - - - - { Page Navigation } - - - - - */
-        return await categoryEmbeds[0][0].send(interaction);
+        return await categoryEmbeds[0][0].send(message);
     }
-} as SlashCommand;
+} as PrefixCommand;
