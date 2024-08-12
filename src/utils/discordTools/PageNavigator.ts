@@ -127,14 +127,6 @@ export class PageNavigator {
         };
     };
 
-    /* #events: {
-        pageChanged: Array<(page: PageData | NestedPageData, index: number) => any>;
-        pageBack: Array<(page: PageData | NestedPageData, index: number) => any>;
-        pageNext: Array<(page: PageData | NestedPageData, index: number) => any>;
-        pageJumped: Array<(page: PageData | NestedPageData, index: number) => any>;
-        selectMenuOptionPicked: Array<(option: SelectMenuOptionData) => any>;
-    }; */
-
     #events: {
         pageChanged: Array<Function>;
         pageBack: Array<Function>;
