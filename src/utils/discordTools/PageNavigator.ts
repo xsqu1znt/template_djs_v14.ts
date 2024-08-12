@@ -4,19 +4,9 @@ import { DynaSendOptions } from "./dynaSend";
 type PaginationEvent = "pageChanged" | "pageBack" | "pageNext" | "pageJumped" | "selectMenuOptionPicked";
 type PaginationType = "short" | "shortJump" | "long" | "longJump";
 
-interface PageData {
-    content?: string;
-    embed: EmbedResolveable;
-}
-
-interface NestedPageData {
-    content?: string;
-    embeds: EmbedResolveable[];
-}
-
-interface PageNavigatorData {
+interface PageNavigatorOptions {
     /** The type of pagination. Defaults to `short`. */
-    type: PaginationType;
+    type?: PaginationType;
     /** The user or users that are allowed to interact with the navigator. */
     allowedParticipants: GuildMember | User | Array<GuildMember | User>;
     /** The pages to be displayed. */
@@ -31,8 +21,20 @@ interface PageNavigatorData {
     dynamic?: boolean;
     /** How long to wait before timing out. Use `null` to never timeout.
      *
+     * Defaults to `timeouts.PAGINATION`. Configure in `./config.json`.
+     *
      * This option also utilizes `@utils/jsTools.parseTime()`, letting you use "10s" or "1m 30s" instead of a number. */
-    timeout?: number | null;
+    timeout?: number | string | null;
+}
+
+interface PageData {
+    content?: string;
+    embed: EmbedResolveable;
+}
+
+interface NestedPageData {
+    content?: string;
+    embeds: EmbedResolveable[];
 }
 
 interface SelectMenuOptionData {
@@ -50,7 +52,19 @@ interface SelectMenuOptionData {
 
 interface SendOptions extends Omit<DynaSendOptions, "content" | "embeds" | "components"> {}
 
-import { GuildMember, User } from "discord.js";
+import {
+    ActionRowBuilder,
+    ButtonBuilder,
+    ButtonInteraction,
+    ButtonStyle,
+    ComponentEmojiResolvable,
+    GuildMember,
+    InteractionCollector,
+    Message,
+    ReactionCollector,
+    StringSelectMenuBuilder,
+    User
+} from "discord.js";
 import { deleteMessageAfter } from "./deleteMessageAfter";
 import { dynaSend } from "./dynaSend";
 import { BetterEmbed } from "./BetterEmbed";
@@ -60,7 +74,87 @@ import jt from "@utils/jsTools";
 import * as config from "./config.json";
 
 export class PageNavigator {
-    #configure_page() {}
+    options: {
+        type: PaginationType;
+        allowedParticipants: Array<GuildMember | User>;
+        pages: Array<PageData | NestedPageData>;
+        useReactions: boolean;
+        dynamic: boolean;
+        timeout: number | null;
+    };
+
+    data: {
+        message: Message | null;
+        messageActionRows: ActionRowBuilder<ButtonBuilder>[] | never[];
+
+        page: {
+            current: Array<PageData | NestedPageData> | null;
+            nestedLength: number;
+            index: { current: number; nested: number };
+        };
+
+        selectMenu: {
+            current: SelectMenuOptionData | null;
+            optionIDs: string[];
+        };
+
+        navigation: {
+            reactions: { current_id: string; label: string }[] | never[];
+            required: boolean;
+            canUseLong: boolean;
+            canJump: boolean;
+        };
+
+        collectors: {
+            component: InteractionCollector<ButtonInteraction> | null;
+            reaction: ReactionCollector | null;
+        };
+
+        components: {
+            actionRows: {
+                selectMenu: ActionRowBuilder<StringSelectMenuBuilder> | null;
+                navigation: ActionRowBuilder<ButtonBuilder> | null;
+            };
+
+            selectMenu: StringSelectMenuBuilder | null;
+            navigation: {
+                to_first: ButtonBuilder;
+                back: ButtonBuilder;
+                jump: ButtonBuilder;
+                next: ButtonBuilder;
+                to_last: ButtonBuilder;
+            };
+        };
+    };
+
+    /* #events: {
+        pageChanged: Array<(page: PageData | NestedPageData, index: number) => any>;
+        pageBack: Array<(page: PageData | NestedPageData, index: number) => any>;
+        pageNext: Array<(page: PageData | NestedPageData, index: number) => any>;
+        pageJumped: Array<(page: PageData | NestedPageData, index: number) => any>;
+        selectMenuOptionPicked: Array<(option: SelectMenuOptionData) => any>;
+    }; */
+
+    #events: {
+        pageChanged: Array<Function>;
+        pageBack: Array<Function>;
+        pageNext: Array<Function>;
+        pageJumped: Array<Function>;
+        selectMenuOptionPicked: Array<Function>;
+    };
+
+    #createButton(data: { custom_id: string; emoji?: ComponentEmojiResolvable; label: string }) {
+        let button = new ButtonBuilder({ custom_id: data.custom_id, style: ButtonStyle.Secondary });
+        if (data.label) button.setLabel(data.label);
+        else if (data.emoji) button.setEmoji(data.emoji);
+        // prettier-ignore
+        else throw new Error(
+			"[EmbedNavigator>createButton] You must provide text or an emoji ID for this navigator button in '_dT_config.json'."
+        )
+        return button;
+    }
+
+    #changePage() {}
 
     #configure_components() {}
 
@@ -80,9 +174,94 @@ export class PageNavigator {
 
     async #collectReactions() {}
 
-    constructor() {}
+    constructor(options: PageNavigatorOptions) {
+        /* - - - - - { Error Checking } - - - - - */
+        if (!options.pages || !options.pages.length) {
+            throw new Error("[EmbedNavigator]: You must provide at least 1 page.");
+        }
 
-    on(event: PaginationEvent, listener: () => void) {}
+        // prettier-ignore
+        if (options?.useReactions) {
+            for (let [key, val] of Object.entries(config.navigator.buttons)) {
+				if (!val.emoji.id) throw new Error(`[EmbedNavigator]: \`${key}.id\` is an empty value; This is required to be able to add it as a reaction. Fix this in \'./config.json\'.`);
+				if (!val.emoji.name) throw new Error(`[EmbedNavigator]: \`${key}.name\` is an empty value; This is required to determine which reaction a user reacted to. Fix this in \'./config.json\'.`);
+            }
+        }
+
+        /* - - - - - { Parse Options } - - - - - */
+        this.options = {
+            ...options,
+            type: options.type || "short",
+            allowedParticipants: jt.forceArray(options.allowedParticipants),
+            useReactions: options.useReactions || false,
+            dynamic: options.dynamic || false,
+            timeout:
+                typeof options.timeout === "string" || typeof options.timeout === "number"
+                    ? jt.parseTime(options.timeout)
+                    : jt.parseTime(config.timeouts.PAGINATION)
+        };
+
+        this.data = {
+            message: null,
+            messageActionRows: [],
+
+            page: {
+                current: null,
+                nestedLength: 0,
+                index: { current: 0, nested: 0 }
+            },
+
+            selectMenu: {
+                current: null,
+                optionIDs: []
+            },
+
+            navigation: {
+                reactions: [],
+                required: false,
+                canUseLong: false,
+                canJump: false
+            },
+
+            collectors: {
+                component: null,
+                reaction: null
+            },
+
+            components: {
+                actionRows: {
+                    selectMenu: null,
+                    navigation: null
+                },
+
+                selectMenu: null,
+                navigation: {
+                    to_first: this.#createButton({ custom_id: "btn_to_first", ...config.navigator.buttons.to_first }),
+                    back: this.#createButton({ custom_id: "btn_back", ...config.navigator.buttons.back }),
+                    jump: this.#createButton({ custom_id: "btn_jump", ...config.navigator.buttons.jump }),
+                    next: this.#createButton({ custom_id: "btn_next", ...config.navigator.buttons.next }),
+                    to_last: this.#createButton({ custom_id: "btn_to_last", ...config.navigator.buttons.to_last })
+                }
+            }
+        };
+
+        this.#events = {
+            pageChanged: [],
+            pageBack: [],
+            pageNext: [],
+            pageJumped: [],
+            selectMenuOptionPicked: []
+        };
+    }
+
+    on(event: "pageChanged", listener: (page: PageData | NestedPageData, index: number) => any): void;
+    on(event: "pageBack", listener: (page: PageData | NestedPageData, index: number) => any): void;
+    on(event: "pageNext", listener: (page: PageData | NestedPageData, index: number) => any): void;
+    on(event: "pageJumped", listener: (page: PageData | NestedPageData, index: number) => any): void;
+    on(event: "selectMenuOptionPicked", listener: (option: SelectMenuOptionData) => any): void;
+    on(event: PaginationEvent, listener: Function) {
+        this.#events[event].push(listener);
+    }
 
     addSelectMenuOptions(...options: {}[]) {}
 
@@ -92,11 +271,11 @@ export class PageNavigator {
 
     async setPaginationType(type: PaginationType) {}
 
-    async insertComponentAtIndex(index: number, component: []) {}
+    async insertButtonAt(index: number, component: []) {}
 
-    async removeComponentAtIndex(index: number) {}
+    async removeButtonAt(index: number) {}
 
-    async send(handler: SendHandler, options: {}) {}
+    async send(handler: SendHandler, options: SendOptions) {}
 
     async refresh() {}
 }

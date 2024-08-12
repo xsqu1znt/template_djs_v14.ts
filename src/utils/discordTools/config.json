@@ -17,11 +17,11 @@
         "ASK_PAGE_NUMBER_ERROR": "$USER_MENTION `$MESSAGE_CONTENT` is not a valid page.",
 
         "buttons": {
-            "to_first": { "TEXT": "◀◀", "emoji": { "NAME": "⏮️", "ID": "⏮️" } },
-            "back": { "TEXT": "◀", "emoji": { "NAME": "◀️", "ID": "◀️" } },
-            "jump": { "TEXT": "📄", "emoji": { "NAME": "📄", "ID": "📄" } },
-            "next": { "TEXT": "▶", "emoji": { "NAME": "▶️", "ID": "▶️" } },
-            "to_last": { "TEXT": "▶▶", "emoji": { "NAME": "⏭️", "ID": "⏭️" } }
+            "to_first": { "label": "◀◀", "emoji": { "animated": false, "name": "⏮️", "id": "⏮️" } },
+            "back": { "label": "◀", "emoji": { "animated": false, "name": "◀️", "id": "◀️" } },
+            "jump": { "label": "📄", "emoji": { "animated": false, "name": "📄", "id": "📄" } },
+            "next": { "label": "▶", "emoji": { "animated": false, "name": "▶️", "id": "▶️" } },
+            "to_last": { "label": "▶▶", "emoji": { "animated": false, "name": "⏭️", "id": "⏭️" } }
         }
     },
 
