@@ -10,7 +10,8 @@
     },
 
     "navigator": {
-        "PAGE_JUMP_THRESHOLD": 5,
+        "CAN_JUMP_THRESHOLD": 5,
+        "CAN_USE_LONG_THRESHOLD": 4,
 
         "DEFAULT_SELECT_MENU_PLACEHOLDER": "Choose a page to view...",
         "ASK_PAGE_NUMBER_MESSAGE": "$USER_MENTION say the page number you would like to view.",

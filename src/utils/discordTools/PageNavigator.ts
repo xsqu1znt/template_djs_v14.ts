@@ -73,6 +73,10 @@ import jt from "@utils/jsTools";
 
 import * as config from "./config.json";
 
+function isNestedPageData(pageData: any): pageData is NestedPageData {
+    return Object.hasOwn(pageData, "embeds");
+}
+
 export class PageNavigator {
     options: {
         type: PaginationType;
@@ -88,13 +92,13 @@ export class PageNavigator {
         messageActionRows: ActionRowBuilder<ButtonBuilder>[] | never[];
 
         page: {
-            current: Array<PageData | NestedPageData> | null;
-            nestedLength: number;
+            currentEmbed: EmbedResolveable | null;
+            currentData: PageData | NestedPageData | null;
             index: { current: number; nested: number };
         };
 
         selectMenu: {
-            current: SelectMenuOptionData | null;
+            currentlySelected: SelectMenuOptionData | null;
             optionIDs: string[];
         };
 
@@ -146,7 +150,30 @@ export class PageNavigator {
         return button;
     }
 
-    #changePage() {}
+    #changePage(pageIndex: number, nestedPageIndex: number = 0) {
+        // Clamp page index to the number of pages
+        this.data.page.index.current = jt.clamp(pageIndex, { max: this.options.pages.length - 1 });
+
+        let pageData = this.options.pages[this.data.page.index.current];
+
+        /* - - - - - { Set the Current Page } - - - - - */
+        if (isNestedPageData(pageData)) {
+            // Clamp nested page index to the number of nested pages
+            this.data.page.index.nested = nestedPageIndex % (pageData.embeds.length - 1);
+
+            this.data.page.currentEmbed = pageData.embeds[this.data.page.index.nested];
+            this.data.page.currentData = pageData;
+        } else {
+            this.data.page.currentEmbed = pageData.embed;
+            this.data.page.currentData = pageData;
+        }
+
+        /* - - - - - { Determine Navigation Options } - - - - - */
+        const { CAN_JUMP_THRESHOLD, CAN_USE_LONG_THRESHOLD } = config.navigator;
+        this.data.navigation.required = isNestedPageData(pageData) && pageData.embeds.length >= 2;
+        this.data.navigation.canJump = isNestedPageData(pageData) && pageData.embeds.length >= CAN_JUMP_THRESHOLD;
+        this.data.navigation.canUseLong = isNestedPageData(pageData) && pageData.embeds.length >= CAN_USE_LONG_THRESHOLD;
+    }
 
     #configure_components() {}
 
@@ -198,13 +225,13 @@ export class PageNavigator {
             messageActionRows: [],
 
             page: {
-                current: null,
-                nestedLength: 0,
+                currentEmbed: null,
+                currentData: null,
                 index: { current: 0, nested: 0 }
             },
 
             selectMenu: {
-                current: null,
+                currentlySelected: null,
                 optionIDs: []
             },
 
