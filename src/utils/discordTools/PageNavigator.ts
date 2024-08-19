@@ -89,7 +89,7 @@ export class PageNavigator {
 
     data: {
         message: Message | null;
-        messageActionRows: ActionRowBuilder<ButtonBuilder>[] | never[];
+        messageActionRows: ActionRowBuilder<StringSelectMenuBuilder | ButtonBuilder>[];
 
         page: {
             currentEmbed: EmbedResolveable | null;
@@ -103,7 +103,7 @@ export class PageNavigator {
         };
 
         navigation: {
-            reactions: { current_id: string; label: string }[] | never[];
+            reactions: { name: string; id: string }[];
             required: boolean;
             canUseLong: boolean;
             canJump: boolean;
@@ -116,11 +116,11 @@ export class PageNavigator {
 
         components: {
             actionRows: {
-                selectMenu: ActionRowBuilder<StringSelectMenuBuilder> | null;
-                navigation: ActionRowBuilder<ButtonBuilder> | null;
+                selectMenu: ActionRowBuilder<StringSelectMenuBuilder>;
+                navigation: ActionRowBuilder<ButtonBuilder>;
             };
 
-            selectMenu: StringSelectMenuBuilder | null;
+            selectMenu: StringSelectMenuBuilder;
             navigation: {
                 to_first: ButtonBuilder;
                 back: ButtonBuilder;
@@ -152,14 +152,14 @@ export class PageNavigator {
 
     #changePage(pageIndex: number, nestedPageIndex: number = 0) {
         // Clamp page index to the number of pages
-        this.data.page.index.current = jt.clamp(pageIndex, { max: this.options.pages.length - 1 });
-
-        let pageData = this.options.pages[this.data.page.index.current];
+        this.data.page.index.current = jt.clamp(pageIndex, this.options.pages.length - 1);
 
         /* - - - - - { Set the Current Page } - - - - - */
+        let pageData = this.options.pages[this.data.page.index.current];
+
         if (isNestedPageData(pageData)) {
             // Clamp nested page index to the number of nested pages
-            this.data.page.index.nested = nestedPageIndex % (pageData.embeds.length - 1);
+            this.data.page.index.nested = jt.clamp(nestedPageIndex, pageData.embeds.length - 1);
 
             this.data.page.currentEmbed = pageData.embeds[this.data.page.index.nested];
             this.data.page.currentData = pageData;
@@ -175,9 +175,66 @@ export class PageNavigator {
         this.data.navigation.canUseLong = isNestedPageData(pageData) && pageData.embeds.length >= CAN_USE_LONG_THRESHOLD;
     }
 
-    #configure_components() {}
+    #configure_components() {
+        this.data.messageActionRows = [];
 
-    #configure_pagination() {}
+        // Add select menu navigation, if needed
+        if (this.data.selectMenu.optionIDs.length) {
+            this.data.messageActionRows.push(this.data.components.actionRows.selectMenu);
+        }
+
+        // Add button navigation, if needed
+        if (this.data.navigation.required && !this.options.useReactions) {
+            this.data.messageActionRows.push(this.data.components.actionRows.navigation);
+        }
+    }
+
+    #configure_navigation() {
+        this.data.navigation.reactions = [];
+        if (!this.options.useReactions || !this.data.navigation.required) return;
+
+        let navTypes = [];
+
+        // prettier-ignore
+        switch (this.options.type) {
+            case "short":
+                navTypes = ["back", "next"];                                                    // Short ( STATIC )
+                break;
+
+            case "shortJump":
+                navTypes = this.options.dynamic
+                    ? this.data.navigation.canJump
+                        ? ["back", "jump", "next"]                                              // Short Jump ( DYNAMIC )
+                        : ["back", "next"]                                                      // Short ( DYNAMIC )
+                    : ["back", "jump", "next"];                                                 // Short Jump ( STATIC )
+                break;
+
+            case "long":
+                navTypes = ["to_first", "back", "next", "to_last"];                             // Long ( STATIC )
+                break;
+
+            case "longJump":
+                navTypes = this.options.dynamic
+                    ? this.data.navigation.canJump
+                        ? ["to_first", "back", "jump", "next", "to_last"]                       // Long Jump ( DYNAMIC )
+                        : ["to_first", "back", "next", "to_last"]                               // Long ( DYNAMIC )
+                    : ["to_first", "back", "jump", "next", "to_last"];                          // Long Jump ( STATIC )
+                break;
+        }
+
+        // Convert types to reactions/buttons
+        if (this.options.useReactions) {
+            /* as reactions */
+            this.data.navigation.reactions = navTypes.map(
+                type => jt.getProp(config.navigator.buttons, `${type}.emoji`) as { name: string; id: string }
+            );
+        } else {
+            /* as buttons */
+            this.data.components.actionRows.navigation.setComponents(
+                ...navTypes.map(type => jt.getProp(this.data.components.navigation, type) as ButtonBuilder)
+            );
+        }
+    }
 
     async #navComponents_add() {}
 
@@ -249,11 +306,11 @@ export class PageNavigator {
 
             components: {
                 actionRows: {
-                    selectMenu: null,
-                    navigation: null
+                    selectMenu: new ActionRowBuilder<StringSelectMenuBuilder>(),
+                    navigation: new ActionRowBuilder<ButtonBuilder>()
                 },
 
-                selectMenu: null,
+                selectMenu: new StringSelectMenuBuilder(),
                 navigation: {
                     to_first: this.#createButton({ custom_id: "btn_to_first", ...config.navigator.buttons.to_first }),
                     back: this.#createButton({ custom_id: "btn_back", ...config.navigator.buttons.back }),
