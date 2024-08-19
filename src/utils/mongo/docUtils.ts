@@ -33,14 +33,14 @@ export default class DocumentUtils<T> {
              * @param filter The filter used to find the document. It can be a string representing the document's `_id` or an object representing the document's properties. */
             _exists: this.exists,
 
-            /** Fetch a document from the collection based on the provided `_id`.
-             * @param _id The unique identifier for the document.
-             * @param options Optional parameters for filtering and querying the document. */
-            _fetch: this.fetch,
-
             /** Insert a new document into the collection with the given `_id` if it doesn't already exist.
              * @param _id The unique identifier for the document. */
             _insertNew: this.insertNew,
+
+            /** Fetch a document from the collection based on the provided `_id`.
+             * @param filter The filter used to find the document. It can be a string representing the document's `_id` or an object representing the document's properties.
+             * @param options Optional parameters for filtering and querying the document. */
+            _fetch: this.fetch,
 
             /** Update a document in the collection based on the provided filter.
              * @param filter The filter used to find the document. It can be a string representing the document's `_id` or an object representing the document's properties.
@@ -79,11 +79,15 @@ export default class DocumentUtils<T> {
     }
 
     /** Fetch a document from the collection based on the provided `_id`.
-     * @param _id The unique identifier for the document.
+     * @param filter The filter used to find the document. It can be a string representing the document's `_id` or an object representing the document's properties.
      * @param options Optional parameters for filtering and querying the document. */
-    async fetch(_id: string, options?: DocumentFilterOptions<T>) {
+    async fetch(filter: string | Partial<T>, options?: DocumentFilterOptions<T>) {
         let lean = options?.lean ?? true;
-        return await this.model.findById(_id, options?.query, { upsert: options?.upsert, lean });
+        if (typeof filter === "string") {
+            return await this.model.findById(filter, options?.query, { upsert: options?.upsert, lean });
+        } else {
+            return await this.model.findOne(filter, options?.query, { upsert: options?.upsert, lean });
+        }
     }
 
     /** Update a document in the collection based on the provided filter.
@@ -92,6 +96,10 @@ export default class DocumentUtils<T> {
      * @param options Optional parameters for the update operation. */
     async update(filter: string | Partial<T>, query: Partial<T>, options?: BaseDocumentOptions) {
         let lean = options?.lean ?? true;
-        return await this.model.findByIdAndUpdate(filter, query, { upsert: options?.upsert, lean });
+        if (typeof filter === "string") {
+            return await this.model.findByIdAndUpdate(filter, query, { upsert: options?.upsert, lean });
+        } else {
+            return await this.model.findOneAndUpdate(filter, query, { upsert: options?.upsert, lean });
+        }
     }
 }
