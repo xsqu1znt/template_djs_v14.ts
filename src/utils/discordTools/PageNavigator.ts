@@ -268,7 +268,62 @@ export class PageNavigator {
         await this.data.message.reactions.removeAll().catch(() => null);
     }
 
-    async #askPageNumber(allowedParticipant: User) {}
+    async #askPageNumber(requestedBy: User): Promise<number | null> {
+        if (!this.data.message) throw new Error("[EmbedNavigator>#askPageNumber]: 'this.data.message' is undefined.");
+
+        // prettier-ignore
+        const _acf = (str: string, msg?: Message) => str
+            .replace("$USER_MENTION", requestedBy.toString())
+            .replace("$MESSAGE_CONTENT", msg?.content || "");
+
+        let messageReply = await this.data.message
+            .reply({ content: _acf(config.navigator.ASK_PAGE_NUMBER_MESSAGE) })
+            .catch(() => null);
+
+        /* erorr */
+        if (!messageReply) return null;
+
+        /* - - - - - { Collect the next Messsage } - - - - - */
+        const _timeouts = {
+            confirm: jt.parseTime(config.timeouts.CONFIRMATION),
+            error: jt.parseTime(config.timeouts.ERROR_MESSAGE)
+        };
+
+        let filter = (msg: Message) => (msg.author.id === requestedBy.id && msg.content.match(/^\d+$/) ? true : false);
+
+        return await messageReply.channel
+            .awaitMessages({ filter, max: 1, time: _timeouts.confirm })
+            .then(collected => {
+                let msg = collected.first();
+                if (!msg) return null;
+
+                /* NOTE: subtraction is to account for 0-based index */
+                let chosenPageNumber = Number(msg.content) - 1;
+                let fuckedUp = false;
+
+                // Check if the chosen page number is within range
+                if (chosenPageNumber > 0 && chosenPageNumber <= this.options.pages.length) {
+                    fuckedUp = true;
+                    dynaSend(msg, {
+                        content: _acf(config.navigator.ASK_PAGE_NUMBER_ERROR, msg),
+                        deleteAfter: _timeouts.error,
+                        fetchReply: false
+                    });
+                }
+
+                // Delete the user's reply
+                if (msg.deletable) msg.delete().catch(() => null);
+                // Delete the message reply
+                if (messageReply.deletable) messageReply.delete().catch(() => null);
+
+                return fuckedUp ? null : chosenPageNumber;
+            })
+            .catch(() => {
+                // Delete the message reply
+                if (messageReply.deletable) messageReply.delete().catch(() => null);
+                return null;
+            });
+    }
 
     async #collectComponents() {}
 
