@@ -12,7 +12,7 @@
  * ```
  * @param obj The object.
  * @param path Path to the nested property within the object. */
-export function getProp(obj: {}, path: string): any {
+export function getProp<T>(obj: {}, path: string): T {
     if (typeof obj !== "object") throw new TypeError("You must provide a valid object");
     if (typeof path !== "string") throw new TypeError("You must provide a valid path string");
 

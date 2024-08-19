@@ -225,24 +225,48 @@ export class PageNavigator {
         // Convert types to reactions/buttons
         if (this.options.useReactions) {
             /* as reactions */
-            this.data.navigation.reactions = navTypes.map(
-                type => jt.getProp(config.navigator.buttons, `${type}.emoji`) as { name: string; id: string }
+            this.data.navigation.reactions = navTypes.map(type =>
+                jt.getProp<{ name: string; id: string }>(config.navigator.buttons, `${type}.emoji`)
             );
         } else {
             /* as buttons */
             this.data.components.actionRows.navigation.setComponents(
-                ...navTypes.map(type => jt.getProp(this.data.components.navigation, type) as ButtonBuilder)
+                ...navTypes.map(type => jt.getProp<ButtonBuilder>(this.data.components.navigation, type))
             );
         }
     }
 
-    async #navComponents_add() {}
+    async #navComponents_addToMessage() {
+        if (!this.data.message?.editable) return;
+        await this.data.message.edit({ components: this.data.messageActionRows }).catch(() => null);
+    }
 
-    async #navComponents_remove() {}
+    async #navComponents_removeFromMessage() {
+        if (!this.data.message?.editable) return;
+        await this.data.message.edit({ components: [] }).catch(() => null);
+    }
 
-    async #navReactions_add() {}
+    async #navReactions_addToMessage() {
+        if (!this.data.message || !this.options.useReactions || !this.data.navigation.reactions.length) return;
 
-    async #navReactions_remove() {}
+        const reactionNames = Object.values(config.navigator.buttons).map(d => d.emoji.name);
+
+        // Get the current relevant reactions on the message
+        let _reactions = this.data.message.reactions.cache.filter(r => reactionNames.includes(r.emoji.name || ""));
+
+        // Check if the cached reactions are the same as the ones required
+        if (_reactions.size !== this.data.navigation.reactions.length) {
+            await this.#navReactions_removeFromMessage();
+
+            // React to the message
+            for (let r of this.data.navigation.reactions) await this.data.message.react(r.id).catch(() => null);
+        }
+    }
+
+    async #navReactions_removeFromMessage() {
+        if (!this.data.message) return;
+        await this.data.message.reactions.removeAll().catch(() => null);
+    }
 
     async #askPageNumber(allowedParticipant: User) {}
 
