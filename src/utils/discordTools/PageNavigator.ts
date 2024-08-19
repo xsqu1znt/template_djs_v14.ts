@@ -65,9 +65,9 @@ import {
     StringSelectMenuBuilder,
     User
 } from "discord.js";
-import { deleteMessageAfter } from "./deleteMessageAfter";
-import { dynaSend } from "./dynaSend";
-import { BetterEmbed } from "./BetterEmbed";
+// import deleteMessageAfter from "./deleteMessageAfter";
+import dynaSend from "./dynaSend";
+// import BetterEmbed from "./BetterEmbed";
 import logger from "@utils/logger";
 import jt from "@utils/jsTools";
 

@@ -39,11 +39,11 @@ import {
     RepliableInteraction,
     TextBasedChannel
 } from "discord.js";
-import { deleteMessageAfter } from "./deleteMessageAfter";
+import deleteMessageAfter from "./deleteMessageAfter";
 import logger from "@utils/logger";
 import jt from "@utils/jsTools";
 
-export async function dynaSend(handler: SendHandler, options: DynaSendOptions): Promise<Message | null> {
+export default async function dynaSend(handler: SendHandler, options: DynaSendOptions): Promise<Message | null> {
     let _options = {
         ...{
             content: "",

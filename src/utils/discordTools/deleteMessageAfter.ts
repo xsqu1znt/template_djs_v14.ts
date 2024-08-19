@@ -3,7 +3,7 @@ import jt from "@utils/jsTools";
 
 import { timeouts } from "./config.json";
 
-export async function deleteMessageAfter(
+export default async function deleteMessageAfter(
     message: Message | Promise<Message>,
     delay: string | number = timeouts.ERROR_MESSAGE
 ): Promise<Message | null> {
