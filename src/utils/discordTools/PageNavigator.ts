@@ -1,7 +1,7 @@
 import { SendHandler, EmbedResolveable } from "./types";
 import { DynaSendOptions } from "./dynaSend";
 
-type PaginationEvent = "pageChanged" | "pageBack" | "pageNext" | "pageJumped" | "selectMenuOptionPicked";
+type PaginationEvent = "pageChanged" | "pageBack" | "pageNext" | "pageJumped" | "selectMenuOptionPicked" | "timeout";
 type PaginationType = "short" | "shortJump" | "long" | "longJump";
 
 interface PageNavigatorOptions {
@@ -25,6 +25,21 @@ interface PageNavigatorOptions {
      *
      * This option also utilizes `@utils/jsTools.parseTime()`, letting you use "10s" or "1m 30s" instead of a number. */
     timeout?: number | string | null;
+    /** What to do after the page navigator times out.
+     *
+     * ___1.___ `disableComponents`: Disable the components. (default: `false`)
+     *
+     * ___2.___ `clearComponents`: Clear the components. (default: `true`)
+     *
+     * ___3.___ `clearReactions`: Clear the reactions. (default: `true`)
+     *
+     * ___4.___ `deleteMessage`: Delete the message. (default: `false`) */
+    postTimeout?: {
+        disableComponents: boolean;
+        clearComponents: boolean;
+        clearReactions: boolean;
+        deleteMessage: boolean;
+    };
 }
 
 interface PageData {
@@ -63,6 +78,7 @@ import {
     Message,
     ReactionCollector,
     StringSelectMenuBuilder,
+    StringSelectMenuInteraction,
     User
 } from "discord.js";
 // import deleteMessageAfter from "./deleteMessageAfter";
@@ -85,6 +101,12 @@ export class PageNavigator {
         useReactions: boolean;
         dynamic: boolean;
         timeout: number | null;
+        postTimeout: {
+            disableComponents: boolean;
+            clearComponents: boolean;
+            clearReactions: boolean;
+            deleteMessage: boolean;
+        };
     };
 
     data: {
@@ -110,7 +132,7 @@ export class PageNavigator {
         };
 
         collectors: {
-            component: InteractionCollector<ButtonInteraction> | null;
+            component: InteractionCollector<StringSelectMenuInteraction | ButtonInteraction> | null;
             reaction: ReactionCollector | null;
         };
 
@@ -132,11 +154,12 @@ export class PageNavigator {
     };
 
     #events: {
-        pageChanged: Array<Function>;
-        pageBack: Array<Function>;
-        pageNext: Array<Function>;
-        pageJumped: Array<Function>;
-        selectMenuOptionPicked: Array<Function>;
+        pageChanged: Array<{ listener: Function; once: boolean }>;
+        pageBack: Array<{ listener: Function; once: boolean }>;
+        pageNext: Array<{ listener: Function; once: boolean }>;
+        pageJumped: Array<{ listener: Function; once: boolean }>;
+        selectMenuOptionPicked: Array<{ listener: Function; once: boolean }>;
+        timeout: Array<{ listener: Function; once: boolean }>;
     };
 
     #createButton(data: { custom_id: string; emoji?: ComponentEmojiResolvable; label: string }) {
@@ -236,6 +259,18 @@ export class PageNavigator {
         }
     }
 
+    #callEventStack(event: PaginationEvent, ...args: any) {
+        if (!this.#events[event].length) return;
+
+        // Iterate through the event listeners
+        for (let i = 0; i < this.#events[event].length; i++) {
+            // Execute the listener function
+            this.#events[event][i].listener.apply(null, args);
+            // Remove once listeners
+            if (this.#events[event][i].once) this.#events[event].splice(i, 1);
+        }
+    }
+
     async #navComponents_addToMessage() {
         if (!this.data.message?.editable) return;
         await this.data.message.edit({ components: this.data.messageActionRows }).catch(() => null);
@@ -325,13 +360,106 @@ export class PageNavigator {
             });
     }
 
+    async #handlePostTimeout() {
+        if (this.options.postTimeout.deleteMessage) {
+            /* > error handling ( START ) */
+            // Get options that are not "deleteMessage"
+            let _postTimeoutOptions = Object.entries(this.options.postTimeout)
+                // Filter out "deleteMessage"
+                .filter(([k, _]) => k !== "deleteMessage")
+                // Filter out disabled ones
+                .filter(([_, v]) => v)
+                // Map only the keys
+                .map(([k, _]) => k);
+
+            // Check if any of them are enabled
+            if (_postTimeoutOptions.length) {
+                logger.debug(
+                    `[PageNavigator>#handlePostTimeout]: ${_postTimeoutOptions
+                        .map(k => `'${k}'`)
+                        .join(", ")} has no effect when 'deleteMessage' is enabled.`
+                );
+            }
+            /* > error handling ( END ) */
+
+            // Delete the message
+            if (this.data.message?.deletable) this.data.message = await this.data.message.delete().catch(() => null);
+        }
+
+        if (this.data.message && this.data.message.editable && !this.options.postTimeout.deleteMessage) {
+            // Disable components
+            if (this.options.postTimeout.disableComponents) {
+                this.data.messageActionRows.forEach(ar => ar.components.forEach(c => c.setDisabled(true)));
+                this.data.message.edit({ components: this.data.messageActionRows }).catch(() => null);
+            }
+            // Clear components
+            if (this.options.postTimeout.clearComponents) {
+                this.#navComponents_removeFromMessage();
+            }
+            // Clear reactions
+            if (this.options.postTimeout.clearReactions) {
+                this.#navReactions_removeFromMessage();
+            }
+        }
+
+        // Call events ( TIMEOUT )
+        this.#callEventStack("timeout", this.data.message);
+    }
+
     async #collectComponents() {
         if (this.data.collectors.component) {
             this.data.collectors.component.resetTimer();
             return;
         }
 
-        let filter_userIds = this.options.allowedParticipants.map(m => m.id);
+        const filter_userIds = this.options.allowedParticipants.map(m => m.id);
+
+        // Create the component collector
+        const collector = this.data.message?.createMessageComponentCollector({
+            filter: i => filter_userIds.includes(i.user.id),
+            ...(this.options.timeout ? { time: this.options.timeout } : {})
+        }) as InteractionCollector<ButtonInteraction | StringSelectMenuInteraction>;
+
+        // Cache the collector
+        this.data.collectors.component = collector;
+
+        return new Promise(resolve => {
+            // Collector ( COLLECT )
+            collector.on("collect", async i => {
+                // Ignore interactions that aren't StringSelectMenu/Button
+                if (!i.isStringSelectMenu() && !i.isButton()) return;
+
+                // Defer the interaction
+                await i.deferUpdate().catch(() => null);
+                // Reset the collector's timer
+                collector.resetTimer();
+
+                try {
+                    switch (i.customId) {
+                        case "ssm_pageSelect":
+                            break;
+                        case "btn_to_first":
+                            break;
+                        case "btn_back":
+                            break;
+                        case "btn_jump":
+                            break;
+                        case "btn_next":
+                            break;
+                        case "btn_to_last":
+                            break;
+                    }
+                } catch (err) {
+                    logger.error("$_TIMESTAMP [PageNavigator>#collectComponents]", "", err);
+                }
+            });
+
+            // Collector ( END )
+            collector.on("end", async () => {
+                this.data.collectors.component = null;
+                this.#handlePostTimeout();
+            });
+        });
     }
 
     async #collectReactions() {}
@@ -360,7 +488,13 @@ export class PageNavigator {
             timeout:
                 typeof options.timeout === "string" || typeof options.timeout === "number"
                     ? jt.parseTime(options.timeout)
-                    : jt.parseTime(config.timeouts.PAGINATION)
+                    : jt.parseTime(config.timeouts.PAGINATION),
+            postTimeout: {
+                disableComponents: false,
+                clearComponents: true,
+                clearReactions: true,
+                deleteMessage: false
+            }
         };
 
         this.data = {
@@ -412,17 +546,19 @@ export class PageNavigator {
             pageBack: [],
             pageNext: [],
             pageJumped: [],
-            selectMenuOptionPicked: []
+            selectMenuOptionPicked: [],
+            timeout: []
         };
     }
 
-    on(event: "pageChanged", listener: (page: PageData | NestedPageData, index: number) => any): void;
-    on(event: "pageBack", listener: (page: PageData | NestedPageData, index: number) => any): void;
-    on(event: "pageNext", listener: (page: PageData | NestedPageData, index: number) => any): void;
-    on(event: "pageJumped", listener: (page: PageData | NestedPageData, index: number) => any): void;
-    on(event: "selectMenuOptionPicked", listener: (option: SelectMenuOptionData) => any): void;
-    on(event: PaginationEvent, listener: Function) {
-        this.#events[event].push(listener);
+    on(event: "pageChanged", listener: (page: PageData | NestedPageData, index: number) => any, once: boolean): void;
+    on(event: "pageBack", listener: (page: PageData | NestedPageData, index: number) => any, once: boolean): void;
+    on(event: "pageNext", listener: (page: PageData | NestedPageData, index: number) => any, once: boolean): void;
+    on(event: "pageJumped", listener: (page: PageData | NestedPageData, index: number) => any, once: boolean): void;
+    on(event: "selectMenuOptionPicked", listener: (option: SelectMenuOptionData) => any, once: boolean): void;
+    on(event: "timeout", listener: (message: Message) => any, once: boolean): void;
+    on(event: PaginationEvent, listener: Function, once: boolean = false) {
+        this.#events[event].push({ listener, once });
     }
 
     addSelectMenuOptions(...options: {}[]) {}
