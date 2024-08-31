@@ -99,7 +99,7 @@ export class PageNavigator {
 
         selectMenu: {
             currentlySelected: SelectMenuOptionData | null;
-            optionIDs: string[];
+            optionIds: string[];
         };
 
         navigation: {
@@ -179,7 +179,7 @@ export class PageNavigator {
         this.data.messageActionRows = [];
 
         // Add select menu navigation, if needed
-        if (this.data.selectMenu.optionIDs.length) {
+        if (this.data.selectMenu.optionIds.length) {
             this.data.messageActionRows.push(this.data.components.actionRows.selectMenu);
         }
 
@@ -325,7 +325,14 @@ export class PageNavigator {
             });
     }
 
-    async #collectComponents() {}
+    async #collectComponents() {
+        if (this.data.collectors.component) {
+            this.data.collectors.component.resetTimer();
+            return;
+        }
+
+        let filter_userIds = this.options.allowedParticipants.map(m => m.id);
+    }
 
     async #collectReactions() {}
 
@@ -368,7 +375,7 @@ export class PageNavigator {
 
             selectMenu: {
                 currentlySelected: null,
-                optionIDs: []
+                optionIds: []
             },
 
             navigation: {

@@ -30,7 +30,7 @@ export default class AppCommandManager {
     /** Register app commands to one or more specific servers.
      *
      * __NOTE__: This ___does not___ add `UserInstall` commands to user accounts. */
-    async registerToLocal(guildIDs: string[], commands?: RegisterableCommand[]): Promise<void> {
+    async registerToLocal(guildIds: string[], commands?: RegisterableCommand[]): Promise<void> {
         // If no commands are provided, use all public and interaction commands from the client
         commands = commands?.length
             ? commands
@@ -42,7 +42,7 @@ export default class AppCommandManager {
         }
 
         // Fetch the guilds from the client using the provided guild IDs
-        let guilds = (await Promise.all(guildIDs.map(id => this.client.guilds.fetch(id).catch(() => null))))
+        let guilds = (await Promise.all(guildIds.map(id => this.client.guilds.fetch(id).catch(() => null))))
             // Filter out falsey values
             .filter(Boolean) as Guild[];
 
@@ -104,9 +104,9 @@ export default class AppCommandManager {
     /** Remove app commands from one or more specific servers.
      *
      * __NOTE__: This has no effect on app commands registered with `registerToGlobal`. */
-    async removeFromLocal(guildIDs: string[]): Promise<void> {
+    async removeFromLocal(guildIds: string[]): Promise<void> {
         // Fetch the guilds from the client using the provided guild IDs
-        let guilds = (await Promise.all(guildIDs.map(id => this.client.guilds.fetch(id).catch(() => null))))
+        let guilds = (await Promise.all(guildIds.map(id => this.client.guilds.fetch(id).catch(() => null))))
             // Filter out falsey values
             .filter(Boolean) as Guild[];
 
