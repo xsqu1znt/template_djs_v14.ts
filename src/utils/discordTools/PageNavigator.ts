@@ -69,6 +69,7 @@ interface SendOptions extends Omit<DynaSendOptions, "content" | "embeds" | "comp
 
 import {
     ActionRowBuilder,
+    APISelectMenuOption,
     ButtonBuilder,
     ButtonInteraction,
     ButtonStyle,
@@ -79,6 +80,7 @@ import {
     ReactionCollector,
     StringSelectMenuBuilder,
     StringSelectMenuInteraction,
+    StringSelectMenuOptionBuilder,
     User
 } from "discord.js";
 // import deleteMessageAfter from "./deleteMessageAfter";
@@ -120,7 +122,7 @@ export class PageNavigator {
         };
 
         selectMenu: {
-            currentlySelected: SelectMenuOptionData | null;
+            currentlySelected: StringSelectMenuOptionBuilder | null;
             optionIds: string[];
         };
 
@@ -173,9 +175,20 @@ export class PageNavigator {
         return button;
     }
 
-    #changePage(pageIndex: number, nestedPageIndex: number = 0) {
+    #setPage(pageIndex: number = 0, nestedPageIndex: number = 0) {
         // Clamp page index to the number of pages
         this.data.page.index.current = jt.clamp(pageIndex, this.options.pages.length - 1);
+
+        // Set the currently selected option, if it exists
+        this.data.selectMenu.currentlySelected =
+            this.data.components.selectMenu.options[this.data.page.index.current] || null;
+
+        if (this.data.selectMenu.currentlySelected) {
+            // Reset the 'default' property for each select menu option
+            this.data.components.selectMenu.options.forEach(o => o.setDefault(false));
+            // Set the 'default' property for the currently selected option
+            this.data.selectMenu.currentlySelected.setDefault(true);
+        }
 
         /* - - - - - { Set the Current Page } - - - - - */
         let pageData = this.options.pages[this.data.page.index.current];
@@ -437,16 +450,28 @@ export class PageNavigator {
                 try {
                     switch (i.customId) {
                         case "ssm_pageSelect":
-                            break;
+                            let _ssmOptionIndex =
+                                this.data.selectMenu.optionIds.indexOf((i as StringSelectMenuInteraction).values[0]) + 1;
+                            this.#setPage(_ssmOptionIndex);
+                            return await this.refresh();
+
                         case "btn_to_first":
-                            break;
+                            this.#setPage(this.data.page.index.current, 0);
+                            return await this.refresh();
+
                         case "btn_back":
+                            this.#setPage(this.data.page.index.current, this.data.page.index.nested - 1);
                             break;
+
                         case "btn_jump":
                             break;
+
                         case "btn_next":
+                            this.#setPage(this.data.page.index.current, this.data.page.index.nested + 1);
                             break;
+
                         case "btn_to_last":
+                            // this.#setPage(this.data.page.index.current, this.data.page.currentData);
                             break;
                     }
                 } catch (err) {
@@ -530,7 +555,7 @@ export class PageNavigator {
                     navigation: new ActionRowBuilder<ButtonBuilder>()
                 },
 
-                selectMenu: new StringSelectMenuBuilder(),
+                selectMenu: new StringSelectMenuBuilder().setCustomId("ssm_pageSelect"),
                 navigation: {
                     to_first: this.#createButton({ custom_id: "btn_to_first", ...config.navigator.buttons.to_first }),
                     back: this.#createButton({ custom_id: "btn_back", ...config.navigator.buttons.back }),
