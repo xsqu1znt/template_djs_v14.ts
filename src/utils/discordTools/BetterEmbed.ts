@@ -81,7 +81,7 @@ import {
     TextBasedChannel,
     User
 } from "discord.js";
-import { dynaSend, DynaSendOptions } from "./dynaSend";
+import dynaSend, { DynaSendOptions } from "./dynaSend";
 import logger from "@utils/logger";
 import jt from "@utils/jsTools";
 

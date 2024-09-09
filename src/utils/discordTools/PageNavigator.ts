@@ -53,23 +53,22 @@ interface NestedPageData {
 }
 
 interface SelectMenuOptionData {
-    /** Custom option ID. Useful if you have custom handling for this option. */
-    id?: string;
     /** The emoji to be displayed to the left of the option. */
     emoji?: string | null;
     /** The main text to be displayed. */
     label: string;
     /** The description to be displayed. */
-    description: string;
+    description?: string;
+    /** Custom option ID. Useful if you have custom handling for this option. */
+    value?: string;
     /** Whether this is the default option. */
-    isDefault?: boolean;
+    default?: boolean;
 }
 
 interface SendOptions extends Omit<DynaSendOptions, "content" | "embeds" | "components"> {}
 
 import {
     ActionRowBuilder,
-    APISelectMenuOption,
     ButtonBuilder,
     ButtonInteraction,
     ButtonStyle,
@@ -78,6 +77,7 @@ import {
     InteractionCollector,
     Message,
     ReactionCollector,
+    SelectMenuComponentOptionData,
     StringSelectMenuBuilder,
     StringSelectMenuInteraction,
     StringSelectMenuOptionBuilder,
@@ -90,12 +90,17 @@ import logger from "@utils/logger";
 import jt from "@utils/jsTools";
 
 import * as config from "./config.json";
+import { MessageActionRowComponent } from "discord.js";
+
+// Get the name of each pagination reaction emoji
+// this will be used as a filter when getting the current reactions from the message
+const paginationReactionNames = Object.values(config.navigator.buttons).map(data => data.emoji.name);
 
 function isNestedPageData(pageData: any): pageData is NestedPageData {
     return Object.hasOwn(pageData, "embeds");
 }
 
-export class PageNavigator {
+export default class PageNavigator {
     options: {
         type: PaginationType;
         allowedParticipants: Array<GuildMember | User>;
@@ -316,7 +321,7 @@ export class PageNavigator {
         await this.data.message.reactions.removeAll().catch(() => null);
     }
 
-    async #askPageNumber(requestedBy: User): Promise<number | null> {
+    async #askPageNumber(requestedBy: GuildMember | User): Promise<number | null> {
         if (!this.data.message) throw new Error("[EmbedNavigator>#askPageNumber]: 'this.data.message' is undefined.");
 
         // prettier-ignore
@@ -375,7 +380,7 @@ export class PageNavigator {
 
     async #handlePostTimeout() {
         if (this.options.postTimeout.deleteMessage) {
-            /* > error handling ( START ) */
+            /* > error prevention ( START ) */
             // Get options that are not "deleteMessage"
             let _postTimeoutOptions = Object.entries(this.options.postTimeout)
                 // Filter out "deleteMessage"
@@ -393,7 +398,7 @@ export class PageNavigator {
                         .join(", ")} has no effect when 'deleteMessage' is enabled.`
                 );
             }
-            /* > error handling ( END ) */
+            /* > error prevention ( END ) */
 
             // Delete the message
             if (this.data.message?.deletable) this.data.message = await this.data.message.delete().catch(() => null);
@@ -420,6 +425,7 @@ export class PageNavigator {
     }
 
     async #collectComponents() {
+        if (!this.data.message) return;
         if (this.data.collectors.component) {
             this.data.collectors.component.resetTimer();
             return;
@@ -428,7 +434,7 @@ export class PageNavigator {
         const filter_userIds = this.options.allowedParticipants.map(m => m.id);
 
         // Create the component collector
-        const collector = this.data.message?.createMessageComponentCollector({
+        const collector = this.data.message.createMessageComponentCollector({
             filter: i => filter_userIds.includes(i.user.id),
             ...(this.options.timeout ? { time: this.options.timeout } : {})
         }) as InteractionCollector<ButtonInteraction | StringSelectMenuInteraction>;
@@ -450,8 +456,9 @@ export class PageNavigator {
                 try {
                     switch (i.customId) {
                         case "ssm_pageSelect":
-                            let _ssmOptionIndex =
-                                this.data.selectMenu.optionIds.indexOf((i as StringSelectMenuInteraction).values[0]) + 1;
+                            let _ssmOptionIndex = this.data.selectMenu.optionIds.indexOf(
+                                (i as StringSelectMenuInteraction).values[0]
+                            );
                             this.#setPage(_ssmOptionIndex);
                             return await this.refresh();
 
@@ -461,18 +468,21 @@ export class PageNavigator {
 
                         case "btn_back":
                             this.#setPage(this.data.page.index.current, this.data.page.index.nested - 1);
-                            break;
+                            return await this.refresh();
 
                         case "btn_jump":
-                            break;
+                            let jumpIndex = await this.#askPageNumber(i.user);
+                            if (jumpIndex === null) return;
+                            this.#setPage(this.data.page.index.current, jumpIndex);
+                            return await this.refresh();
 
                         case "btn_next":
                             this.#setPage(this.data.page.index.current, this.data.page.index.nested + 1);
-                            break;
+                            return await this.refresh();
 
                         case "btn_to_last":
-                            // this.#setPage(this.data.page.index.current, this.data.page.currentData);
-                            break;
+                            this.#setPage(this.data.page.index.current, this.options.pages.length - 1);
+                            return await this.refresh();
                     }
                 } catch (err) {
                     logger.error("$_TIMESTAMP [PageNavigator>#collectComponents]", "", err);
@@ -487,7 +497,74 @@ export class PageNavigator {
         });
     }
 
-    async #collectReactions() {}
+    async #collectReactions() {
+        if (!this.data.message) return;
+        if (this.data.collectors.reaction) {
+            this.data.collectors.reaction.resetTimer();
+            return;
+        }
+
+        const filter_userIds = this.options.allowedParticipants.map(m => m.id);
+
+        // Create the component collector
+        const collector = this.data.message.createReactionCollector({
+            ...(this.options.timeout ? { time: this.options.timeout } : {})
+        });
+
+        // Cache the collector
+        this.data.collectors.reaction = collector;
+
+        return new Promise(resolve => {
+            // Collector ( COLLECT )
+            collector.on("collect", async (reaction, user) => {
+                // Ignore reactions that aren't part of our pagination
+                if (!paginationReactionNames.includes(reaction.emoji.name || "")) return;
+
+                // Remove the reaction unless it's from the bot itself
+                if (user.id !== reaction.message.guild?.members?.me?.id) await reaction.users.remove(user.id);
+
+                // Ignore reactions that weren't from the allowed users
+                if (!filter_userIds.includes(user.id)) return;
+
+                // Reset the collector's timer
+                collector.resetTimer();
+
+                try {
+                    switch (reaction.emoji.name) {
+                        case config.navigator.buttons.to_first.emoji.name:
+                            this.#setPage(this.data.page.index.current, 0);
+                            return await this.refresh();
+
+                        case config.navigator.buttons.back.emoji.name:
+                            this.#setPage(this.data.page.index.current, this.data.page.index.nested - 1);
+                            return await this.refresh();
+
+                        case config.navigator.buttons.jump.emoji.name:
+                            let jumpIndex = await this.#askPageNumber(user);
+                            if (jumpIndex === null) return;
+                            this.#setPage(this.data.page.index.current, jumpIndex);
+                            return await this.refresh();
+
+                        case config.navigator.buttons.next.emoji.name:
+                            this.#setPage(this.data.page.index.current, this.data.page.index.nested + 1);
+                            return await this.refresh();
+
+                        case config.navigator.buttons.to_last.emoji.name:
+                            this.#setPage(this.data.page.index.current, this.options.pages.length - 1);
+                            return await this.refresh();
+                    }
+                } catch (err) {
+                    logger.error("$_TIMESTAMP [PageNavigator>#collectReactions]", "", err);
+                }
+            });
+
+            // Collector ( END )
+            collector.on("end", async () => {
+                this.data.collectors.reaction = null;
+                this.#handlePostTimeout();
+            });
+        });
+    }
 
     constructor(options: PageNavigatorOptions) {
         /* - - - - - { Error Checking } - - - - - */
@@ -576,27 +653,92 @@ export class PageNavigator {
         };
     }
 
-    on(event: "pageChanged", listener: (page: PageData | NestedPageData, index: number) => any, once: boolean): void;
-    on(event: "pageBack", listener: (page: PageData | NestedPageData, index: number) => any, once: boolean): void;
-    on(event: "pageNext", listener: (page: PageData | NestedPageData, index: number) => any, once: boolean): void;
-    on(event: "pageJumped", listener: (page: PageData | NestedPageData, index: number) => any, once: boolean): void;
-    on(event: "selectMenuOptionPicked", listener: (option: SelectMenuOptionData) => any, once: boolean): void;
-    on(event: "timeout", listener: (message: Message) => any, once: boolean): void;
-    on(event: PaginationEvent, listener: Function, once: boolean = false) {
+    on(event: "pageChanged", listener: (page: PageData | NestedPageData, index: number) => any, once: boolean): this;
+    on(event: "pageBack", listener: (page: PageData | NestedPageData, index: number) => any, once: boolean): this;
+    on(event: "pageNext", listener: (page: PageData | NestedPageData, index: number) => any, once: boolean): this;
+    on(event: "pageJumped", listener: (page: PageData | NestedPageData, index: number) => any, once: boolean): this;
+    on(event: "selectMenuOptionPicked", listener: (option: SelectMenuOptionData) => any, once: boolean): this;
+    on(event: "timeout", listener: (message: Message) => any, once: boolean): this;
+    on(event: PaginationEvent, listener: Function, once: boolean = false): this {
         this.#events[event].push({ listener, once });
+        return this;
     }
 
-    addSelectMenuOptions(...options: {}[]) {}
+    /** Add one or more options to the select menu component. */
+    addSelectMenuOptions(...options: SelectMenuOptionData[]): this {
+        const ssm_options: StringSelectMenuOptionBuilder[] = [];
 
-    removeSelectMenuOptions(indexes: number | number[]) {}
+        for (let data of options) {
+            /* error prevention */
+            if (!data.emoji && !data.label)
+                throw new Error("[PageNavigator>addSelectMenuOptions]: Option must include either an emoji or a label.");
 
-    async setSelectMenuEnabled(enabled: boolean, remove: boolean = false) {}
+            // Set option defaults
+            data = {
+                emoji: data.emoji || "",
+                label: data.label || `page ${this.data.selectMenu.optionIds.length + 1}`,
+                description: data.description || "",
+                value: data.value || `ssm_o_${this.data.selectMenu.optionIds.length + 1}`,
+                default: data.default ?? this.data.selectMenu.optionIds.length === 0 ? true : false
+            };
 
-    async setPaginationType(type: PaginationType) {}
+            // Create a new StringSelectMenuOption
+            const ssm_option = new StringSelectMenuOptionBuilder(data as SelectMenuComponentOptionData);
+            // Add the new StringSelectMenuOption to the master array
+            ssm_options.push(ssm_option);
+            // Add the new option ID (value) to our optionIds array
+            this.data.selectMenu.optionIds.push(data.value as string);
+        }
 
-    async insertButtonAt(index: number, component: []) {}
+        // Add the new options to the select menu
+        this.data.components.selectMenu.addOptions(...ssm_options);
+        return this;
+    }
 
-    async removeButtonAt(index: number) {}
+    /** Remove select menu options at the given index/indices.
+     * ```ts
+     * // Remove the options at index 0, 2, and 4
+     * PageNavigator.removeSelectMenuOptions(0, 2, 4);
+     *
+     * // Remove the last option
+     * PageNavigator.removeSelectMenuOptions(-1);
+     * ``` */
+    removeSelectMenuOptions(...index: number[]): this {
+        index.forEach(i => this.data.components.selectMenu.spliceOptions(i, 1));
+        return this;
+    }
+
+    /** Set the pagination type. */
+    setPaginationType(type: PaginationType): this {
+        this.options.type = type;
+        return this;
+    }
+
+    /** Allows inserting a button at the given index in the same action row as the navigation buttons. */
+    insertButtonAt(index: number, component: ButtonBuilder): this {
+        /* error prevention */
+        if (this.data.components.actionRows.navigation.components.length === 5) {
+            logger.debug(
+                "[PageNavigator>insertButtonAt]: You cannot have more than 5 buttons in the same action row. Add a new ActionRow."
+            );
+        }
+
+        this.data.components.actionRows.navigation.components.splice(index, 0, component);
+        return this;
+    }
+
+    /** Remove buttons at the given index/indices.
+     * ```ts
+     * // Remove the button at index 0, 2, and 4
+     * PageNavigator.removeButtonAt(0, 2, 4);
+     *
+     * // Remove the last button
+     * PageNavigator.removeButtonAt(-1);
+     * ``` */
+    removeButtonAt(...index: number[]): this {
+        index.forEach(i => this.data.components.actionRows.navigation.components.splice(i, 1));
+        return this;
+    }
 
     async send(handler: SendHandler, options: SendOptions) {}
 
