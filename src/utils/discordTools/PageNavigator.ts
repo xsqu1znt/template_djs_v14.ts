@@ -5,7 +5,7 @@ type PaginationEvent = "pageChanged" | "pageBack" | "pageNext" | "pageJumped" | 
 type PaginationType = "short" | "shortJump" | "long" | "longJump";
 type RefreshType = "full" | "embed" | "navigation" | "reactions" | "collectors";
 
-interface PageNavigatorOptions {
+export interface PageNavigatorOptions {
     /** The type of pagination. Defaults to `short`. */
     type?: PaginationType;
     /** The user or users that are allowed to interact with the navigator. */
@@ -43,17 +43,17 @@ interface PageNavigatorOptions {
     };
 }
 
-interface PageData {
+export interface PageData {
     content?: string;
     embed: EmbedResolveable;
 }
 
-interface NestedPageData {
+export interface NestedPageData {
     content?: string;
     embeds: EmbedResolveable[];
 }
 
-interface SelectMenuOptionData {
+export interface SelectMenuOptionData {
     /** The emoji to be displayed to the left of the option. */
     emoji?: string | null;
     /** The main text to be displayed. */
@@ -84,14 +84,11 @@ import {
     StringSelectMenuOptionBuilder,
     User
 } from "discord.js";
-// import deleteMessageAfter from "./deleteMessageAfter";
 import dynaSend from "./dynaSend";
-// import BetterEmbed from "./BetterEmbed";
 import logger from "@utils/logger";
 import jt from "@utils/jsTools";
 
 import * as config from "./config.json";
-import { MessageActionRowComponent } from "discord.js";
 
 // Get the name of each pagination reaction emoji
 // this will be used as a filter when getting the current reactions from the message
@@ -743,7 +740,7 @@ export default class PageNavigator {
     }
 
     /** Send the PageNavigator. */
-    async send(handler: SendHandler, options: SendOptions) {
+    async send(handler: SendHandler, options?: SendOptions) {
         this.#configure_components();
         this.#configure_navigation();
 

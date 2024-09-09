@@ -2,6 +2,10 @@ import BetterEmbed_default from "./BetterEmbed";
 export * from "./BetterEmbed";
 export const BetterEmbed = BetterEmbed_default;
 
+import PageNavigator_default from "./PageNavigator";
+export * from "./PageNavigator";
+export const PageNavigator = PageNavigator_default;
+
 import dynaSend_default from "./dynaSend";
 export * from "./dynaSend";
 export const dynaSend = dynaSend_default;
