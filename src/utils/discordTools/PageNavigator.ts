@@ -426,6 +426,7 @@ export default class PageNavigator {
 
     async #collectComponents() {
         if (!this.data.message) return;
+        if (!this.data.messageActionRows.length) return;
         if (this.data.collectors.component) {
             this.data.collectors.component.resetTimer();
             return;
@@ -740,7 +741,104 @@ export default class PageNavigator {
         return this;
     }
 
-    async send(handler: SendHandler, options: SendOptions) {}
+    async send(handler: SendHandler, options: SendOptions) {
+        this.#configure_components();
+        this.#configure_navigation();
 
-    async refresh() {}
+        // Send with dynaSend
+        this.data.message = await dynaSend(handler, {
+            ...options,
+            embeds: this.data.page.currentEmbed as EmbedResolveable,
+            components: this.data.messageActionRows
+        });
+
+        // Return null if failed
+        if (!this.data.message) return null;
+
+        // Add reactions, if applicable
+        /* NOTE: this is not awaited so we're able to interact with the reactions before they're fully added */
+        this.#navReactions_addToMessage();
+
+        // Start collectors
+        this.#collectComponents();
+        this.#collectReactions();
+
+        // Return the message
+        return this.data.message;
+    }
+
+    /** Refresh the current page embed, navigation, and collectors. */
+    async refresh(
+        refreshType: "full" | "embed" | "navigation" | "reactions" | "collectors" = "full"
+    ): Promise<Message | null> {
+        /* error prevention */
+        if (!this.data.message) {
+            logger.debug("[PageNavigator>refresh]: Could not refresh navigator; message not sent.");
+            return null;
+        }
+        if (!this.data.message.editable) {
+            logger.debug("[PageNavigator>refresh]: Could not refresh navigator; message not editable.");
+            return null;
+        }
+
+        const refreshNavigation = () => {
+            this.#configure_components();
+            this.#configure_navigation();
+        };
+
+        const refreshReactions = async () => {
+            await this.#navReactions_removeFromMessage();
+            await this.#navReactions_addToMessage();
+        };
+
+        const refreshCollectors = () => {
+            if (this.data.collectors.component) {
+                this.data.collectors.component.resetTimer();
+            } else {
+                this.#collectComponents();
+            }
+
+            if (this.data.collectors.reaction) {
+                this.data.collectors.reaction.resetTimer();
+            } else {
+                this.#collectReactions();
+            }
+        };
+
+        // Determine the refresh operation
+        switch (refreshType) {
+            case "full":
+                refreshNavigation();
+                refreshCollectors();
+                this.data.message = await this.data.message.edit({
+                    embeds: [this.data.page.currentEmbed as EmbedResolveable],
+                    components: this.data.messageActionRows
+                });
+                await refreshReactions();
+                break;
+
+            case "embed":
+                this.data.message = await this.data.message.edit({
+                    embeds: [this.data.page.currentEmbed as EmbedResolveable]
+                });
+                break;
+
+            case "navigation":
+                refreshNavigation();
+                this.data.message = await this.data.message.edit({
+                    components: this.data.messageActionRows
+                });
+                break;
+
+            case "reactions":
+                await refreshReactions();
+                break;
+
+            case "collectors":
+                refreshCollectors();
+                break;
+        }
+
+        return this.data.message;
+    }
 }
