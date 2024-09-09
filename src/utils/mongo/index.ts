@@ -42,7 +42,7 @@ export async function ping(): Promise<string> {
 
     /// Ping the connection database
     let before = Date.now();
-    await mongoose.connection.db.admin().ping();
+    await mongoose.connection.db?.admin().ping();
     let after = Date.now();
 
     return (after - before).toString();

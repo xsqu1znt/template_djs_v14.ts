@@ -8,6 +8,7 @@ export default {
 
     execute: async (client, message, {}) => {
         let embed_test = new BetterEmbed({
+            context: { message },
             description: "Hello, **$DISPLAY_NAME**!"
         });
 
@@ -16,14 +17,19 @@ export default {
         });
 
         let embed_test3 = new BetterEmbed({
-            description: "Feel free to tell @842555247145779211 fuck you!"
+            description: "Feel free to tell <@842555247145779211> fuck you!"
         });
 
         let pageNav = new PageNavigator({
             allowedParticipants: [message.author],
-            pages: [{ embeds: [embed_test, embed_test2, embed_test3] }]
+            pages: [{ embed: embed_test }, { embed: embed_test2 }, { embed: embed_test3 }]
         });
 
-        return await pageNav.send(message.channel);
+        pageNav.addSelectMenuOptions({ label: "Page 1" }, { label: "Page 2" }, { label: "Page 3" });
+        
+        await pageNav.send(message.channel);
+        console.log(pageNav.data);
+        console.log(pageNav.options);
+        return;
     }
 } as PrefixCommand;

@@ -197,8 +197,9 @@ export default class PageNavigator {
         let pageData = this.options.pages[this.data.page.index.current];
 
         if (isNestedPageData(pageData)) {
-            // Clamp nested page index to the number of nested pages
-            this.data.page.index.nested = jt.clamp(nestedPageIndex, pageData.embeds.length - 1);
+            /// Clamp nested page index to the number of nested pages & allow overflow wrapping
+            this.data.page.index.nested = nestedPageIndex % pageData.embeds.length;
+            if (this.data.page.index.nested < 0) this.data.page.index.nested = pageData.embeds.length - 1;
 
             this.data.page.currentEmbed = pageData.embeds[this.data.page.index.nested];
             this.data.page.currentData = pageData;
@@ -214,23 +215,9 @@ export default class PageNavigator {
         this.data.navigation.canUseLong = isNestedPageData(pageData) && pageData.embeds.length >= CAN_USE_LONG_THRESHOLD;
     }
 
-    #configure_components() {
-        this.data.messageActionRows = [];
-
-        // Add select menu navigation, if needed
-        if (this.data.selectMenu.optionIds.length) {
-            this.data.messageActionRows.push(this.data.components.actionRows.selectMenu);
-        }
-
-        // Add button navigation, if needed
-        if (this.data.navigation.required && !this.options.useReactions) {
-            this.data.messageActionRows.push(this.data.components.actionRows.navigation);
-        }
-    }
-
     #configure_navigation() {
         this.data.navigation.reactions = [];
-        if (!this.options.useReactions || !this.data.navigation.required) return;
+        if (!this.data.navigation.required) return;
 
         let navTypes = [];
 
@@ -272,6 +259,21 @@ export default class PageNavigator {
             this.data.components.actionRows.navigation.setComponents(
                 ...navTypes.map(type => jt.getProp<ButtonBuilder>(this.data.components.navigation, type))
             );
+        }
+    }
+
+    #configure_components() {
+        this.data.messageActionRows = [];
+
+        // Add select menu navigation, if needed
+        if (this.data.selectMenu.optionIds.length) {
+            this.data.components.actionRows.selectMenu.setComponents(this.data.components.selectMenu);
+            this.data.messageActionRows.push(this.data.components.actionRows.selectMenu);
+        }
+
+        // Add button navigation, if needed
+        if (this.data.navigation.required && !this.options.useReactions) {
+            this.data.messageActionRows.push(this.data.components.actionRows.navigation);
         }
     }
 
@@ -492,12 +494,14 @@ export default class PageNavigator {
             collector.on("end", async () => {
                 this.data.collectors.component = null;
                 this.#handlePostTimeout();
+                resolve(this);
             });
         });
     }
 
     async #collectReactions() {
         if (!this.data.message) return;
+        if (!this.data.navigation.reactions.length) return;
         if (this.data.collectors.reaction) {
             this.data.collectors.reaction.resetTimer();
             return;
@@ -561,6 +565,7 @@ export default class PageNavigator {
             collector.on("end", async () => {
                 this.data.collectors.reaction = null;
                 this.#handlePostTimeout();
+                resolve(this);
             });
         });
     }
@@ -650,6 +655,11 @@ export default class PageNavigator {
             selectMenuOptionPicked: [],
             timeout: []
         };
+
+        /// Configure
+        this.#setPage();
+        this.#configure_navigation();
+        this.#configure_components();
     }
 
     on(event: "pageChanged", listener: (page: PageData | NestedPageData, index: number) => any, once: boolean): this;
@@ -668,7 +678,7 @@ export default class PageNavigator {
         const ssm_options: StringSelectMenuOptionBuilder[] = [];
 
         for (let data of options) {
-            /* error prevention */
+            /* error */
             if (!data.emoji && !data.label)
                 throw new Error("[PageNavigator>addSelectMenuOptions]: Option must include either an emoji or a label.");
 
@@ -682,7 +692,16 @@ export default class PageNavigator {
             };
 
             // Create a new StringSelectMenuOption
-            const ssm_option = new StringSelectMenuOptionBuilder(data as SelectMenuComponentOptionData);
+            const ssm_option = new StringSelectMenuOptionBuilder({
+                label: data.label,
+                value: data.value as string,
+                default: data.default
+            });
+
+            /// Set option properties, if available
+            if (data.emoji) ssm_option.setEmoji(data.emoji);
+            if (data.description) ssm_option.setDescription(data.description);
+
             // Add the new StringSelectMenuOption to the master array
             ssm_options.push(ssm_option);
             // Add the new option ID (value) to our optionIds array
@@ -715,7 +734,7 @@ export default class PageNavigator {
 
     /** Allows inserting a button at the given index in the same action row as the navigation buttons. */
     insertButtonAt(index: number, component: ButtonBuilder): this {
-        /* error prevention */
+        /* error */
         if (this.data.components.actionRows.navigation.components.length === 5) {
             logger.debug(
                 "[PageNavigator>insertButtonAt]: You cannot have more than 5 buttons in the same action row. Add a new ActionRow."
@@ -741,8 +760,9 @@ export default class PageNavigator {
 
     /** Send the PageNavigator. */
     async send(handler: SendHandler, options?: SendOptions) {
-        this.#configure_components();
+        this.#setPage();
         this.#configure_navigation();
+        this.#configure_components();
 
         // Send with dynaSend
         this.data.message = await dynaSend(handler, {
@@ -768,7 +788,7 @@ export default class PageNavigator {
 
     /** Refresh the current page embed, navigation, and collectors. */
     async refresh(type: RefreshType = "full"): Promise<Message | null> {
-        /* error prevention */
+        /* error */
         if (!this.data.message) {
             logger.debug("[PageNavigator>refresh]: Could not refresh navigator; message not sent.");
             return null;
@@ -779,8 +799,8 @@ export default class PageNavigator {
         }
 
         const refreshNavigation = () => {
-            this.#configure_components();
             this.#configure_navigation();
+            this.#configure_components();
         };
 
         const refreshReactions = async () => {

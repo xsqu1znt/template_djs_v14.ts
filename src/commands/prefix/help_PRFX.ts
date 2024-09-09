@@ -83,6 +83,7 @@ export default {
         for (let category of categoryNames) {
             // Get all the commands for the current category
             let _commands = commandList.filter(cmd => cmd.category === category.name);
+            if (!_commands.length) continue;
 
             // Sort command names alphabetically
             _commands.sort((a, b) => a.name.localeCompare(b.name));
