@@ -3,6 +3,7 @@ import { DynaSendOptions } from "./dynaSend";
 
 type PaginationEvent = "pageChanged" | "pageBack" | "pageNext" | "pageJumped" | "selectMenuOptionPicked" | "timeout";
 type PaginationType = "short" | "shortJump" | "long" | "longJump";
+type RefreshType = "full" | "embed" | "navigation" | "reactions" | "collectors";
 
 interface PageNavigatorOptions {
     /** The type of pagination. Defaults to `short`. */
@@ -289,9 +290,9 @@ export default class PageNavigator {
         }
     }
 
-    async #navComponents_addToMessage() {
-        if (!this.data.message?.editable) return;
-        await this.data.message.edit({ components: this.data.messageActionRows }).catch(() => null);
+    async #navComponents_addToMessage(): Promise<Message | null> {
+        if (!this.data.message?.editable) return null;
+        return await this.data.message.edit({ components: this.data.messageActionRows }).catch(() => null);
     }
 
     async #navComponents_removeFromMessage() {
@@ -741,6 +742,7 @@ export default class PageNavigator {
         return this;
     }
 
+    /** Send the PageNavigator. */
     async send(handler: SendHandler, options: SendOptions) {
         this.#configure_components();
         this.#configure_navigation();
@@ -768,9 +770,7 @@ export default class PageNavigator {
     }
 
     /** Refresh the current page embed, navigation, and collectors. */
-    async refresh(
-        refreshType: "full" | "embed" | "navigation" | "reactions" | "collectors" = "full"
-    ): Promise<Message | null> {
+    async refresh(type: RefreshType = "full"): Promise<Message | null> {
         /* error prevention */
         if (!this.data.message) {
             logger.debug("[PageNavigator>refresh]: Could not refresh navigator; message not sent.");
@@ -806,7 +806,7 @@ export default class PageNavigator {
         };
 
         // Determine the refresh operation
-        switch (refreshType) {
+        switch (type) {
             case "full":
                 refreshNavigation();
                 refreshCollectors();
@@ -825,9 +825,7 @@ export default class PageNavigator {
 
             case "navigation":
                 refreshNavigation();
-                this.data.message = await this.data.message.edit({
-                    components: this.data.messageActionRows
-                });
+                this.data.message = await this.#navComponents_addToMessage();
                 break;
 
             case "reactions":
