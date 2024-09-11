@@ -21,20 +21,20 @@ function getStaffGuildAdminBypass(commandName: string): string[] {
     let _staff = config.client.staff;
 
     let result: string[] = [];
-    let bypass = _staff.BYPASSED.find(b => b.COMMAND_NAME === commandName);
+    let bypass = _staff.BYPASSERS.find(b => b.COMMAND_NAME === commandName);
 
-    if (_staff.IGNORES_GUILD_ADMIN.AllStaff) return [_staff.OWNER_ID, ..._staff.MEMBERS, ...(bypass ? bypass.USER_IDS : [])];
-    if (_staff.IGNORES_GUILD_ADMIN.Owner) result.push(_staff.OWNER_ID);
-    if (_staff.IGNORES_GUILD_ADMIN.Members) result.push(..._staff.MEMBERS);
-    if (_staff.IGNORES_GUILD_ADMIN.Bypassed) result.push(...(bypass ? bypass.USER_IDS : []));
+    if (_staff.IGNORES_GUILD_ADMIN.AllBotStaff) return [_staff.OWNER_ID, ..._staff.SUPERUSERS, ...(bypass ? bypass.USER_IDS : [])];
+    if (_staff.IGNORES_GUILD_ADMIN.BotOwner) result.push(_staff.OWNER_ID);
+    if (_staff.IGNORES_GUILD_ADMIN.SuperUsers) result.push(..._staff.SUPERUSERS);
+    if (_staff.IGNORES_GUILD_ADMIN.Bypassers) result.push(...(bypass ? bypass.USER_IDS : []));
 
     return result;
 }
 
 function userIsStaffOrBypassable(message: Message, commandName: string): boolean {
     let _staff = config.client.staff;
-    let bypass = _staff.BYPASSED.find(b => b.COMMAND_NAME === commandName);
-    return [_staff.OWNER_ID, ..._staff.MEMBERS, ...(bypass ? bypass.USER_IDS : [])].includes(message.author.id);
+    let bypass = _staff.BYPASSERS.find(b => b.COMMAND_NAME === commandName);
+    return [_staff.OWNER_ID, ..._staff.SUPERUSERS, ...(bypass ? bypass.USER_IDS : [])].includes(message.author.id);
 }
 
 function userHasGuildAdminOrBypassable(message: Message, commandName: string): boolean {

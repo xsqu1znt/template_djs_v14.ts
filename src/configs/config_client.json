@@ -10,20 +10,20 @@
 
     "staff": {
         "OWNER_ID": "",
-        "MEMBERS": [],
-        "BYPASSED": [{ "COMMAND_NAME": "", "USER_IDS": [] }],
+        "SUPERUSERS": [],
+        "BYPASSERS": [{ "COMMAND_NAME": "", "USER_IDS": [] }],
         "IGNORES_GUILD_ADMIN": {
-            "AllStaff": false,
-            "Owner": false,
-            "Members": false,
-            "Bypassed": false
+            "AllBotStaff": false,
+            "BotOwner": false,
+            "SuperUsers": false,
+            "Bypassers": false
         }
     },
 
     "support_server": {
+        "GUILD_ID": "",
         "INVITE_URL": "https://discord.gg/your_server",
         "INVITE_ON_COMMAND_ERROR": false,
-        "GUILD_ID": "",
         "channels": {
             "WELCOME": "0123456789"
         }
