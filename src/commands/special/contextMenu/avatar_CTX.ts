@@ -6,7 +6,6 @@ import { BetterEmbed } from "@utils/discordTools";
 export default {
     category: "Fun",
 
-    // prettier-ignore
     builder: new ContextMenuCommandBuilder().setName("View Avatar")
         .setType(ApplicationCommandType.User),
 

@@ -87,7 +87,6 @@
             "export default {",
             "    category: \"Fun\",\n",
 
-            "    // prettier-ignore",
             "    builder: new ContextMenuCommandBuilder().setName(\"${1:View Avatar}\")",
             "        .setType(ApplicationCommandType.${2|User,Message|}),\n",
 
