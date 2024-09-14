@@ -1,7 +1,13 @@
 import { Schema, model as Model } from "mongoose";
 import config from "../configs";
 
-export const schema = new Schema(
+interface IGuild {
+    _id: string;
+    prefix: string;
+    timestamp_joined: Date;
+}
+
+export const schema = new Schema<IGuild>(
     {
         _id: { type: String, required: true },
         prefix: { type: String, default: config.client.PREFIX },
@@ -10,4 +16,4 @@ export const schema = new Schema(
     { collection: "guilds" }
 );
 
-export const model = Model("guilds", schema);
+export const model = Model<IGuild>("guilds", schema);
