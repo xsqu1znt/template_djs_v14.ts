@@ -16,7 +16,7 @@ export interface PageNavigatorOptions {
     useReactions?: boolean;
     /** Whether to only add the `Page Jump` action when needed.
      *
-     * I.E. if there's more than 5 pages, add `Page Jump` action.
+     * I.E. if there's more than 5 pages, add the `Page Jump` button/reaction.
      *
      * __NOTE__: The threshold can be confiured in the `./config.json` file. */
     dynamic?: boolean;
@@ -37,8 +37,7 @@ export interface PageNavigatorOptions {
      * ___4.___ `deleteMessage`: Delete the message. (default: `false`) */
     postTimeout?: {
         disableComponents: boolean;
-        clearComponents: boolean;
-        clearReactions: boolean;
+        clearComponentsOrReactions: boolean;
         deleteMessage: boolean;
     };
 }
@@ -49,8 +48,8 @@ export interface PageData {
 }
 
 export interface NestedPageData {
-    content?: string;
-    embeds: EmbedResolveable[];
+    nestedContent?: string[];
+    nestedEmbeds: EmbedResolveable[];
 }
 
 export interface SelectMenuOptionData {
@@ -78,7 +77,6 @@ import {
     InteractionCollector,
     Message,
     ReactionCollector,
-    SelectMenuComponentOptionData,
     StringSelectMenuBuilder,
     StringSelectMenuInteraction,
     StringSelectMenuOptionBuilder,
@@ -95,7 +93,7 @@ import * as config from "./config.json";
 const paginationReactionNames = Object.values(config.navigator.buttons).map(data => data.emoji.name);
 
 function isNestedPageData(pageData: any): pageData is NestedPageData {
-    return Object.hasOwn(pageData, "embeds");
+    return Object.hasOwn(pageData, "nestedEmbeds");
 }
 
 export default class PageNavigator {
@@ -108,8 +106,7 @@ export default class PageNavigator {
         timeout: number | null;
         postTimeout: {
             disableComponents: boolean;
-            clearComponents: boolean;
-            clearReactions: boolean;
+            clearComponentsOrReactions: boolean;
             deleteMessage: boolean;
         };
     };
@@ -198,21 +195,25 @@ export default class PageNavigator {
 
         if (isNestedPageData(pageData)) {
             /// Clamp nested page index to the number of nested pages & allow overflow wrapping
-            this.data.page.index.nested = nestedPageIndex % pageData.embeds.length;
-            if (this.data.page.index.nested < 0) this.data.page.index.nested = pageData.embeds.length - 1;
+            this.data.page.index.nested = nestedPageIndex % pageData.nestedEmbeds.length;
+            if (this.data.page.index.nested < 0) this.data.page.index.nested = pageData.nestedEmbeds.length - 1;
 
-            this.data.page.currentEmbed = pageData.embeds[this.data.page.index.nested];
+            this.data.page.currentEmbed = pageData.nestedEmbeds[this.data.page.index.nested];
             this.data.page.currentData = pageData;
         } else {
+            // Reset nested page index
+            this.data.page.index.nested = 0;
+
             this.data.page.currentEmbed = pageData.embed;
             this.data.page.currentData = pageData;
         }
 
         /* - - - - - { Determine Navigation Options } - - - - - */
         const { CAN_JUMP_THRESHOLD, CAN_USE_LONG_THRESHOLD } = config.navigator;
-        this.data.navigation.required = isNestedPageData(pageData) && pageData.embeds.length >= 2;
-        this.data.navigation.canJump = isNestedPageData(pageData) && pageData.embeds.length >= CAN_JUMP_THRESHOLD;
-        this.data.navigation.canUseLong = isNestedPageData(pageData) && pageData.embeds.length >= CAN_USE_LONG_THRESHOLD;
+        this.data.navigation.required = isNestedPageData(pageData) && pageData.nestedEmbeds.length >= 2;
+        this.data.navigation.canJump = isNestedPageData(pageData) && pageData.nestedEmbeds.length >= CAN_JUMP_THRESHOLD;
+        this.data.navigation.canUseLong =
+            isNestedPageData(pageData) && pageData.nestedEmbeds.length >= CAN_USE_LONG_THRESHOLD;
     }
 
     #configure_navigation() {
@@ -410,13 +411,15 @@ export default class PageNavigator {
                 this.data.messageActionRows.forEach(ar => ar.components.forEach(c => c.setDisabled(true)));
                 this.data.message.edit({ components: this.data.messageActionRows }).catch(() => null);
             }
-            // Clear components
-            if (this.options.postTimeout.clearComponents) {
-                this.#navComponents_removeFromMessage();
-            }
-            // Clear reactions
-            if (this.options.postTimeout.clearReactions) {
-                this.#navReactions_removeFromMessage();
+
+            if (this.options.postTimeout.clearComponentsOrReactions) {
+                if (!this.options.useReactions) {
+                    // Clear message components
+                    this.#navComponents_removeFromMessage();
+                } else {
+                    // Clear message reactions
+                    this.#navReactions_removeFromMessage();
+                }
             }
         }
 
@@ -461,28 +464,43 @@ export default class PageNavigator {
                                 (i as StringSelectMenuInteraction).values[0]
                             );
                             this.#setPage(_ssmOptionIndex);
+                            this.#callEventStack(
+                                "selectMenuOptionPicked",
+                                this.data.page.currentData,
+                                this.data.components.selectMenu.options[_ssmOptionIndex],
+                                this.data.page.index.current
+                            );
+                            this.#callEventStack("pageChanged", this.data.page.currentData, this.data.page.index.current);
                             return await this.refresh();
 
                         case "btn_to_first":
                             this.#setPage(this.data.page.index.current, 0);
+                            this.#callEventStack("pageChanged", this.data.page.currentData, this.data.page.index.nested);
                             return await this.refresh();
 
                         case "btn_back":
                             this.#setPage(this.data.page.index.current, this.data.page.index.nested - 1);
+                            this.#callEventStack("pageBack", this.data.page.currentData, this.data.page.index.nested);
+                            this.#callEventStack("pageChanged", this.data.page.currentData, this.data.page.index.nested);
                             return await this.refresh();
 
                         case "btn_jump":
                             let jumpIndex = await this.#askPageNumber(i.user);
                             if (jumpIndex === null) return;
                             this.#setPage(this.data.page.index.current, jumpIndex);
+                            this.#callEventStack("pageJumped", this.data.page.currentData, this.data.page.index.nested);
+                            this.#callEventStack("pageChanged", this.data.page.currentData, this.data.page.index.nested);
                             return await this.refresh();
 
                         case "btn_next":
                             this.#setPage(this.data.page.index.current, this.data.page.index.nested + 1);
+                            this.#callEventStack("pageNext", this.data.page.currentData, this.data.page.index.nested);
+                            this.#callEventStack("pageChanged", this.data.page.currentData, this.data.page.index.nested);
                             return await this.refresh();
 
                         case "btn_to_last":
                             this.#setPage(this.data.page.index.current, this.options.pages.length - 1);
+                            this.#callEventStack("pageChanged", this.data.page.currentData, this.data.page.index.nested);
                             return await this.refresh();
                     }
                 } catch (err) {
@@ -536,24 +554,32 @@ export default class PageNavigator {
                     switch (reaction.emoji.name) {
                         case config.navigator.buttons.to_first.emoji.name:
                             this.#setPage(this.data.page.index.current, 0);
+                            this.#callEventStack("pageChanged", this.data.page.currentData, this.data.page.index.current);
                             return await this.refresh();
 
                         case config.navigator.buttons.back.emoji.name:
                             this.#setPage(this.data.page.index.current, this.data.page.index.nested - 1);
+                            this.#callEventStack("pageBack", this.data.page.currentData, this.data.page.index.nested);
+                            this.#callEventStack("pageChanged", this.data.page.currentData, this.data.page.index.current);
                             return await this.refresh();
 
                         case config.navigator.buttons.jump.emoji.name:
                             let jumpIndex = await this.#askPageNumber(user);
                             if (jumpIndex === null) return;
                             this.#setPage(this.data.page.index.current, jumpIndex);
+                            this.#callEventStack("pageJumped", this.data.page.currentData, this.data.page.index.nested);
+                            this.#callEventStack("pageChanged", this.data.page.currentData, this.data.page.index.current);
                             return await this.refresh();
 
                         case config.navigator.buttons.next.emoji.name:
                             this.#setPage(this.data.page.index.current, this.data.page.index.nested + 1);
+                            this.#callEventStack("pageNext", this.data.page.currentData, this.data.page.index.nested);
+                            this.#callEventStack("pageChanged", this.data.page.currentData, this.data.page.index.current);
                             return await this.refresh();
 
                         case config.navigator.buttons.to_last.emoji.name:
                             this.#setPage(this.data.page.index.current, this.options.pages.length - 1);
+                            this.#callEventStack("pageChanged", this.data.page.currentData, this.data.page.index.current);
                             return await this.refresh();
                     }
                 } catch (err) {
@@ -569,6 +595,8 @@ export default class PageNavigator {
             });
         });
     }
+
+    async #reconfigure() {}
 
     constructor(options: PageNavigatorOptions) {
         /* - - - - - { Error Checking } - - - - - */
@@ -597,8 +625,7 @@ export default class PageNavigator {
                     : jt.parseTime(config.timeouts.PAGINATION),
             postTimeout: {
                 disableComponents: false,
-                clearComponents: true,
-                clearReactions: true,
+                clearComponentsOrReactions: true,
                 deleteMessage: false
             }
         };
@@ -666,7 +693,11 @@ export default class PageNavigator {
     on(event: "pageBack", listener: (page: PageData | NestedPageData, index: number) => any, once: boolean): this;
     on(event: "pageNext", listener: (page: PageData | NestedPageData, index: number) => any, once: boolean): this;
     on(event: "pageJumped", listener: (page: PageData | NestedPageData, index: number) => any, once: boolean): this;
-    on(event: "selectMenuOptionPicked", listener: (option: SelectMenuOptionData) => any, once: boolean): this;
+    on(
+        event: "selectMenuOptionPicked",
+        listener: (page: PageData | NestedPageData, option: SelectMenuOptionData, index: number) => any,
+        once: boolean
+    ): this;
     on(event: "timeout", listener: (message: Message) => any, once: boolean): this;
     on(event: PaginationEvent, listener: Function, once: boolean = false): this {
         this.#events[event].push({ listener, once });
@@ -764,9 +795,17 @@ export default class PageNavigator {
         this.#configure_navigation();
         this.#configure_components();
 
+        // Check for message content
+        const _content = isNestedPageData(this.data.page.currentData)
+            ? this.data.page.currentData.nestedContent
+                ? this.data.page.currentData.nestedContent[this.data.page.index.nested]
+                : undefined
+            : this.data.page.currentData?.content || undefined;
+
         // Send with dynaSend
         this.data.message = await dynaSend(handler, {
             ...options,
+            content: _content,
             embeds: this.data.page.currentEmbed as EmbedResolveable,
             components: this.data.messageActionRows
         });
@@ -798,6 +837,14 @@ export default class PageNavigator {
             return null;
         }
 
+        const checkForMessageContent = () => {
+            return isNestedPageData(this.data.page.currentData)
+                ? this.data.page.currentData.nestedContent
+                    ? this.data.page.currentData.nestedContent[this.data.page.index.nested]
+                    : undefined
+                : this.data.page.currentData?.content || undefined;
+        };
+
         const refreshNavigation = () => {
             this.#configure_navigation();
             this.#configure_components();
@@ -828,6 +875,7 @@ export default class PageNavigator {
                 refreshNavigation();
                 refreshCollectors();
                 this.data.message = await this.data.message.edit({
+                    content: checkForMessageContent(),
                     embeds: [this.data.page.currentEmbed as EmbedResolveable],
                     components: this.data.messageActionRows
                 });
@@ -836,6 +884,7 @@ export default class PageNavigator {
 
             case "embed":
                 this.data.message = await this.data.message.edit({
+                    content: checkForMessageContent(),
                     embeds: [this.data.page.currentEmbed as EmbedResolveable]
                 });
                 break;
