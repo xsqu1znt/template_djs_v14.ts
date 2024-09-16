@@ -114,8 +114,10 @@ export default class PageNavigator {
     data: {
         message: Message | null;
         messageActionRows: ActionRowBuilder<StringSelectMenuBuilder | ButtonBuilder>[];
+        extraUserButtons: { index: number; component: ButtonBuilder }[];
 
         page: {
+            currentMessageContent: string | undefined;
             currentEmbed: EmbedResolveable | null;
             currentData: PageData | NestedPageData | null;
             index: { current: number; nested: number };
@@ -200,12 +202,16 @@ export default class PageNavigator {
 
             this.data.page.currentEmbed = pageData.nestedEmbeds[this.data.page.index.nested];
             this.data.page.currentData = pageData;
+            this.data.page.currentMessageContent = pageData.nestedContent
+                ? pageData.nestedContent[this.data.page.index.nested] || undefined
+                : undefined;
         } else {
             // Reset nested page index
             this.data.page.index.nested = 0;
 
             this.data.page.currentEmbed = pageData.embed;
             this.data.page.currentData = pageData;
+            this.data.page.currentMessageContent = pageData.content || undefined;
         }
 
         /* - - - - - { Determine Navigation Options } - - - - - */
@@ -261,6 +267,11 @@ export default class PageNavigator {
                 ...navTypes.map(type => jt.getProp<ButtonBuilder>(this.data.components.navigation, type))
             );
         }
+
+        // Add extra buttons, if any
+        for (const btn of this.data.extraUserButtons) {
+            this.data.components.actionRows.navigation.components.splice(btn.index, 0, btn.component);
+        }
     }
 
     #configure_components() {
@@ -276,6 +287,12 @@ export default class PageNavigator {
         if (this.data.navigation.required && !this.options.useReactions) {
             this.data.messageActionRows.push(this.data.components.actionRows.navigation);
         }
+    }
+
+    #configure() {
+        this.#setPage();
+        this.#configure_navigation();
+        this.#configure_components();
     }
 
     #callEventStack(event: PaginationEvent, ...args: any) {
@@ -631,8 +648,10 @@ export default class PageNavigator {
         this.data = {
             message: null,
             messageActionRows: [],
+            extraUserButtons: [],
 
             page: {
+                currentMessageContent: undefined,
                 currentEmbed: null,
                 currentData: null,
                 index: { current: 0, nested: 0 }
@@ -770,7 +789,7 @@ export default class PageNavigator {
             );
         }
 
-        this.data.components.actionRows.navigation.components.splice(index, 0, component);
+        this.data.extraUserButtons.push({ index, component });
         return this;
     }
 
@@ -783,7 +802,7 @@ export default class PageNavigator {
      * PageNavigator.removeButtonAt(-1);
      * ``` */
     removeButtonAt(...index: number[]): this {
-        index.forEach(i => this.data.components.actionRows.navigation.components.splice(i, 1));
+        index.forEach(i => this.data.extraUserButtons[this.data.extraUserButtons.findIndex(b => b.index === i)]);
         return this;
     }
 
@@ -793,17 +812,10 @@ export default class PageNavigator {
         this.#configure_navigation();
         this.#configure_components();
 
-        // Check for message content
-        const _content = isNestedPageData(this.data.page.currentData)
-            ? this.data.page.currentData.nestedContent
-                ? this.data.page.currentData.nestedContent[this.data.page.index.nested]
-                : undefined
-            : this.data.page.currentData?.content || undefined;
-
         // Send with dynaSend
         this.data.message = await dynaSend(handler, {
             ...options,
-            content: _content,
+            content: this.data.page.currentMessageContent,
             embeds: this.data.page.currentEmbed as EmbedResolveable,
             components: this.data.messageActionRows
         });
@@ -834,14 +846,6 @@ export default class PageNavigator {
             logger.debug("[PageNavigator>refresh]: Could not refresh navigator; message not editable.");
             return null;
         }
-
-        const checkForMessageData = () => {
-            return isNestedPageData(this.data.page.currentData)
-                ? this.data.page.currentData.nestedContent
-                    ? this.data.page.currentData.nestedContent[this.data.page.index.nested]
-                    : undefined
-                : this.data.page.currentData?.content || undefined;
-        };
 
         const refreshNavigation = () => {
             this.#configure_navigation();
@@ -874,7 +878,7 @@ export default class PageNavigator {
                 this.#configure_navigation();
                 this.#configure_components();
                 this.data.message = await this.data.message.edit({
-                    content: checkForMessageData(),
+                    content: this.data.page.currentMessageContent,
                     embeds: [this.data.page.currentEmbed as EmbedResolveable],
                     components: this.data.messageActionRows
                 });
@@ -884,7 +888,7 @@ export default class PageNavigator {
             case "embed":
                 this.#setPage();
                 this.data.message = await this.data.message.edit({
-                    content: checkForMessageData(),
+                    content: this.data.page.currentMessageContent,
                     embeds: [this.data.page.currentEmbed as EmbedResolveable]
                 });
                 break;

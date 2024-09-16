@@ -59,7 +59,7 @@ export default {
             { label: "nested pages", description: "lorem ipsum dolor sit amut" }
         );
 
-        pageNav.insertButtonAt(2, new ButtonBuilder().setStyle(ButtonStyle.Primary).setLabel("test").setCustomId("test"));
+        pageNav.insertButtonAt(0, new ButtonBuilder().setStyle(ButtonStyle.Primary).setLabel("test").setCustomId("test"));
 
         return await pageNav.send(message.channel);
     }
