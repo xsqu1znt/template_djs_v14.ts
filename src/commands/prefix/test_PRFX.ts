@@ -2,6 +2,7 @@ import { PrefixCommand } from "@customTypes/commands";
 
 import { BetterEmbed, PageNavigator } from "@utils/discordTools";
 import jt from "@utils/jsTools";
+import { ButtonBuilder, ButtonStyle } from "discord.js";
 
 export default {
     name: "test",
@@ -57,6 +58,8 @@ export default {
             { label: "select menu 2", description: "lorem ipsum dolor sit amut" },
             { label: "nested pages", description: "lorem ipsum dolor sit amut" }
         );
+
+        pageNav.insertButtonAt(2, new ButtonBuilder().setStyle(ButtonStyle.Primary).setLabel("test").setCustomId("test"));
 
         return await pageNav.send(message.channel);
     }

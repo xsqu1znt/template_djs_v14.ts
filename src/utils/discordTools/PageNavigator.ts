@@ -175,7 +175,7 @@ export default class PageNavigator {
         return button;
     }
 
-    #setPage(pageIndex: number = 0, nestedPageIndex: number = 0) {
+    #setPage(pageIndex: number = this.data.page.index.current, nestedPageIndex: number = this.data.page.index.nested) {
         // Clamp page index to the number of pages
         this.data.page.index.current = jt.clamp(pageIndex, this.options.pages.length - 1);
 
@@ -596,8 +596,6 @@ export default class PageNavigator {
         });
     }
 
-    async #reconfigure() {}
-
     constructor(options: PageNavigatorOptions) {
         /* - - - - - { Error Checking } - - - - - */
         if (!options.pages || !options.pages.length) {
@@ -837,7 +835,7 @@ export default class PageNavigator {
             return null;
         }
 
-        const checkForMessageContent = () => {
+        const checkForMessageData = () => {
             return isNestedPageData(this.data.page.currentData)
                 ? this.data.page.currentData.nestedContent
                     ? this.data.page.currentData.nestedContent[this.data.page.index.nested]
@@ -872,10 +870,11 @@ export default class PageNavigator {
         // Determine the refresh operation
         switch (type) {
             case "full":
-                refreshNavigation();
-                refreshCollectors();
+                this.#setPage();
+                this.#configure_navigation();
+                this.#configure_components();
                 this.data.message = await this.data.message.edit({
-                    content: checkForMessageContent(),
+                    content: checkForMessageData(),
                     embeds: [this.data.page.currentEmbed as EmbedResolveable],
                     components: this.data.messageActionRows
                 });
@@ -883,8 +882,9 @@ export default class PageNavigator {
                 break;
 
             case "embed":
+                this.#setPage();
                 this.data.message = await this.data.message.edit({
-                    content: checkForMessageContent(),
+                    content: checkForMessageData(),
                     embeds: [this.data.page.currentEmbed as EmbedResolveable]
                 });
                 break;
