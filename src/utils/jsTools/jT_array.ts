@@ -1,16 +1,9 @@
-type ForcedArray<T> = T extends any[] ? T : T[];
-
-interface ForceArrayOptions {
-    copy?: boolean;
-    filterFalsey?: boolean;
-}
-
-import * as _o from "./jT_object";
+import * as __object from "./jT_object";
 
 /** Split an array into groups that don't exceed the given size.
  * @param {array} arr The array to split.
  * @param {number} size The max size before splitting.
- * @param {boolean} copy Return a deep copy of the array using structuredClone(). */
+ * @param {boolean} copy Return a deep copy of the array using {@link structuredClone()}. */
 export function chunk<T extends any[]>(arr: T, size: number, copy: boolean = false): T[] {
     if (!Array.isArray(arr)) throw new TypeError("A valid array must be provided");
     if (size <= 0) throw new Error("Size cannot be 0 or negative");
@@ -31,7 +24,7 @@ export function chunk<T extends any[]>(arr: T, size: number, copy: boolean = fal
  *
  * If a property path isn't provided, items will be sorted by direct comparison.
  *
- * Property paths utilize `@utils/jsTools.getProp()` which allows for advanced property paths.
+ * Property paths utilize {@link __object.getProp} which allows for advanced property paths.
  *
  * @example
  * ```ts
@@ -47,13 +40,13 @@ export function chunk<T extends any[]>(arr: T, size: number, copy: boolean = fal
  * ```
  * @param arr The array of items to filter.
  * @param prop The nested property within each item to filter by.
- * @param copy Return a deep copy of the array using structuredClone(). */
+ * @param copy Return a deep copy of the array using {@link structuredClone()}. */
 export function unique<T extends any[]>(arr: T, prop?: string, copy: boolean = false): T {
     let uniqueArray = [];
     let referenceMap = new Map();
 
     for (let item of arr) {
-        let property = typeof item === "object" && prop ? _o.getProp(item, prop) : item;
+        let property = typeof item === "object" && prop ? __object.getProp(item, prop) : item;
 
         // Check if the reference map already has this property
         if (!referenceMap.has(property)) {
@@ -65,6 +58,13 @@ export function unique<T extends any[]>(arr: T, prop?: string, copy: boolean = f
     return (copy ? structuredClone(uniqueArray) : uniqueArray) as T;
 }
 
+interface ForceArrayOptions {
+    copy?: boolean;
+    filterFalsey?: boolean;
+}
+
+type ForcedArray<T> = T extends any[] ? T : T[];
+
 /** Check if the given item is an array, return the item in an array if it isn't. */
 export function forceArray<T>(item: T, options?: ForceArrayOptions): ForcedArray<T> {
     let itemArray = Array.isArray(item) ? item : [item];
@@ -74,3 +74,5 @@ export function forceArray<T>(item: T, options?: ForceArrayOptions): ForcedArray
 
     return itemArray as ForcedArray<T>;
 }
+
+export default { chunk, unique, forceArray };

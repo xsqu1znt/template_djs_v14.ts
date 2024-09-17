@@ -1,10 +1,10 @@
-import * as _nT from "./jT_number";
+import __number from "./jT_number";
 
 interface parseTime_options {
     /** Return "s" (seconds) or "ms" (milliseconds). */
-    type: "ms" | "s";
+    type?: "ms" | "s";
     /** Add `Date.now()` to the result. */
-    fromNow: boolean;
+    fromNow?: boolean;
 }
 
 /** Parse a string into either milliseconds or seconds.
@@ -55,8 +55,10 @@ export function parseTime(str: string | number, options?: parseTime_options) {
 
     /* - - - - - { Return the Result } - - - - - */
     if (options.fromNow) isNegative ? (sum = Date.now() - sum) : (sum = Date.now() + sum);
-    if (options.type === "s") sum = _nT.msToSec(sum);
+    if (options.type === "s") sum = __number.msToSec(sum);
     if (!options.fromNow && isNegative) sum = -sum;
 
     return sum;
 }
+
+export default { parseTime };

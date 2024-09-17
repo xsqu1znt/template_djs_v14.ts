@@ -2,7 +2,7 @@ import fs from "fs";
 
 interface readDir_options {
     /** Return nested files inside of the directory. */
-    recursive: boolean;
+    recursive?: boolean;
 }
 
 /** Get an array of file paths inside of a folder.
@@ -33,3 +33,5 @@ export function readDir(path: string, options?: readDir_options): string[] {
 
     return walk(path);
 }
+
+export default { readDir };

@@ -37,3 +37,5 @@ export function msToSec(ms: number, round: boolean = true): number {
 export function formatThousands(num: number, sep: string = ","): string {
     return `${num}`.replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, sep);
 }
+
+export default { clamp, secToMs, msToSec, formatThousands };

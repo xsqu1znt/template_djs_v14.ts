@@ -19,8 +19,10 @@ export function chance(percent: number = 50): boolean {
 
 /** Choose a psuedo-random item from an array.
  * @param arr Array of items to choose from.
- * @param copy Return a deep copy of the array using structuredClone(). */
+ * @param copy Return a deep copy of the array using {@link structuredClone()}. */
 export function choice<T>(arr: T[], copy: boolean = false): T {
     let item = arr[randomNumber(0, arr.length - 1)];
     return copy ? structuredClone(item) : item;
 }
+
+export default { randomNumber, chance, choice };

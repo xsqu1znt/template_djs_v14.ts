@@ -53,3 +53,5 @@ export function getProp<T>(obj: {}, path: string): T {
 
     return _obj;
 }
+
+export default { getProp };
