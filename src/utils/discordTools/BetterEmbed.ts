@@ -1,6 +1,6 @@
 import { SendHandler, InteractionResolveable } from "./types";
 
-export interface BetterEmbedData {
+interface BetterEmbedData {
     /** Can be provided for Auto-shorthand context formatting (_ACF_). */
     context?: {
         client?: Client | null;
@@ -34,7 +34,7 @@ export interface BetterEmbedData {
     acf?: boolean;
 }
 
-export interface BetterEmbedAuthor {
+interface BetterEmbedAuthor {
     /** A user that will be used for Auto-shorthand context formatting (_ACF_).
      *
      * __NOTE:__ There is no reason to provide this unless:
@@ -53,14 +53,14 @@ export interface BetterEmbedAuthor {
     hyperlink?: string | null;
 }
 
-export interface BetterEmbedTitle {
+interface BetterEmbedTitle {
     /** Text to be displayed. */
     text: string;
     /** If provided, will turn the title's text into a hyperlink. */
     hyperlink?: string | null;
 }
 
-export interface BetterEmbedFooter {
+interface BetterEmbedFooter {
     /** Text to be displayed. */
     text: string;
     /** Icon to be displayed on the bottom left of the `Embed`.

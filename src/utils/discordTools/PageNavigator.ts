@@ -4,7 +4,7 @@ import { DynaSendOptions } from "./dynaSend";
 type PaginationEvent = "pageChanged" | "pageBack" | "pageNext" | "pageJumped" | "selectMenuOptionPicked" | "timeout";
 type PaginationType = "short" | "shortJump" | "long" | "longJump";
 
-export interface PageNavigatorOptions {
+interface PageNavigatorOptions {
     /** The type of pagination. Defaults to `short`. */
     type?: PaginationType;
     /** The user or users that are allowed to interact with the navigator. */
@@ -23,7 +23,7 @@ export interface PageNavigatorOptions {
      *
      * Defaults to `timeouts.PAGINATION`. Configure in `./config.json`.
      *
-     * This option also utilizes `@utils/jsTools.parseTime()`, letting you use "10s" or "1m 30s" instead of a number. */
+     * This option also utilizes {@link jt.parseTime}, letting you use "10s" or "1m 30s" instead of a number. */
     timeout?: number | string | null;
     /** What to do after the page navigator times out.
      *
@@ -41,17 +41,17 @@ export interface PageNavigatorOptions {
     };
 }
 
-export interface PageData {
+interface PageData {
     content?: string;
     embed: EmbedResolveable;
 }
 
-export interface NestedPageData {
+interface NestedPageData {
     nestedContent?: string[];
     nestedEmbeds: EmbedResolveable[];
 }
 
-export interface SelectMenuOptionData {
+interface SelectMenuOptionData {
     /** The emoji to be displayed to the left of the option. */
     emoji?: string | null;
     /** The main text to be displayed. */

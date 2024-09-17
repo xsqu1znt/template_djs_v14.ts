@@ -3,6 +3,11 @@ import jt from "@utils/jsTools";
 
 import { timeouts } from "./config.json";
 
+/** Delete a message after a specified amount of time.
+ * @param message The message to delete, or a promise resolving to a message.
+ * @param delay The time to wait before deleting the message. Defaults to `timeouts.ERROR_MESSAGE`.
+
+ * This option also utilizes {@link jt.parseTime}, letting you use "10s" or "1m 30s" instead of a number. */
 export default async function deleteMessageAfter(
     message: Message | Promise<Message>,
     delay: string | number = timeouts.ERROR_MESSAGE

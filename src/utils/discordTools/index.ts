@@ -13,3 +13,7 @@ export const dynaSend = dynaSend_default;
 import deleteMessageAfter_default from "./deleteMessageAfter";
 export * from "./deleteMessageAfter";
 export const deleteMessageAfter = deleteMessageAfter_default;
+
+import extractWordsFromMessage_default from "./extractWordsFromMessage";
+export * from "./extractWordsFromMessage";
+export const extractWordsFromMessage = extractWordsFromMessage_default;
