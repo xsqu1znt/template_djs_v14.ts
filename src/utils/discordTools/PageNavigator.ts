@@ -3,7 +3,6 @@ import { DynaSendOptions } from "./dynaSend";
 
 type PaginationEvent = "pageChanged" | "pageBack" | "pageNext" | "pageJumped" | "selectMenuOptionPicked" | "timeout";
 type PaginationType = "short" | "shortJump" | "long" | "longJump";
-type RefreshType = "full" | "embed" | "navigation" | "reactions" | "collectors";
 
 export interface PageNavigatorOptions {
     /** The type of pagination. Defaults to `short`. */
@@ -117,9 +116,9 @@ export default class PageNavigator {
         extraUserButtons: { index: number; component: ButtonBuilder }[];
 
         page: {
-            currentMessageContent: string | undefined;
             currentEmbed: EmbedResolveable | null;
             currentData: PageData | NestedPageData | null;
+            currentMessageContent: string | undefined;
             index: { current: number; nested: number };
         };
 
@@ -166,7 +165,7 @@ export default class PageNavigator {
         timeout: Array<{ listener: Function; once: boolean }>;
     };
 
-    #createButton(data: { custom_id: string; emoji?: ComponentEmojiResolvable; label: string }) {
+    #createButton(data: { custom_id: string; emoji?: ComponentEmojiResolvable; label: string }): ButtonBuilder {
         let button = new ButtonBuilder({ custom_id: data.custom_id, style: ButtonStyle.Secondary });
         if (data.label) button.setLabel(data.label);
         else if (data.emoji) button.setEmoji(data.emoji);
@@ -177,7 +176,7 @@ export default class PageNavigator {
         return button;
     }
 
-    #setPage(pageIndex: number = this.data.page.index.current, nestedPageIndex: number = this.data.page.index.nested) {
+    #setPage(pageIndex: number = this.data.page.index.current, nestedPageIndex: number = this.data.page.index.nested): void {
         // Clamp page index to the number of pages
         this.data.page.index.current = jt.clamp(pageIndex, this.options.pages.length - 1);
 
@@ -222,7 +221,19 @@ export default class PageNavigator {
             isNestedPageData(pageData) && pageData.nestedEmbeds.length >= CAN_USE_LONG_THRESHOLD;
     }
 
-    #configure_navigation() {
+    #callEventStack(event: PaginationEvent, ...args: any): void {
+        if (!this.#events[event].length) return;
+
+        // Iterate through the event listeners
+        for (let i = 0; i < this.#events[event].length; i++) {
+            // Execute the listener function
+            this.#events[event][i].listener.apply(null, args);
+            // Remove once listeners
+            if (this.#events[event][i].once) this.#events[event].splice(i, 1);
+        }
+    }
+
+    #configure_navigation(): void {
         this.data.navigation.reactions = [];
         if (!this.data.navigation.required) return;
 
@@ -274,7 +285,7 @@ export default class PageNavigator {
         }
     }
 
-    #configure_components() {
+    #configure_components(): void {
         this.data.messageActionRows = [];
 
         // Add select menu navigation, if needed
@@ -289,54 +300,10 @@ export default class PageNavigator {
         }
     }
 
-    #configure() {
+    #configure_all(): void {
         this.#setPage();
         this.#configure_navigation();
         this.#configure_components();
-    }
-
-    #callEventStack(event: PaginationEvent, ...args: any) {
-        if (!this.#events[event].length) return;
-
-        // Iterate through the event listeners
-        for (let i = 0; i < this.#events[event].length; i++) {
-            // Execute the listener function
-            this.#events[event][i].listener.apply(null, args);
-            // Remove once listeners
-            if (this.#events[event][i].once) this.#events[event].splice(i, 1);
-        }
-    }
-
-    async #navComponents_addToMessage(): Promise<Message | null> {
-        if (!this.data.message?.editable) return null;
-        return await this.data.message.edit({ components: this.data.messageActionRows }).catch(() => null);
-    }
-
-    async #navComponents_removeFromMessage() {
-        if (!this.data.message?.editable) return;
-        await this.data.message.edit({ components: [] }).catch(() => null);
-    }
-
-    async #navReactions_addToMessage() {
-        if (!this.data.message || !this.options.useReactions || !this.data.navigation.reactions.length) return;
-
-        const reactionNames = Object.values(config.navigator.buttons).map(d => d.emoji.name);
-
-        // Get the current relevant reactions on the message
-        let _reactions = this.data.message.reactions.cache.filter(r => reactionNames.includes(r.emoji.name || ""));
-
-        // Check if the cached reactions are the same as the ones required
-        if (_reactions.size !== this.data.navigation.reactions.length) {
-            await this.#navReactions_removeFromMessage();
-
-            // React to the message
-            for (let r of this.data.navigation.reactions) await this.data.message.react(r.id).catch(() => null);
-        }
-    }
-
-    async #navReactions_removeFromMessage() {
-        if (!this.data.message) return;
-        await this.data.message.reactions.removeAll().catch(() => null);
     }
 
     async #askPageNumber(requestedBy: GuildMember | User): Promise<number | null> {
@@ -396,55 +363,34 @@ export default class PageNavigator {
             });
     }
 
-    async #handlePostTimeout() {
-        if (this.options.postTimeout.deleteMessage) {
-            /* > error prevention ( START ) */
-            // Get options that are not "deleteMessage"
-            let _postTimeoutOptions = Object.entries(this.options.postTimeout)
-                // Filter out "deleteMessage"
-                .filter(([k, _]) => k !== "deleteMessage")
-                // Filter out disabled ones
-                .filter(([_, v]) => v)
-                // Map only the keys
-                .map(([k, _]) => k);
-
-            // Check if any of them are enabled
-            if (_postTimeoutOptions.length) {
-                logger.debug(
-                    `[PageNavigator>#handlePostTimeout]: ${_postTimeoutOptions
-                        .map(k => `'${k}'`)
-                        .join(", ")} has no effect when 'deleteMessage' is enabled.`
-                );
-            }
-            /* > error prevention ( END ) */
-
-            // Delete the message
-            if (this.data.message?.deletable) this.data.message = await this.data.message.delete().catch(() => null);
-        }
-
-        if (this.data.message && this.data.message.editable && !this.options.postTimeout.deleteMessage) {
-            // Disable components
-            if (this.options.postTimeout.disableComponents) {
-                this.data.messageActionRows.forEach(ar => ar.components.forEach(c => c.setDisabled(true)));
-                this.data.message.edit({ components: this.data.messageActionRows }).catch(() => null);
-            }
-
-            if (this.options.postTimeout.clearComponentsOrReactions) {
-                if (!this.options.useReactions) {
-                    // Clear message components
-                    this.#navComponents_removeFromMessage();
-                } else {
-                    // Clear message reactions
-                    this.#navReactions_removeFromMessage();
-                }
-            }
-        }
-
-        // Call events ( TIMEOUT )
-        this.#callEventStack("timeout", this.data.message);
+    async #navComponents_removeFromMessage(): Promise<void> {
+        if (!this.data.message?.editable) return;
+        await this.data.message.edit({ components: [] }).catch(() => null);
     }
 
-    async #collectComponents() {
+    async #navReactions_addToMessage(): Promise<void> {
+        if (!this.data.message || !this.options.useReactions || !this.data.navigation.reactions.length) return;
+
+        const reactionNames = Object.values(config.navigator.buttons).map(d => d.emoji.name);
+
+        // Get the current relevant reactions on the message
+        let _reactions = this.data.message.reactions.cache.filter(r => reactionNames.includes(r.emoji.name || ""));
+
+        // Check if the cached reactions are the same as the ones required
+        if (_reactions.size !== this.data.navigation.reactions.length) {
+            await this.#navReactions_removeFromMessage();
+
+            // React to the message
+            for (let r of this.data.navigation.reactions) await this.data.message.react(r.id).catch(() => null);
+        }
+    }
+
+    async #navReactions_removeFromMessage(): Promise<void> {
+        if (!this.data.message) return;
+        await this.data.message.reactions.removeAll().catch(() => null);
+    }
+
+    async #collect_components(): Promise<void> {
         if (!this.data.message) return;
         if (!this.data.messageActionRows.length) return;
         if (this.data.collectors.component) {
@@ -529,12 +475,12 @@ export default class PageNavigator {
             collector.on("end", async () => {
                 this.data.collectors.component = null;
                 this.#handlePostTimeout();
-                resolve(this);
+                resolve();
             });
         });
     }
 
-    async #collectReactions() {
+    async #collect_reactions(): Promise<void> {
         if (!this.data.message) return;
         if (!this.data.navigation.reactions.length) return;
         if (this.data.collectors.reaction) {
@@ -608,9 +554,61 @@ export default class PageNavigator {
             collector.on("end", async () => {
                 this.data.collectors.reaction = null;
                 this.#handlePostTimeout();
-                resolve(this);
+                resolve();
             });
         });
+    }
+
+    async #collect_all(): Promise<[void, void]> {
+        return await Promise.all([this.#collect_components(), this.#collect_reactions()]);
+    }
+
+    async #handlePostTimeout(): Promise<void> {
+        if (this.options.postTimeout.deleteMessage) {
+            /* > error prevention ( START ) */
+            // Get options that are not "deleteMessage"
+            let _postTimeoutOptions = Object.entries(this.options.postTimeout)
+                // Filter out "deleteMessage"
+                .filter(([k, _]) => k !== "deleteMessage")
+                // Filter out disabled ones
+                .filter(([_, v]) => v)
+                // Map only the keys
+                .map(([k, _]) => k);
+
+            // Check if any of them are enabled
+            if (_postTimeoutOptions.length) {
+                logger.debug(
+                    `[PageNavigator>#handlePostTimeout]: ${_postTimeoutOptions
+                        .map(k => `'${k}'`)
+                        .join(", ")} has no effect when 'deleteMessage' is enabled.`
+                );
+            }
+            /* > error prevention ( END ) */
+
+            // Delete the message
+            if (this.data.message?.deletable) this.data.message = await this.data.message.delete().catch(() => null);
+        }
+
+        if (this.data.message && this.data.message.editable && !this.options.postTimeout.deleteMessage) {
+            // Disable components
+            if (this.options.postTimeout.disableComponents) {
+                this.data.messageActionRows.forEach(ar => ar.components.forEach(c => c.setDisabled(true)));
+                this.data.message.edit({ components: this.data.messageActionRows }).catch(() => null);
+            }
+
+            if (this.options.postTimeout.clearComponentsOrReactions) {
+                if (!this.options.useReactions) {
+                    // Clear message components
+                    this.#navComponents_removeFromMessage();
+                } else {
+                    // Clear message reactions
+                    this.#navReactions_removeFromMessage();
+                }
+            }
+        }
+
+        // Call events ( TIMEOUT )
+        this.#callEventStack("timeout", this.data.message);
     }
 
     constructor(options: PageNavigatorOptions) {
@@ -651,9 +649,9 @@ export default class PageNavigator {
             extraUserButtons: [],
 
             page: {
-                currentMessageContent: undefined,
                 currentEmbed: null,
                 currentData: null,
+                currentMessageContent: undefined,
                 index: { current: 0, nested: 0 }
             },
 
@@ -701,9 +699,7 @@ export default class PageNavigator {
         };
 
         /// Configure
-        this.#setPage();
-        this.#configure_navigation();
-        this.#configure_components();
+        this.#configure_all();
     }
 
     on(event: "pageChanged", listener: (page: PageData | NestedPageData, index: number) => any, once: boolean): this;
@@ -807,10 +803,9 @@ export default class PageNavigator {
     }
 
     /** Send the PageNavigator. */
-    async send(handler: SendHandler, options?: SendOptions) {
-        this.#setPage();
-        this.#configure_navigation();
-        this.#configure_components();
+    async send(handler: SendHandler, options?: SendOptions): Promise<Message | null> {
+        // Pre-configure
+        this.#configure_all();
 
         // Send with dynaSend
         this.data.message = await dynaSend(handler, {
@@ -820,24 +815,22 @@ export default class PageNavigator {
             components: this.data.messageActionRows
         });
 
-        // Return null if failed
-        if (!this.data.message) return null;
+        if (this.data.message) {
+            // Add reactions, if applicable
+            /* NOTE: this is not awaited so we're able to interact with the reactions before they're fully added */
+            this.#navReactions_addToMessage();
 
-        // Add reactions, if applicable
-        /* NOTE: this is not awaited so we're able to interact with the reactions before they're fully added */
-        this.#navReactions_addToMessage();
+            // Start collectors
+            this.#collect_all();
+        }
 
-        // Start collectors
-        this.#collectComponents();
-        this.#collectReactions();
-
-        // Return the message
+        // Return the message, if it exists
         return this.data.message;
     }
 
     /** Refresh the current page embed, navigation, and collectors. */
-    async refresh(type: RefreshType = "full"): Promise<Message | null> {
-        /* error */
+    async refresh(): Promise<Message | null> {
+        /* > error prevention ( START ) */
         if (!this.data.message) {
             logger.debug("[PageNavigator>refresh]: Could not refresh navigator; message not sent.");
             return null;
@@ -846,67 +839,26 @@ export default class PageNavigator {
             logger.debug("[PageNavigator>refresh]: Could not refresh navigator; message not editable.");
             return null;
         }
+        /* > error prevention ( END ) */
 
-        const refreshNavigation = () => {
-            this.#configure_navigation();
-            this.#configure_components();
-        };
+        // Pre-configure
+        this.#configure_all();
 
-        const refreshReactions = async () => {
-            await this.#navReactions_removeFromMessage();
-            await this.#navReactions_addToMessage();
-        };
+        // Edit the message with dynaSend
+        this.data.message = await dynaSend(this.data.message, {
+            sendMethod: "messageEdit",
+            content: this.data.page.currentMessageContent,
+            embeds: this.data.page.currentEmbed as EmbedResolveable,
+            components: this.data.messageActionRows
+        });
 
-        const refreshCollectors = () => {
-            if (this.data.collectors.component) {
-                this.data.collectors.component.resetTimer();
-            } else {
-                this.#collectComponents();
-            }
-
-            if (this.data.collectors.reaction) {
-                this.data.collectors.reaction.resetTimer();
-            } else {
-                this.#collectReactions();
-            }
-        };
-
-        // Determine the refresh operation
-        switch (type) {
-            case "full":
-                this.#setPage();
-                this.#configure_navigation();
-                this.#configure_components();
-                this.data.message = await this.data.message.edit({
-                    content: this.data.page.currentMessageContent,
-                    embeds: [this.data.page.currentEmbed as EmbedResolveable],
-                    components: this.data.messageActionRows
-                });
-                await refreshReactions();
-                break;
-
-            case "embed":
-                this.#setPage();
-                this.data.message = await this.data.message.edit({
-                    content: this.data.page.currentMessageContent,
-                    embeds: [this.data.page.currentEmbed as EmbedResolveable]
-                });
-                break;
-
-            case "navigation":
-                refreshNavigation();
-                this.data.message = await this.#navComponents_addToMessage();
-                break;
-
-            case "reactions":
-                await refreshReactions();
-                break;
-
-            case "collectors":
-                refreshCollectors();
-                break;
+        if (this.data.message) {
+            // Refresh reactions, if applicable
+            /* NOTE: this is not awaited so we're able to interact with the reactions before they're fully added */
+            this.#navReactions_removeFromMessage().then(() => this.#navReactions_addToMessage());
         }
 
+        // Return the message, if it exists
         return this.data.message;
     }
 }
