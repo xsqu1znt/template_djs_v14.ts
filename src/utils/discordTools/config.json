@@ -9,6 +9,11 @@
         "ERROR_MESSAGE": "5s"
     },
 
+    "await_confirm": {
+        "DEFAULT_EMBED_TITLE": "Are you sure?",
+        "DEFAULT_EMBED_DESCRIPTION": "Please review your action and confirm your decision."
+    },
+
     "navigator": {
         "CAN_JUMP_THRESHOLD": 5,
         "CAN_USE_LONG_THRESHOLD": 4,

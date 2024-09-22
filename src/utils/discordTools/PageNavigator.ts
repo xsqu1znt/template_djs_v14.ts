@@ -19,12 +19,12 @@ interface PageNavigatorOptions {
      *
      * __NOTE__: The threshold can be confiured in the `./config.json` file. */
     dynamic?: boolean;
-    /** How long to wait before timing out. Use `null` to never timeout.
+    /** How long to wait before timing out. Use `undefined` to never timeout.
      *
      * Defaults to `timeouts.PAGINATION`. Configure in `./config.json`.
      *
      * This option also utilizes {@link jt.parseTime}, letting you use "10s" or "1m 30s" instead of a number. */
-    timeout?: number | string | null;
+    timeout?: number | string | undefined;
     /** What to do after the page navigator times out.
      *
      * ___1.___ `disableComponents`: Disable the components. (default: `false`)
@@ -316,7 +316,7 @@ export default class PageNavigator {
 
         let messageReply = await this.data.message
             .reply({ content: _acf(config.navigator.ASK_PAGE_NUMBER_MESSAGE) })
-            .catch(() => null);
+            .catch(null);
 
         /* erorr */
         if (!messageReply) return null;
@@ -350,22 +350,22 @@ export default class PageNavigator {
                 }
 
                 // Delete the user's reply
-                if (msg.deletable) msg.delete().catch(() => null);
+                if (msg.deletable) msg.delete().catch(null);
                 // Delete the message reply
-                if (messageReply.deletable) messageReply.delete().catch(() => null);
+                if (messageReply.deletable) messageReply.delete().catch(null);
 
                 return fuckedUp ? null : chosenPageNumber;
             })
             .catch(() => {
                 // Delete the message reply
-                if (messageReply.deletable) messageReply.delete().catch(() => null);
+                if (messageReply.deletable) messageReply.delete().catch(null);
                 return null;
             });
     }
 
     async #navComponents_removeFromMessage(): Promise<void> {
         if (!this.data.message?.editable) return;
-        await this.data.message.edit({ components: [] }).catch(() => null);
+        await this.data.message.edit({ components: [] }).catch(null);
     }
 
     async #navReactions_addToMessage(): Promise<void> {
@@ -381,13 +381,13 @@ export default class PageNavigator {
             await this.#navReactions_removeFromMessage();
 
             // React to the message
-            for (let r of this.data.navigation.reactions) await this.data.message.react(r.id).catch(() => null);
+            for (let r of this.data.navigation.reactions) await this.data.message.react(r.id).catch(null);
         }
     }
 
     async #navReactions_removeFromMessage(): Promise<void> {
         if (!this.data.message) return;
-        await this.data.message.reactions.removeAll().catch(() => null);
+        await this.data.message.reactions.removeAll().catch(null);
     }
 
     async #collect_components(): Promise<void> {
@@ -403,7 +403,7 @@ export default class PageNavigator {
         // Create the component collector
         const collector = this.data.message.createMessageComponentCollector({
             filter: i => filter_userIds.includes(i.user.id),
-            ...(this.options.timeout ? { time: this.options.timeout } : {})
+            ...(this.options.timeout ? { idle: this.options.timeout } : {})
         }) as InteractionCollector<ButtonInteraction | StringSelectMenuInteraction>;
 
         // Cache the collector
@@ -416,7 +416,7 @@ export default class PageNavigator {
                 if (!i.isStringSelectMenu() && !i.isButton()) return;
 
                 // Defer the interaction
-                await i.deferUpdate().catch(() => null);
+                await i.deferUpdate().catch(null);
                 // Reset the collector's timer
                 collector.resetTimer();
 
@@ -492,7 +492,7 @@ export default class PageNavigator {
 
         // Create the component collector
         const collector = this.data.message.createReactionCollector({
-            ...(this.options.timeout ? { time: this.options.timeout } : {})
+            ...(this.options.timeout ? { idle: this.options.timeout } : {})
         });
 
         // Cache the collector
@@ -586,14 +586,14 @@ export default class PageNavigator {
             /* > error prevention ( END ) */
 
             // Delete the message
-            if (this.data.message?.deletable) this.data.message = await this.data.message.delete().catch(() => null);
+            if (this.data.message?.deletable) this.data.message = await this.data.message.delete().catch(null);
         }
 
         if (this.data.message && this.data.message.editable && !this.options.postTimeout.deleteMessage) {
             // Disable components
             if (this.options.postTimeout.disableComponents) {
                 this.data.messageActionRows.forEach(ar => ar.components.forEach(c => c.setDisabled(true)));
-                this.data.message.edit({ components: this.data.messageActionRows }).catch(() => null);
+                this.data.message.edit({ components: this.data.messageActionRows }).catch(null);
             }
 
             if (this.options.postTimeout.clearComponentsOrReactions) {

@@ -22,5 +22,5 @@ export default async function deleteMessageAfter(
 
     // Check if the message is deletable
     if (!message.deletable) return null;
-    return await message.delete().catch(() => null);
+    return await message.delete().catch(null);
 }

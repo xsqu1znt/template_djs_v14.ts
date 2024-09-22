@@ -80,7 +80,7 @@ export default {
         if (_commandOptions?.guildOnly === false && !interaction.inGuild()) {
             return await interaction
                 .reply({ content: "This command can only be used inside of a server.", ephemeral: true })
-                .catch(() => null);
+                .catch(null);
         }
 
         if (_commandOptions) {
@@ -144,15 +144,15 @@ export default {
                             content: "This command uses options that require the command to be used in a server.",
                             ephemeral: true
                         })
-                        .catch(() => null);
+                        .catch(null);
                 }
             }
 
             // Defer the interaction
             if (_commandOptions.deferReply) {
-                await interaction.deferReply().catch(() => null);
+                await interaction.deferReply().catch(null);
             } else if (_commandOptions.deferReplyEphemeral) {
-                await interaction.deferReply({ ephemeral: true }).catch(() => null);
+                await interaction.deferReply({ ephemeral: true }).catch(null);
             }
         }
 

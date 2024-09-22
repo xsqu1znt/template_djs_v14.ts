@@ -42,7 +42,7 @@ export default class AppCommandManager {
         }
 
         // Fetch the guilds from the client using the provided guild IDs
-        let guilds = (await Promise.all(guildIds.map(id => this.client.guilds.fetch(id).catch(() => null))))
+        let guilds = (await Promise.all(guildIds.map(id => this.client.guilds.fetch(id).catch(null))))
             // Filter out falsey values
             .filter(Boolean) as Guild[];
 
@@ -106,7 +106,7 @@ export default class AppCommandManager {
      * __NOTE__: This has no effect on app commands registered with `registerToGlobal`. */
     async removeFromLocal(guildIds: string[]): Promise<void> {
         // Fetch the guilds from the client using the provided guild IDs
-        let guilds = (await Promise.all(guildIds.map(id => this.client.guilds.fetch(id).catch(() => null))))
+        let guilds = (await Promise.all(guildIds.map(id => this.client.guilds.fetch(id).catch(null))))
             // Filter out falsey values
             .filter(Boolean) as Guild[];
 
