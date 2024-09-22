@@ -1,8 +1,8 @@
-import { SendHandler, SendMethod, EmbedResolveable } from "./types";
+import { SendHandler, EmbedResolveable, UserResolvable } from "./types";
 
 interface AwaitConfirmOptions extends Omit<DynaSendOptions, "embeds" | "components" | "deleteAfter" | "fetchReply"> {
-    /** The user or users that are allowed to interact with the navigator. */
-    allowedParticipants: GuildMember | User | Array<GuildMember | User>;
+    /** The users that are allowed to interact with the message. */
+    allowedParticipants: UserResolvable | UserResolvable[];
     /** The embed or embed configuration to send. Set to `null` to not send an embed. */
     embed?: EmbedResolveable | null;
     /** How long to wait before timing out. Use `null` to never timeout.
@@ -21,20 +21,19 @@ interface AwaitConfirmOptions extends Omit<DynaSendOptions, "embeds" | "componen
     };
 }
 
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType, GuildMember, Message, User } from "discord.js";
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType } from "discord.js";
 
-import deleteMessageAfter from "./deleteMessageAfter";
+import dynaSend, { DynaSendOptions } from "./dynaSend";
 import BetterEmbed from "./BetterEmbed";
 import logger from "@utils/logger";
-import dynaSend, { DynaSendOptions } from "./dynaSend";
 import jt from "@utils/jsTools";
 
 import config from "./config.json";
 
 /** Send a confirmation message and await the user's response.
 
- * This function utilizes {@link BetterEmbed}. */
-export default async function awaitConfirm(handler: SendHandler, options: AwaitConfirmOptions) {
+ * This function utilizes {@link BetterEmbed} and {@link dynaSend}. */
+export default async function awaitConfirm(handler: SendHandler, options: AwaitConfirmOptions): Promise<boolean> {
     const _options = {
         ...options,
         allowedParticipants: jt.forceArray(options.allowedParticipants),
@@ -86,8 +85,8 @@ export default async function awaitConfirm(handler: SendHandler, options: AwaitC
     // Cancel if the message failed to send
     if (!message) return false;
 
-    /* - - - - - { Send the Message } - - - - - */
-    const cleanUp = async (confirmed: boolean) => {
+    /* - - - - - { Await the User's Decision } - - - - - */
+    const cleanUp = async (resolve: (value: boolean) => void, confirmed: boolean) => {
         // Delete the message ( CONFIRM )
         if (confirmed && _options.onResolve.deleteOnConfirm) {
             if (message?.deletable) await message.delete().catch(null);
@@ -97,18 +96,22 @@ export default async function awaitConfirm(handler: SendHandler, options: AwaitC
             if (message?.deletable) await message.delete().catch(null);
         }
 
-        // Return regardless since the message was deleted
-        if (_options.onResolve.deleteOnConfirm || _options.onResolve.deleteOnCancel) return;
+        // Return and resolve the promise since the message was deleted
+        if (_options.onResolve.deleteOnConfirm || _options.onResolve.deleteOnCancel) return resolve(confirmed);
 
         // Disable the components
         if (_options.onResolve.disableComponents) {
             buttons.cancel.setDisabled(true);
             buttons.confirm.setDisabled(true);
             await message?.edit({ components: [actionRow] }).catch(null);
+
+            // Resolve the promise
+            return resolve(confirmed);
         }
     };
 
-    const allowedParticipantIds = _options.allowedParticipants.map(m => m.id);
+    // Map the allowed participants to their IDs
+    const allowedParticipantIds = _options.allowedParticipants.map(m => typeof m === "string" ? m : m.id);
 
     return new Promise(async resolve => {
         // Create the collector
@@ -118,18 +121,16 @@ export default async function awaitConfirm(handler: SendHandler, options: AwaitC
             time: _options.timeout
         });
 
+        // Determine the action
         switch (res?.customId) {
             case "btn_confirm":
-                await cleanUp(true);
-                return resolve(true);
+                return await cleanUp(resolve, true);
 
             case "btn_cancel":
-                await cleanUp(false);
-                return resolve(false);
+                return await cleanUp(resolve, false);
 
             default:
-                await cleanUp(false);
-                return resolve(false);
+                return await cleanUp(resolve, false);
         }
     });
 }

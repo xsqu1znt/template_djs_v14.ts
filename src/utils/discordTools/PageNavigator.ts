@@ -8,6 +8,7 @@ interface PageNavigatorOptions {
     /** The type of pagination. Defaults to `short`. */
     type?: PaginationType;
     /** The user or users that are allowed to interact with the navigator. */
+    // TODO: Use `UserResolvable` instead
     allowedParticipants: GuildMember | User | Array<GuildMember | User>;
     /** The pages to be displayed. */
     pages: Array<PageData | NestedPageData>;
