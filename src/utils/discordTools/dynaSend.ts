@@ -9,7 +9,9 @@ export interface DynaSendOptions {
      *
      * ___2.___ `TextBasedChannel`: "sendInChannel"
      *
-     * ___3.___ `Message`: "messageReply" */
+     * ___3.___ `Message`: "messageReply"
+     *
+     * ___3.___ `GuildMember` | `User`: "dmUser" */
     sendMethod?: SendMethod;
     /** Text content to send in the message. */
     content?: string;
@@ -33,11 +35,13 @@ import {
     ActionRowBuilder,
     BaseChannel,
     BaseInteraction,
+    GuildMember,
     Message,
     MessageActionRowComponentBuilder,
     MessageMentionOptions,
     RepliableInteraction,
-    TextBasedChannel
+    TextBasedChannel,
+    User
 } from "discord.js";
 import deleteMessageAfter from "./deleteMessageAfter";
 import logger from "@utils/logger";
@@ -50,20 +54,24 @@ export default async function dynaSend(handler: SendHandler, options: DynaSendOp
             embeds: [],
             components: [],
             allowedMentions: {},
-            sendMethod:
-                // defaults
-                handler instanceof BaseInteraction
-                    ? "reply"
-                    : handler instanceof BaseChannel
-                    ? "sendInChannel"
-                    : handler instanceof Message
-                    ? "messageReply"
-                    : "reply",
             ephemeral: false,
             deleteAfter: 0,
             fetchReply: true
         },
         ...options,
+
+        sendMethod:
+            options.sendMethod ??
+            /* defaults */
+            handler instanceof BaseInteraction
+                ? "reply"
+                : handler instanceof BaseChannel
+                ? "sendInChannel"
+                : handler instanceof Message
+                ? "messageReply"
+                : handler instanceof GuildMember || handler instanceof User
+                ? "dmUser"
+                : "reply",
 
         /* Ensure all arrays are, well, arrays */
         embeds: options.embeds ? jt.forceArray(options.embeds, { filterFalsey: true }) : [],
@@ -92,6 +100,9 @@ export default async function dynaSend(handler: SendHandler, options: DynaSendOp
 
         if (!(handler instanceof Message) && ["messageReply", "messageEdit"].includes(_options.sendMethod))
             throw new TypeError("[DynaSend] Invalid SendMethod", { cause: "'handler' is not 'Message' based" });
+
+        if (!(handler instanceof GuildMember || handler instanceof User) && ["dmUser"].includes(_options.sendMethod))
+            throw new TypeError("[DynaSend] Invalid SendMethod", { cause: "'handler' is not 'User' based" });
 
         // Ephemeral fallback
         if (["reply", "followUp"].includes(_options.sendMethod) && _options.ephemeral) {
@@ -146,7 +157,7 @@ export default async function dynaSend(handler: SendHandler, options: DynaSendOp
             break;
 
         case "sendInChannel":
-            message = await (handler as TextBasedChannel).send(sendData).catch(err => {
+            message = await (handler as TextBasedChannel | GuildMember | User).send(sendData).catch(err => {
                 logger.error("$_TIMESTAMP [DYNASEND]", "SEND_IN_CHANNEL | SendMethod: 'sendInChannel'", err);
                 return null;
             });
@@ -167,6 +178,13 @@ export default async function dynaSend(handler: SendHandler, options: DynaSendOp
             }
             message = await (handler as Message).edit(sendData).catch(err => {
                 logger.error("$_TIMESTAMP [DYNASEND]", "EDIT_MESSAGE | SendMethod: 'messageEdit'", err);
+                return null;
+            });
+            break;
+
+        case "dmUser":
+            message = await (handler as GuildMember | User).send(sendData).catch(err => {
+                logger.error("$_TIMESTAMP [DYNASEND]", "DM_USER | SendMethod: 'dmUser'", err);
                 return null;
             });
             break;

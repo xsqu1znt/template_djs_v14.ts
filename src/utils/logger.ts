@@ -38,7 +38,7 @@ const _IMPORT_COMMAND = (): string => colorTemplates.moduleName("[IMPORT/COMMAND
 
 const _COMMAND = (): string => colorTemplates.moduleName("[COMMAND]");
 const _EVENT = (): string => colorTemplates.moduleName("[EVENT]");
-const _MONGO = (): string => colorTemplates.moduleName("[MONGO]");
+const _MONGO = (): string => colorTemplates.moduleName("[🥭 MONGO]");
 
 const _DYNAMIC_SHARD = (shards: Shard[]): string =>
     shards?.length ? chalk.gray`(${shards.length === 1 ? "Shard:" : "Shards:"} ${shards.join(", ")})` : "";

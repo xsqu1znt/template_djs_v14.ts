@@ -463,7 +463,7 @@ export default class BetterEmbed {
             return this;
         }
 
-        // what are we supposed to do with an empty array here?
+        /* what are we supposed to do with an empty array here? */
         if (!fieldData) return this;
 
         /* - - - - - { Validate Fields } - - - - - */

@@ -10,8 +10,8 @@
     },
 
     "await_confirm": {
-        "DEFAULT_EMBED_TITLE": "Are you sure?",
-        "DEFAULT_EMBED_DESCRIPTION": "Please review your action and confirm your decision."
+        "DEFAULT_EMBED_TITLE": "⚠️ Are you sure?",
+        "DEFAULT_EMBED_DESCRIPTION": "Carefully review your action and confirm your decision."
     },
 
     "navigator": {

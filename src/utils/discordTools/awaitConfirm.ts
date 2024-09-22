@@ -35,21 +35,17 @@ import config from "./config.json";
  * This function utilizes {@link BetterEmbed} and {@link dynaSend}. */
 export default async function awaitConfirm(handler: SendHandler, options: AwaitConfirmOptions): Promise<boolean> {
     const _options = {
-        ...options,
-        allowedParticipants: jt.forceArray(options.allowedParticipants),
-        timeout: jt.parseTime(options.timeout || config.timeouts.CONFIRMATION),
         onResolve: {
             deleteOnConfirm: true,
             deleteOnCancel: true,
             disableComponents: false
-        }
+        },
+        ...options,
+        allowedParticipants: jt.forceArray(options.allowedParticipants),
+        timeout: jt.parseTime(options.timeout || config.timeouts.CONFIRMATION)
     };
 
     /* error prevention ( START ) */
-    if (!_options.content && !_options.embed) {
-        throw new Error("[AwaitConfirm]: You must provide either `content` or an `embed` to send the message.");
-    }
-
     if (_options.timeout < 1000) {
         logger.debug("[AwaitConfirm]: 'timeout' is less than 1 second; Is this intentional?");
     }
@@ -62,7 +58,9 @@ export default async function awaitConfirm(handler: SendHandler, options: AwaitC
                   title: config.await_confirm.DEFAULT_EMBED_TITLE,
                   description: config.await_confirm.DEFAULT_EMBED_DESCRIPTION
               })
-            : undefined;
+            : _options.embed === null
+            ? undefined
+            : _options.embed;
 
     /* - - - - - { Action Row  } - - - - - */
     const buttons = {
@@ -111,26 +109,33 @@ export default async function awaitConfirm(handler: SendHandler, options: AwaitC
     };
 
     // Map the allowed participants to their IDs
-    const allowedParticipantIds = _options.allowedParticipants.map(m => typeof m === "string" ? m : m.id);
+    const allowedParticipantIds = _options.allowedParticipants.map(m => (typeof m === "string" ? m : m.id));
 
     return new Promise(async resolve => {
-        // Create the collector
-        const res = await message.awaitMessageComponent({
-            filter: i => allowedParticipantIds.includes(i.user.id) && ["btn_confirm", "btn_cancel"].includes(i.customId),
-            componentType: ComponentType.Button,
-            time: _options.timeout
-        });
+        const executeAction = async (customId: string) => {
+            switch (customId) {
+                case "btn_confirm":
+                    return await cleanUp(resolve, true);
 
-        // Determine the action
-        switch (res?.customId) {
-            case "btn_confirm":
-                return await cleanUp(resolve, true);
+                case "btn_cancel":
+                    return await cleanUp(resolve, false);
 
-            case "btn_cancel":
-                return await cleanUp(resolve, false);
+                default:
+                    return await cleanUp(resolve, false);
+            }
+        };
 
-            default:
-                return await cleanUp(resolve, false);
-        }
+        // Wait for the next button interaction
+        await message
+            .awaitMessageComponent({
+                filter: i => allowedParticipantIds.includes(i.user.id) && ["btn_confirm", "btn_cancel"].includes(i.customId),
+                componentType: ComponentType.Button,
+                time: _options.timeout
+            })
+            .then(async i => {
+                await i.deferUpdate().catch(null);
+                executeAction(i.customId);
+            })
+            .catch(() => executeAction("btn_cancel"));
     });
 }
