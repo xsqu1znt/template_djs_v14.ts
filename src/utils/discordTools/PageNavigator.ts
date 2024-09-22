@@ -1,4 +1,4 @@
-import { SendHandler, EmbedResolveable } from "./types";
+import { SendHandler, EmbedResolveable, UserResolvable } from "./types";
 import { DynaSendOptions } from "./dynaSend";
 
 type PaginationEvent = "pageChanged" | "pageBack" | "pageNext" | "pageJumped" | "selectMenuOptionPicked" | "timeout";
@@ -8,8 +8,7 @@ interface PageNavigatorOptions {
     /** The type of pagination. Defaults to `short`. */
     type?: PaginationType;
     /** The user or users that are allowed to interact with the navigator. */
-    // TODO: Use `UserResolvable` instead
-    allowedParticipants: GuildMember | User | Array<GuildMember | User>;
+    allowedParticipants: UserResolvable | UserResolvable[];
     /** The pages to be displayed. */
     pages: Array<PageData | NestedPageData>;
     /** Whether or not to use reactions instead of buttons. */
@@ -99,7 +98,7 @@ function isNestedPageData(pageData: any): pageData is NestedPageData {
 export default class PageNavigator {
     options: {
         type: PaginationType;
-        allowedParticipants: Array<GuildMember | User>;
+        allowedParticipants: UserResolvable[];
         pages: Array<PageData | NestedPageData>;
         useReactions: boolean;
         dynamic: boolean;
@@ -399,11 +398,11 @@ export default class PageNavigator {
             return;
         }
 
-        const filter_userIds = this.options.allowedParticipants.map(m => m.id);
+        const allowedParticipantIds = this.options.allowedParticipants.map(m => typeof m === "string" ? m : m.id);
 
         // Create the component collector
         const collector = this.data.message.createMessageComponentCollector({
-            filter: i => filter_userIds.includes(i.user.id),
+            filter: i => allowedParticipantIds.includes(i.user.id),
             ...(this.options.timeout ? { idle: this.options.timeout } : {})
         }) as InteractionCollector<ButtonInteraction | StringSelectMenuInteraction>;
 
@@ -489,7 +488,7 @@ export default class PageNavigator {
             return;
         }
 
-        const filter_userIds = this.options.allowedParticipants.map(m => m.id);
+        const allowedParticipantIds = this.options.allowedParticipants.map(m => typeof m === "string" ? m : m.id);
 
         // Create the component collector
         const collector = this.data.message.createReactionCollector({
@@ -509,7 +508,7 @@ export default class PageNavigator {
                 if (user.id !== reaction.message.guild?.members?.me?.id) await reaction.users.remove(user.id);
 
                 // Ignore reactions that weren't from the allowed users
-                if (!filter_userIds.includes(user.id)) return;
+                if (!allowedParticipantIds.includes(user.id)) return;
 
                 // Reset the collector's timer
                 collector.resetTimer();
