@@ -1,4 +1,6 @@
 {
+    "LOG_TIMESTAMPS": true,
+
     "STARTUP_MESSAGES": [
         "Initalizing...",
         "Starting up...",

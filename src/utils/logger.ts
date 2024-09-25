@@ -62,6 +62,7 @@ function contextFormatter(str: string): string {
         .replace("$_MONGO", _MONGO());
 }
 
+/* - - - - - { Exports } - - - - - */
 export function debug(msg: string): void {
     console.log(contextFormatter(colorTemplates.debug.italic(chalk`${msg}`)));
 }
