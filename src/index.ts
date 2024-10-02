@@ -9,7 +9,7 @@ import importers from "@utils/importers";
 import logger from "@utils/logger";
 import mongo from "@utils/mongo";
 
-import { TOKEN, IS_DEV_MODE } from "@constants";
+import { TOKEN, IS_DEV_MODE, cli } from "@constants";
 
 /* - - - - - { Check for TOKEN } - - - - - */
 if (IS_DEV_MODE && !TOKEN) {
@@ -74,24 +74,31 @@ async function init(): Promise<void> {
     // Log the next step to console
     logger.client.conecting();
 
-    // prettier-ignore
     // Connect the client to Discord
     client.login(TOKEN).then(async () => {
         const acm = new AppCommandManager(client);
 
         // Register commands to specific servers ( Local )
-        // await acm.registerToLocal(["guild_id"]);
+        if (cli.PUSH_COMMANDS_LOCAL) {
+            await acm.registerToLocal(cli.GUILD_IDS ?? ["guild_id"]);
+        }
 
         // Remove commands from specific servers ( Local )
-        /* NOTE: does nothing if commands were registered globally */
-        // await acm.removeFromLocal(["guild_id"]);
-        
+        else if (cli.REMOVE_COMMANDS_LOCAL) {
+            /* NOTE: does nothing if commands were registered globally */
+            await acm.removeFromLocal(cli.GUILD_IDS ?? ["guild_id"]);
+        }
+
         // Register commands to all servers and users ( Global )
-        // await acm.registerToGlobal();
-        
+        else if (cli.PUSH_COMMANDS_GLOBAL) {
+            await acm.registerToGlobal();
+        }
+
         // Remove commands from all servers and users ( Global )
-        /* NOTE: does nothing if commands were registered locally */
-        // await acm.removeFromGlobal();
+        else if (cli.REMOVE_COMMANDS_GLOBAL) {
+            /* NOTE: does nothing if commands were registered locally */
+            await acm.removeFromGlobal();
+        }
 
         await mongo.connect();
 

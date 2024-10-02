@@ -1,5 +1,16 @@
 import config from "@configs";
 
+/* - - - - - { CLI } - - - - -  */
+const argsv: string[] = process.argv.slice(2);
+
+export const cli = {
+    GUILD_IDS: argsv.find(arg => arg.startsWith("--guild="))?.split(" ") as string[],
+    PUSH_COMMANDS_LOCAL: argsv.includes("--push-local") as boolean,
+    REMOVE_COMMANDS_LOCAL: argsv.includes("--remove-local") as boolean,
+    PUSH_COMMANDS_GLOBAL: argsv.includes("--push-global") as boolean,
+    REMOVE_COMMANDS_GLOBAL: argsv.includes("--remove-global") as boolean
+};
+
 /* - - - - - { Environment } - - - - -  */
 /** Whether the environment is in development mode. */
 export const IS_DEV_MODE: boolean = process.env.DEV_MODE === "true" ? true : config.client.DEV_MODE;
