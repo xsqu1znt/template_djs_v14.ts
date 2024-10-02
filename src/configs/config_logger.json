@@ -11,6 +11,8 @@
 
     "COLORS": {
         "DEBUG": "#C45AB3",
-        "EVENT_NAME": "#9381FF"
+        "EVENT_NAME": "#9381FF",
+        "COMMAND_NAME": "#EFCD1E",
+        "MONGO": "#FF9214"
     }
 }
