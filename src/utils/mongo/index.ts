@@ -11,7 +11,7 @@ import guildManager from "./guildManager";
 export { guildManager };
 
 /* - - - - - { Meta Functions } - - - - - */
-let connection: mongoose.Connection | null = null;
+let connection: mongoose.Mongoose | null = null;
 
 /** Connect to MongoDB. */
 export async function connect(uri: string = MONGO_URI): Promise<mongoose.Connection | null> {
@@ -26,10 +26,11 @@ export async function connect(uri: string = MONGO_URI): Promise<mongoose.Connect
     }
 
     try {
+        logger.log("::MONGO ⏳️ Connecting to MongoDB...");
         // Create a new connection to MongoDB
-        connection = await mongoose.createConnection(uri).asPromise();
+        connection = await mongoose.connect(uri);
         // Log success if connected
-        if (connection) logger.success("::MONGO Successfully connected to MongoDB");
+        if (connection) logger.success("::MONGO ✅ Successfully connected to MongoDB!");
     } catch (err) {
         // Log an error if the connection failed
         logger.error("::MONGO", "Couldn't connect to MongoDB", connection);
@@ -41,16 +42,16 @@ export async function connect(uri: string = MONGO_URI): Promise<mongoose.Connect
 /** Close the connection to MongoDB. */
 export async function disconnect(): Promise<void> {
     if (!connection) return;
-    await connection.close();
+    await connection.disconnect();
 }
 
 /** Check response time for MongoDB. */
 export async function ping(): Promise<string> {
-    if (connection?.readyState !== 1) return "NOT_CONNECTED_TO_MONGO";
+    if (connection?.connection.readyState !== 1) return "NOT_CONNECTED_TO_MONGO";
 
     /// Ping the connection database
     let before = Date.now();
-    await connection.db?.admin().ping();
+    await connection.connection.db?.admin().ping();
     let after = Date.now();
 
     return (after - before).toString();

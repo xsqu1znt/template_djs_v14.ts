@@ -122,6 +122,8 @@ export const __command: PrefixCommand = {
             pages: PageNavigator.resolveEmbedsToPages(categoryEmbeds)
         });
 
+        pageNav.addSelectMenuOptions(...categoryNames.map(cat => ({ emoji: cat.icon, label: cat.name })));
+
         return await pageNav.send(message, { allowedMentions: { repliedUser: false } });
     }
 };

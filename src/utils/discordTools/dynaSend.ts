@@ -91,6 +91,7 @@ export default async function dynaSend(handler: SendHandler, options: DynaSendOp
     _options.deleteAfter = jt.parseTime(_options.deleteAfter as string | number);
 
     /* - - - - - { Error Checking } - - - - - */
+    console.log(_options.sendMethod);
     if (_options.sendMethod) {
         if (!(handler instanceof BaseInteraction) && ["reply", "editReply", "followUp"].includes(_options.sendMethod))
             throw new TypeError("[DynaSend] Invalid SendMethod", { cause: "'handler' is not 'Interaction' based" });
