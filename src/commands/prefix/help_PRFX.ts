@@ -1,6 +1,6 @@
 import { PrefixCommand } from "@customTypes/commands";
 
-import { BetterEmbed } from "@utils/discordTools";
+import { BetterEmbed, PageNavigator } from "@utils/discordTools";
 import jt from "@utils/jsTools";
 
 const categoryIcons: { [key: string]: string } = {
@@ -44,12 +44,12 @@ export const __command: PrefixCommand = {
             .sort((a, b) => a.name.localeCompare(b.name));
 
         /* - - - - - { Format Commands into List } - - - - - */
-        let commandList = [];
-        let categoryEmbeds = [];
+        const commandList: { name: string; category?: string; formatted: string }[] = [];
+        const categoryEmbeds = [];
 
         // Iterate through each command
         /*! NOTE: the design of the commands in the list can be edited here */
-        for (let command of commands) {
+        for (const command of commands) {
             let listEntry = "- $ICON**$PREFIX$NAME**"
                 .replace("$ICON", command.options?.emoji ? `${command.options?.emoji} ` : "")
                 .replace("$PREFIX", prefix)
@@ -117,6 +117,11 @@ export const __command: PrefixCommand = {
         }
 
         /* - - - - - { Page Navigation } - - - - - */
-        return await categoryEmbeds[0][0].send(message);
+        const pageNav = new PageNavigator({
+            allowedParticipants: message.author,
+            pages: PageNavigator.resolveEmbedsToPages(categoryEmbeds)
+        });
+
+        return await pageNav.send(message, { allowedMentions: { repliedUser: false } });
     }
 };

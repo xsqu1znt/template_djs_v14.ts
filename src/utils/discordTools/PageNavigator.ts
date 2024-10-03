@@ -10,7 +10,7 @@ interface PageNavigatorOptions {
     /** The user or users that are allowed to interact with the navigator. */
     allowedParticipants: UserResolvable | UserResolvable[];
     /** The pages to be displayed. */
-    pages: Array<PageData | NestedPageData>;
+    pages: PageData | NestedPageData | Array<PageData | NestedPageData>;
     /** Whether or not to use reactions instead of buttons. */
     useReactions?: boolean;
     /** Whether to only add the `Page Jump` action when needed.
@@ -72,6 +72,7 @@ import {
     ButtonInteraction,
     ButtonStyle,
     ComponentEmojiResolvable,
+    EmbedBuilder,
     GuildMember,
     InteractionCollector,
     Message,
@@ -86,10 +87,15 @@ import logger from "@utils/logger";
 import jt from "@utils/jsTools";
 
 import * as config from "./config.json";
+import BetterEmbed from "./BetterEmbed";
 
 // Get the name of each pagination reaction emoji
 // this will be used as a filter when getting the current reactions from the message
 const paginationReactionNames = Object.values(config.navigator.buttons).map(data => data.emoji.name);
+
+function isPageData(pageData: any): pageData is PageData {
+    return Object.hasOwn(pageData, "embed");
+}
 
 function isNestedPageData(pageData: any): pageData is NestedPageData {
     return Object.hasOwn(pageData, "nestedEmbeds");
@@ -164,6 +170,18 @@ export default class PageNavigator {
         selectMenuOptionPicked: Array<{ listener: Function; once: boolean }>;
         timeout: Array<{ listener: Function; once: boolean }>;
     };
+
+    public static resolveEmbedsToPages(embeds: EmbedResolveable | EmbedResolveable[] | EmbedResolveable[][]): Array<PageData | NestedPageData> {
+        const _pages = jt.forceArray(embeds);
+        let resolvedPages: Array<PageData | NestedPageData> = [];
+
+        for (let p of _pages) {
+            if (Array.isArray(p)) resolvedPages.push({ nestedEmbeds: p as EmbedResolveable[] });
+            else resolvedPages.push({ embed: p as EmbedResolveable });
+        }
+
+        return resolvedPages;
+    }
 
     #createButton(data: { custom_id: string; emoji?: ComponentEmojiResolvable; label: string }): ButtonBuilder {
         let button = new ButtonBuilder({ custom_id: data.custom_id, style: ButtonStyle.Secondary });
@@ -398,7 +416,7 @@ export default class PageNavigator {
             return;
         }
 
-        const allowedParticipantIds = this.options.allowedParticipants.map(m => typeof m === "string" ? m : m.id);
+        const allowedParticipantIds = this.options.allowedParticipants.map(m => (typeof m === "string" ? m : m.id));
 
         // Create the component collector
         const collector = this.data.message.createMessageComponentCollector({
@@ -488,7 +506,7 @@ export default class PageNavigator {
             return;
         }
 
-        const allowedParticipantIds = this.options.allowedParticipants.map(m => typeof m === "string" ? m : m.id);
+        const allowedParticipantIds = this.options.allowedParticipants.map(m => (typeof m === "string" ? m : m.id));
 
         // Create the component collector
         const collector = this.data.message.createReactionCollector({
@@ -613,7 +631,7 @@ export default class PageNavigator {
 
     constructor(options: PageNavigatorOptions) {
         /* - - - - - { Error Checking } - - - - - */
-        if (!options.pages || !options.pages.length) {
+        if (!options.pages || (Array.isArray(options.pages) && !options.pages.length)) {
             throw new Error("[EmbedNavigator]: You must provide at least 1 page.");
         }
 
@@ -628,8 +646,9 @@ export default class PageNavigator {
         /* - - - - - { Parse Options } - - - - - */
         this.options = {
             ...options,
-            type: options.type || "short",
             allowedParticipants: jt.forceArray(options.allowedParticipants),
+            pages: jt.forceArray(options.pages),
+            type: options.type || "short",
             useReactions: options.useReactions || false,
             dynamic: options.dynamic || false,
             timeout:
