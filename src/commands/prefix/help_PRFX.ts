@@ -12,7 +12,7 @@ const config = {
     maxPageLength: 10
 };
 
-export default {
+export const __command: PrefixCommand = {
     name: "help",
     description: "View a list of my commands.",
     category: "Utility",
@@ -119,4 +119,4 @@ export default {
         /* - - - - - { Page Navigation } - - - - - */
         return await categoryEmbeds[0][0].send(message);
     }
-} as PrefixCommand;
+};

@@ -23,7 +23,8 @@ function getStaffGuildAdminBypass(commandName: string): string[] {
     let result: string[] = [];
     let bypass = _staff.BYPASSERS.find(b => b.COMMAND_NAME === commandName);
 
-    if (_staff.IGNORES_GUILD_ADMIN.AllBotStaff) return [_staff.OWNER_ID, ..._staff.SUPERUSERS, ...(bypass ? bypass.USER_IDS : [])];
+    if (_staff.IGNORES_GUILD_ADMIN.AllBotStaff)
+        return [_staff.OWNER_ID, ..._staff.SUPERUSERS, ...(bypass ? bypass.USER_IDS : [])];
     if (_staff.IGNORES_GUILD_ADMIN.BotOwner) result.push(_staff.OWNER_ID);
     if (_staff.IGNORES_GUILD_ADMIN.SuperUsers) result.push(..._staff.SUPERUSERS);
     if (_staff.IGNORES_GUILD_ADMIN.Bypassers) result.push(...(bypass ? bypass.USER_IDS : []));
@@ -55,21 +56,21 @@ function hasRequiredPermissions(member: GuildMember, required: PermissionResolva
     return { has, missing, passed: has.length === required.length };
 }
 
-function getOptionFromMessageContent(content: string, prefix: string, flagName: string, allowSpaces: boolean = false) {
+function getOptionFromMessageContent(str: string, prefix: string, name: string, allowSpaces: boolean = false) {
     let match: RegExpMatchArray | null;
 
     if (allowSpaces) {
         /* NOTE: matches until the first occurrence of the flagPrefix */
-        match = content.match(new RegExp(`${flagName} (.[^${prefix}]*)`));
+        match = str.match(new RegExp(`${name} (.[^${prefix}]*)`));
     } else {
         /* NOTE: matches until the first occurrence of a space */
-        match = content.match(new RegExp(`${flagName} (.)`));
+        match = str.match(new RegExp(`${name} (.)`));
     }
 
     return match ? match[0] : null;
 }
 
-export default {
+export const __event: MessageCreateEventModule = {
     name: "processPrefixCommand",
     event: "messageCreate",
 
@@ -222,4 +223,4 @@ export default {
             );
         }
     }
-} as MessageCreateEventModule;
+};

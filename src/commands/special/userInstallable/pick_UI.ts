@@ -4,7 +4,7 @@ import { SlashCommandBuilder } from "discord.js";
 import { BetterEmbed } from "@utils/discordTools";
 import jt from "@utils/jsTools";
 
-export default {
+export const __command: UserInstallableCommand = {
     builder: new SlashCommandBuilder()
         .setName("pick")
         .setDescription("Have me make that decision for you. Separate by comma.")
@@ -30,4 +30,4 @@ export default {
         // Reply to the interaction with the embed
         return await embed_pick.send(interaction);
     }
-} as UserInstallableCommand;
+};

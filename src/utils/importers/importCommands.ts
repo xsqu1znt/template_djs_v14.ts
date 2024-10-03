@@ -76,12 +76,12 @@ async function importCommandModules<T extends CommandType>(commandType: T): Prom
     let modules: ImportedCommandModule<T>[] = await Promise.all(
         files.map(async fn => {
             let _path = path.join(_moduleDirectory, fn);
-            let _logPath = path.join(_moduleLogPath, fn);
+            let _logPath = `./${path.join(_moduleLogPath, fn)}`;
             let _module = await import(_path)
-                .then(m => m.default)
+                .then(m => m.__command)
                 .catch(err => {
                     // Log the error to the console
-                    logger.error("$_TIMESTAMP $_IMPORT_COMMAND", `Failed to import command module at '${_logPath}'`, err);
+                    logger.error("::IMPORT_COMMAND", `Failed to import command module at '${_logPath}'`, err);
                     return null;
                 });
 
@@ -209,7 +209,7 @@ export default async function (client: Client): Promise<void> {
             client.commands.slash.all.set(command.module.builder.name, command.module);
             client.commands.slash[k as "public" | "staff" | "custom"].set(command.module.builder.name, command.module);
 
-            logger.importer.commandImport(command.module.builder.name, command.path, "SLSH");
+            logger.importer.command(command.module.builder.name, command.path, "SLSH");
         }
     }
 
@@ -220,7 +220,7 @@ export default async function (client: Client): Promise<void> {
             client.commands.prefix.all.set(command.module.name, command.module);
             client.commands.prefix[k as "public" | "staff" | "custom"].set(command.module.name, command.module);
 
-            logger.importer.commandImport(command.module.name, command.path, "PRFX");
+            logger.importer.command(command.module.name, command.path, "PRFX");
 
             // Apply aliases
             if (command.module.aliases) {
@@ -228,7 +228,7 @@ export default async function (client: Client): Promise<void> {
                     client.commands.prefix.all.set(alias, command.module);
                     client.commands.prefix[k as "public" | "staff" | "custom"].set(alias, command.module);
 
-                    logger.importer.commandImport(`${command.module.name} -> @${alias}`, "", "PRFX");
+                    logger.importer.command(`${command.module.name} -> @${alias}`, "", "PRFX");
                 }
             }
         }
@@ -242,10 +242,10 @@ export default async function (client: Client): Promise<void> {
             client.commands.special.all.set(command.module.builder.name, command.module);
             if (AppCommandManager.isContextMenuCommand(command.module)) {
                 client.commands.special.contextMenu.set(command.module.builder.name, command.module);
-                logger.importer.commandImport(command.module.builder.name, command.path, "CTX");
+                logger.importer.command(command.module.builder.name, command.path, "CTX");
             } else if (AppCommandManager.isUserInstallCommand(command.module)) {
                 client.commands.special.userInstallable.set(command.module.builder.name, command.module);
-                logger.importer.commandImport(command.module.builder.name, command.path, "UI");
+                logger.importer.command(command.module.builder.name, command.path, "UI");
             }
         }
     }

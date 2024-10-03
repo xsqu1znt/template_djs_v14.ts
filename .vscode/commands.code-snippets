@@ -10,7 +10,7 @@
             "import { BetterEmbed } from \"@utils/discordTools\";",
             "import jt from \"@utils/jsTools\";\n",
 
-            "export default {",
+            "export const __command: SlashCommand = {",
             "    category: \"Fun\",",
             "    options: { emoji: \"🍪\" },\n",
 
@@ -34,7 +34,7 @@
             "        // Reply to the interaction with the embed",
             "        return await embed_${1:cookie}.send(interaction);$0",
             "    }",
-            "} as SlashCommand;\n"
+            "};\n"
         ]
     },
 
@@ -48,7 +48,7 @@
             "import { BetterEmbed } from \"@utils/discordTools\";",
             "import jt from \"@utils/jsTools\";\n",
 
-            "export default {",
+            "export const __command: PrefixCommand = {",
             "    name: \"${1:cookie}\",",
             "    description: \"${2:Get a cookie or a glass of milk.}\",",
             "    category: \"Fun\",",
@@ -70,7 +70,7 @@
             "        // Reply to the message with the embed",
             "        return await embed_${1:cookie}.send(message, { allowedMentions: { repliedUser: false } });$0",
             "    }",
-            "} as PrefixCommand;\n"
+            "};\n"
         ]
     },
 
@@ -84,7 +84,7 @@
             "import { ApplicationCommandType, ContextMenuCommandBuilder } from \"discord.js\";",
             "import { BetterEmbed } from \"@utils/discordTools\";\n",
 
-            "export default {",
+            "export const __command: ContextMenuCommand = {",
             "    category: \"Fun\",\n",
 
             "    builder: new ContextMenuCommandBuilder().setName(\"${1:View Avatar}\")",
@@ -103,7 +103,7 @@
             "        // Reply to the interaction with the embed",
             "        return await embed_${4:avatar}.send(interaction);$0",
             "    }",
-            "} as ContextMenuCommand;\n"
+            "};\n"
         ]
     },
 
@@ -118,7 +118,7 @@
             "import { BetterEmbed } from \"@utils/discordTools\";",
             "import jt from \"@utils/jsTools\";\n",
 
-            "export default {",
+            "export const __command: UserInstallableCommand = {",
             "    builder: new SlashCommandBuilder()",
             "        .setName(\"${1:pick}\")",
             "        .setDescription(\"${2:Have me make that decision for you. Separate by comma.}\")\n",
@@ -144,7 +144,7 @@
             "        // Reply to the interaction with the embed",
             "        return await embed_${1:pick}.send(interaction);$0",
             "    }",
-            "} as UserInstallableCommand;\n"
+            "};\n"
         ]
     }
 }

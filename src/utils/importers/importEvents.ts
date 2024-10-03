@@ -18,12 +18,12 @@ async function importEventModules() {
     let modules = await Promise.all(
         files.map(async fn => {
             let _path = path.join(__dirname, EVENT_MODULE_RELATIVE_PATH, fn);
-            let _logPath = path.join(EVENT_MODULE_LOG_PATH, fn);
+            let _logPath = `./${path.join(EVENT_MODULE_LOG_PATH, fn)}`;
             let _module = await import(_path)
-                .then(m => m.default as BaseEventModule)
+                .then(m => m.__event as BaseEventModule)
                 .catch(err => {
                     // Log the error to the console
-                    logger.error("$_TIMESTAMP $_IMPORT_EVENT", `Failed to import event module at '${_logPath}'`, err);
+                    logger.error("::IMPORT_EVENT", `Failed to import event module at '${_logPath}'`, err);
                     return null;
                 });
 
@@ -39,7 +39,7 @@ export default async function (client: Client): Promise<void> {
     // Import event files
     let events = await importEventModules();
     if (!events.length) {
-        logger.error("[CLIENT] No event modules found", `dir: '${EVENT_MODULE_DIRECTORY}'`);
+        logger.error("::CLIENT", `dir: '${EVENT_MODULE_DIRECTORY}'`, "No event modules found in that directory");
         return;
     }
 
@@ -55,7 +55,7 @@ export default async function (client: Client): Promise<void> {
         for (let event of group) {
             // Ignore binding events that are disabled
             if (Object.hasOwn(event.module, "enabled") && !event.module.enabled) {
-                logger.importer.eventImport(event.module.name, event.path, false);
+                logger.importer.event(event.module.name, event.path, false);
                 continue;
             }
 
@@ -67,15 +67,15 @@ export default async function (client: Client): Promise<void> {
                 } catch (err) {
                     // Log the error to the console
                     logger.error(
-                        "$_TIMESTAMP $_EVENT",
-                        `Failed to execute '{bold ${event.module.name}}' on event '{bold {blueBright ${event.module.event}}}'`,
+                        "::EVENT",
+                        `Failed to execute '${event.module.name}' on event '${event.module.event}'`,
                         err
                     );
                 }
             });
 
             // Log to the console that the event was successfully loaded
-            logger.importer.eventImport(event.module.name, event.path, true);
+            logger.importer.event(event.module.name, event.path, true);
         }
     }
 }

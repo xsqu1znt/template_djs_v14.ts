@@ -4,7 +4,7 @@ import { SlashCommandBuilder } from "discord.js";
 import mongo from "@utils/mongo";
 import jt from "@utils/jsTools";
 
-export default {
+export const __command: SlashCommand = {
     category: "Utility",
     options: { emoji: "🏓", deferReply: true },
 
@@ -19,4 +19,4 @@ export default {
             content: `Client: **${jt.formatThousands(client.ws.ping)}ms**, Database: **${db_ping}ms**`
         });
     }
-} as SlashCommand;
+};

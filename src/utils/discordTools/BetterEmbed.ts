@@ -541,7 +541,7 @@ export default class BetterEmbed {
     }
 
     /** Send the embed. */
-    async send(handler: SendHandler, options?: DynaSendOptions, data?: BetterEmbedData) {
+    async send(handler: SendHandler, options?: DynaSendOptions, data?: BetterEmbedData): Promise<Message | null> {
         let _embed: BetterEmbed = this;
         this.#parseData();
 

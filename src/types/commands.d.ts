@@ -1,3 +1,4 @@
+import { SlashCommandOptionsOnlyBuilder } from "discord.js";
 import {
     BaseInteraction,
     Client,
@@ -5,6 +6,7 @@ import {
     CommandInteraction,
     ContextMenuCommandBuilder,
     ContextMenuCommandInteraction,
+    InteractionResponse,
     Message,
     MessageContextMenuCommandInteraction,
     PermissionResolvable,
@@ -15,13 +17,13 @@ import {
 /* - - - - - { Types } - - - - - */
 export interface SlashCommand {
     /** Slash command builder. */
-    builder: SlashCommandBuilder;
+    builder: SlashCommandBuilder | SlashCommandOptionsOnlyBuilder;
     /** The category to place the command inside the help command. */
     category?: string;
     /** Extra options for this command. */
     options?: InteractionBasedCommandOptions;
     /** Executed when the command is used. */
-    execute: (client: Client, interaction: CommandInteraction) => Promise<Message | void | null>;
+    execute: (client: Client, interaction: CommandInteraction) => Promise<InteractionResponse | Message | void | null>;
 }
 
 export interface PrefixCommand {
@@ -57,7 +59,7 @@ export interface ContextMenuCommand {
 
 export interface UserInstallableCommand {
     /** Slash command builder. */
-    builder: SlashCommandBuilder;
+    builder: SlashCommandBuilder | SlashCommandOptionsOnlyBuilder;
     /** Type of command. Can only be `CHAT_INPUT` for user installable commands.
      * - `1` `CHAT_INPUT`
      *

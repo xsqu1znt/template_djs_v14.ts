@@ -3,49 +3,57 @@ import logger from "@utils/logger";
 
 import { MONGO_URI, IS_DEV_MODE } from "@constants";
 
-// Export models
+/* - - - - - { Models } - - - - - */
 export * as models from "@models";
 
 /* - - - - - { Managers } - - - - - */
 import guildManager from "./guildManager";
-
-// Export managers
 export { guildManager };
 
 /* - - - - - { Meta Functions } - - - - - */
+let connection: mongoose.Connection | null = null;
+
 /** Connect to MongoDB. */
-export async function connect(uri: string = MONGO_URI): Promise<void> {
-    /* - - - - - { Check for MONGO_URI } - - - - - */
-    if (!uri) return logger.error("$_TIMESTAMP $_MONGO", "MONGO_URI is not set");
-    if (IS_DEV_MODE && !MONGO_URI) {
-        return logger.error("$_TIMESTAMP $_MONGO", "DEV_MODE is enabled, but MONGO_URI_DEV is not set");
+export async function connect(uri: string = MONGO_URI): Promise<mongoose.Connection | null> {
+    if (!uri) {
+        logger.error("::MONGO", "MONGO_URI is not set");
+        return null;
     }
 
-    // Try to connect to MongoDB
-    let connection = await new Promise(async (resolve, reject) => {
-        return mongoose
-            .connect(uri)
-            .then(() => resolve(true))
-            .catch(err => reject(err));
-    });
+    if (IS_DEV_MODE && !MONGO_URI) {
+        logger.error("::MONGO", "DEV_MODE is enabled, but MONGO_URI_DEV is not set");
+        return null;
+    }
 
-    // Log the success if connected
-    if (connection) return logger.success("$_TIMESTAMP $_MONGO Successfully connected to MongoDB");
+    try {
+        // Create a new connection to MongoDB
+        connection = await mongoose.createConnection(uri).asPromise();
+        // Log success if connected
+        if (connection) logger.success("::MONGO Successfully connected to MongoDB");
+    } catch (err) {
+        // Log an error if the connection failed
+        logger.error("::MONGO", "Couldn't connect to MongoDB", connection);
+    }
 
-    // Log the error if the connection failed
-    logger.error("$_TIMESTAMP $_MONGO", "Couldn't connect to MongoDB", connection);
+    return null;
+}
+
+/** Close the connection to MongoDB. */
+export async function disconnect(): Promise<void> {
+    if (!connection) return;
+    await connection.close();
 }
 
 /** Check response time for MongoDB. */
 export async function ping(): Promise<string> {
-    if (mongoose.connection.readyState !== 1) return "NOT_CONNECTED_TO_MONGO";
+    if (connection?.readyState !== 1) return "NOT_CONNECTED_TO_MONGO";
 
     /// Ping the connection database
     let before = Date.now();
-    await mongoose.connection.db?.admin().ping();
+    await connection.db?.admin().ping();
     let after = Date.now();
 
     return (after - before).toString();
 }
 
-export default { connect, ping };
+export default { connection, connect, disconnect, ping };

@@ -4,7 +4,7 @@ import { SlashCommandBuilder } from "discord.js";
 import { BetterEmbed } from "@utils/discordTools";
 import jt from "@utils/jsTools";
 
-export default {
+export const __command: SlashCommand = {
     category: "Fun",
     options: { emoji: "🍪" },
 
@@ -28,4 +28,4 @@ export default {
         // Reply to the interaction with the embed
         return await embed_cookie.send(interaction);
     }
-} as SlashCommand;
+};

@@ -2,7 +2,7 @@ import { PrefixCommand } from "@customTypes/commands";
 
 import { awaitConfirm, BetterEmbed } from "@utils/discordTools";
 
-export default {
+export const __command: PrefixCommand = {
     name: "test",
     description: "A test command.",
     category: "Fun",
@@ -18,4 +18,4 @@ export default {
 
         return await message.reply(`confirmation: ${confirmation}`);
     }
-} as PrefixCommand;
+};

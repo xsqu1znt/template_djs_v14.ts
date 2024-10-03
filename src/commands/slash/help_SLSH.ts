@@ -13,7 +13,7 @@ const config = {
     maxPageLength: 10
 };
 
-export default {
+export const __command: SlashCommand = {
     category: "Utility",
     options: { hidden: true },
 
@@ -105,4 +105,4 @@ export default {
         /* - - - - - { Page Navigation } - - - - - */
         return await categoryEmbeds[0][0].send(interaction);
     }
-} as SlashCommand;
+};

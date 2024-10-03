@@ -2,11 +2,11 @@ import { BaseEventModule } from "@customTypes/events";
 
 import logger from "@utils/logger";
 
-export default {
+export const __event: BaseEventModule = {
     name: "clientReady",
     event: "ready",
 
-    execute: async (client) => {
+    execute: async () => {
         logger.client.online();
     }
-} as BaseEventModule;
+};

@@ -7,7 +7,7 @@ import jt from "@utils/jsTools";
 import { IS_DEV_MODE } from "@constants";
 import config from "@configs";
 
-export default {
+export const __event: BaseEventModule = {
     name: "setClientActivity",
     event: "ready",
 
@@ -93,4 +93,4 @@ export default {
         // Set the client's status
         return await setStatus();
     }
-} as BaseEventModule;
+};

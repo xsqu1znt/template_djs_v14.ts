@@ -18,15 +18,15 @@ if (IS_DEV_MODE && !TOKEN) {
 }
 
 if (!TOKEN) {
-    logger.error("TOKEN Missing", "TOKEN is not set");
+    logger.error("TOKEN Missing", "TOKEN not set");
     process.exit(0);
 }
 
 // prettier-ignore
-if (IS_DEV_MODE) logger.debug("DEV_MODE is enabled! You can change this by setting DEV_MODE to false in either .env or config_client.json");
+if (IS_DEV_MODE) logger.debug("DEV_MODE is enabled! You can change this by setting {bold DEV_MODE} to false in either .env or config_client.json");
 
 /* - - - - - { Setup Client } - - - - - */
-logger.client.initializing();
+logger.client.starting();
 
 const client = new Client({
     intents: [
@@ -72,7 +72,7 @@ async function init(): Promise<void> {
     await importers(client);
 
     // Log the next step to console
-    logger.client.conecting();
+    logger.client.connecting();
 
     // Connect the client to Discord
     client.login(TOKEN).then(async () => {

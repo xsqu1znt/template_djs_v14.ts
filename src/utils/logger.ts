@@ -8,23 +8,23 @@ import config from "@configs";
 
 const { COLORS } = config.logger;
 
-function __format(str: string): string {
+function __format(str: string, colored: boolean = true): string {
     const { LOG_TIMESTAMPS } = config.logger;
 
     str = str
         .replace("::TIMESTAMP ", LOG_TIMESTAMPS ? `[${new Date().toLocaleTimeString()}] ` : "")
 
-        .replace("::CLIENT", chalk.bold.gray("[CLIENT]"))
-        .replace("::ACM_LOCAL", chalk.bold.dim("[ACM/LOCAL]"))
-        .replace("::ACM_GLOBAL", chalk.bold.dim("[ACM/GLOBAL]"))
+        .replace("::CLIENT", colored ? chalk.bold.gray("[CLIENT]") : "[CLIENT]")
+        .replace("::ACM_LOCAL", colored ? chalk.bold.dim("[ACM/LOCAL]") : "[ACM/LOCAL]")
+        .replace("::ACM_GLOBAL", colored ? chalk.bold.dim("[ACM/GLOBAL]") : "[ACM/GLOBAL]")
 
-        .replace("::IMPORTER", chalk.bold.dim("[IMPORTER]"))
-        .replace("::IMPORT_EVENT", chalk.bold.gray("[~/EVENT]"))
-        .replace("::IMPORT_COMMAND", chalk.bold.gray("[~/COMMAND]"))
+        .replace("::IMPORTER", colored ? chalk.bold.dim("[IMPORTER]") : "[IMPORTER]")
+        .replace("::IMPORT_EVENT", colored ? chalk.bold.gray("[~/EVENT]") : "[~/EVENT]")
+        .replace("::IMPORT_COMMAND", colored ? chalk.bold.gray("[~/COMMAND]") : "[~/COMMAND]")
 
-        .replace("::COMMAND", chalk.hex(COLORS.COMMAND_NAME).bold("[⚡️COMMAND]"))
-        .replace("::EVENT", chalk.hex(COLORS.EVENT_NAME).bold("[⚡️EVENT]"))
-        .replace("::MONGO", chalk.hex(COLORS.MONGO).bold("[🥭 MONGO]"));
+        .replace("::COMMAND", colored ? chalk.hex(COLORS.COMMAND_NAME).bold("[⚡️COMMAND]") : "[⚡️COMMAND]")
+        .replace("::EVENT", colored ? chalk.hex(COLORS.EVENT_NAME).bold("[⚡️EVENT]") : "[⚡️EVENT]")
+        .replace("::MONGO", colored ? chalk.hex(COLORS.MONGO).bold("[🥭 MONGO]") : "[🥭 MONGO]");
 
     return chalk`${str}`;
 }
@@ -49,7 +49,7 @@ export function debug(msg: string, format: boolean = true): void {
 }
 
 export function error(header: string, msg: string, err: any = "", format: boolean = true): void {
-    __error(`${chalk.bgRed("ERROR!")} ${chalk.bold.red(header)} ${msg}`, err, format);
+    __error(`${chalk.bgRed("ERROR!")} ${chalk.bold.red(__format(header, false))} ${msg}`, err, format);
 }
 
 export function success(msg: string, format: boolean = true): void {
@@ -122,7 +122,7 @@ export const command = (command: string, msg: string, type: "PRFX" | "SLSH" | "C
 export function test(): void {
     log("This is a test log.");
     debug("This is a test debug.");
-    error("[CLIENT]", "This is a test error.", "This is an error message.");
+    error("::CLIENT", "This is a test error.", "This is an error message.");
     success("This is a test success.");
 
     console.log();

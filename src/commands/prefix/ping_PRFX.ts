@@ -3,7 +3,7 @@ import { PrefixCommand } from "@customTypes/commands";
 import mongo from "@utils/mongo";
 import jt from "@utils/jsTools";
 
-export default {
+export const __command: PrefixCommand = {
     name: "ping",
     description: "Check my ping!",
     category: "Utility",
@@ -19,4 +19,4 @@ export default {
             allowedMentions: { repliedUser: false }
         });
     }
-} as PrefixCommand;
+};

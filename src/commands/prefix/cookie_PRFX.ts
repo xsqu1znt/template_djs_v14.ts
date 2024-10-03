@@ -3,7 +3,7 @@ import { PrefixCommand } from "@customTypes/commands";
 import { BetterEmbed } from "@utils/discordTools";
 import jt from "@utils/jsTools";
 
-export default {
+export const __command: PrefixCommand = {
     name: "cookie",
     description: "Get a cookie or a glass of milk.",
     category: "Fun",
@@ -25,4 +25,4 @@ export default {
         // Reply to the message with the embed
         return await embed_cookie.send(message, { allowedMentions: { repliedUser: false } });
     }
-} as PrefixCommand;
+};

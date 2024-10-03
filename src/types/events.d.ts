@@ -1,4 +1,4 @@
-import { BaseInteraction, Client, ClientEvents, Message } from "discord.js";
+import { BaseInteraction, Client, ClientEvents, InteractionResponse, Message } from "discord.js";
 
 export interface BaseEventModule {
     /** Name of the event. *Used for error logging.* */
@@ -16,5 +16,5 @@ export interface MessageCreateEventModule extends BaseEventModule {
 }
 
 export interface InteractionEventModule extends BaseEventModule {
-    execute: (client: Client, interaction: BaseInteraction) => Promise<Message | void | null>;
+    execute: (client: Client, interaction: BaseInteraction) => Promise<InteractionResponse | Message | void | null>;
 }

@@ -54,7 +54,7 @@ function hasRequiredPermissions(member: GuildMember, required: PermissionResolva
     return { has, missing, passed: has.length === required.length };
 }
 
-export default {
+export const __event: InteractionEventModule = {
     name: "processInteractionCommand",
     event: "interactionCreate",
 
@@ -209,4 +209,4 @@ export default {
             );
         }
     }
-} as InteractionEventModule;
+};

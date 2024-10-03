@@ -6,14 +6,14 @@
         "body": [
             "import { BaseEventModule } from \"@customTypes/events\";\n",
 
-            "export default {",
+            "export const __event: BaseEventModule = {",
             "    name: \"${1:${TM_FILENAME_BASE}}\",",
             "    event: \"${2:messageCreate}\",\n",
 
             "    execute: async (client, ${3:message}) => {",
             "        /* TODO: code to run once the event is triggered... */$0",
             "    }",
-            "} as BaseEventModule;\n"
+            "};\n"
         ]
     },
 
@@ -24,14 +24,14 @@
         "body": [
             "import { InteractionEventModule } from \"@customTypes/events\";\n",
 
-            "export default {",
+            "export const __event: InteractionEventModule = {",
             "    name: \"${1:${TM_FILENAME_BASE}}\",",
             "    event: \"interactionCreate\",\n",
 
             "    execute(client, interaction) {",
             "        /* TODO: code to run once the event is triggered... */$0",
             "    }",
-            "} as InteractionEventModule;\n"
+            "};\n"
         ]
     },
 
@@ -42,14 +42,14 @@
         "body": [
             "import { MessageCreateEventModule } from \"@customTypes/events\";\n",
 
-            "export default {",
+            "export const __event: MessageCreateEventModule = {",
             "    name: \"${1:${TM_FILENAME_BASE}}\",",
             "    event: \"messageCreate\",\n",
 
             "    execute: async (client, message) => {",
             "        /* TODO: code to run once the event is triggered... */$0",
             "    }",
-            "} as MessageCreateEventModule;\n"
+            "};\n"
         ]
     }
 }
