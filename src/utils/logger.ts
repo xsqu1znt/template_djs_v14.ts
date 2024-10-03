@@ -1,160 +1,166 @@
 /** @file Reusable functions for using `console.log()`, but in 4k ultra HD retrocolor. */
 
-import { Shard } from "discord.js";
 import jt from "@utils/jsTools";
 import chalk from "chalk";
 
 import { name as PROJECT } from "@pkgJSON";
 import config from "@configs";
 
-const STARTUP_MESSAGES = [
-    "Initalizing...",
-    "Starting up...",
-    "Revving engines...",
-    "Brewing a cup of coffee...",
-    "Giving the developer a pat on the back..."
-];
+const { COLORS } = config.logger;
 
-/* - - - - - { Color Template } - - - - - */
-export const colorTemplates = {
-    debug: chalk.hex("#C45AB3"),
-    log: chalk.hex("#9F7F95"),
+function __format(str: string): string {
+    const { LOG_TIMESTAMPS } = config.logger;
 
-    moduleName: chalk.bold.gray,
-    eventName: chalk.hex("#9381FF"),
-    commandName: chalk.hex("#EFCD1E")
-};
+    str = str
+        .replace("::TIMESTAMP ", LOG_TIMESTAMPS ? `[${new Date().toLocaleTimeString()}] ` : "")
 
-/* - - - - - { Shorthand } - - - - - */
-const _TIMESTAMP = (): string => `[${new Date().toLocaleTimeString()}]`;
+        .replace("::CLIENT", chalk.bold.gray("[CLIENT]"))
+        .replace("::ACM_LOCAL", chalk.bold.dim("[ACM/LOCAL]"))
+        .replace("::ACM_GLOBAL", chalk.bold.dim("[ACM/GLOBAL]"))
 
-const _CLIENT = (): string => colorTemplates.moduleName("[CLIENT]");
-const _ACM_LOCAL = (): string => colorTemplates.moduleName("[ACM/LOCAL]");
-const _ACM_GLOBAL = (): string => colorTemplates.moduleName("[ACM/GLOBAL]");
+        .replace("::IMPORTER", chalk.bold.dim("[IMPORTER]"))
+        .replace("::IMPORT_EVENT", chalk.bold.gray("[~/EVENT]"))
+        .replace("::IMPORT_COMMAND", chalk.bold.gray("[~/COMMAND]"))
 
-const _IMPORTER = (): string => colorTemplates.moduleName("[IMPORTER]");
-const _IMPORT_EVENT = (): string => colorTemplates.moduleName("[IMPORT/EVENT]");
-const _IMPORT_COMMAND = (): string => colorTemplates.moduleName("[IMPORT/COMMAND]");
+        .replace("::COMMAND", chalk.hex(COLORS.COMMAND_NAME).bold("[⚡️COMMAND]"))
+        .replace("::EVENT", chalk.hex(COLORS.EVENT_NAME).bold("[⚡️EVENT]"))
+        .replace("::MONGO", chalk.hex(COLORS.MONGO).bold("[🥭 MONGO]"));
 
-const _COMMAND = (): string => colorTemplates.moduleName("[COMMAND]");
-const _EVENT = (): string => colorTemplates.moduleName("[EVENT]");
-const _MONGO = (): string => colorTemplates.moduleName("[🥭 MONGO]");
-
-const _DYNAMIC_SHARD = (shards: Shard[]): string =>
-    shards?.length ? chalk.gray`(${shards.length === 1 ? "Shard:" : "Shards:"} ${shards.join(", ")})` : "";
-const _SHARD_COUNT = (count: number): string => `${count ? chalk.gray(`Shards running: ${count}`) : ""}`;
-
-/* - - - - - { Exports } - - - - - */
-function contextFormatter(str: string): string {
-    return str
-        .replace("$_TIMESTAMP", _TIMESTAMP())
-
-        .replace("$_CLIENT", _CLIENT())
-        .replace("$_ACM_LOCAL", _ACM_LOCAL())
-        .replace("$_ACM_GLOBAL", _ACM_GLOBAL())
-
-        .replace("$_IMPORTER", _IMPORTER())
-        .replace("$_IMPORT_EVENT", _IMPORT_EVENT())
-        .replace("$_IMPORT_COMMAND", _IMPORT_COMMAND())
-
-        .replace("$_COMMAND", _COMMAND())
-        .replace("$_EVENT", _EVENT())
-        .replace("$_MONGO", _MONGO());
+    return chalk`${str}`;
 }
 
-/* - - - - - { Exports } - - - - - */
-export function debug(msg: string): void {
-    console.log(contextFormatter(colorTemplates.debug.italic(chalk`${msg}`)));
+function __log(msg: string, format: boolean = true): void {
+    const timestamp = __format("::TIMESTAMP ");
+    console.log(`${timestamp}${format ? __format(`${msg}`) : `${msg}`}`);
 }
 
-export function error(header: string, msg: string, err: any = ""): void {
-    console.error(contextFormatter(chalk`${chalk.bgRed.white("ERROR!")} ${chalk.bold.red(header)} ${msg}`), err);
+function __error(msg: string, err: any, format: boolean = true): void {
+    const timestamp = __format("::TIMESTAMP ");
+    console.error(`${timestamp}${format ? __format(`${msg}`) : `${msg}`}`, err);
 }
 
-export function log(msg: string): void {
-    console.log(contextFormatter(colorTemplates.log.italic(chalk`${msg}`)));
+/* - - - - - { Base } - - - - - */
+export function log(msg: string, format: boolean = true): void {
+    __log(chalk.gray(msg), format);
 }
 
-export function success(msg: string): void {
-    console.log(contextFormatter(chalk.greenBright(chalk`${msg}`)));
+export function debug(msg: string, format: boolean = true): void {
+    __log(chalk.hex(COLORS.DEBUG)(msg), format);
 }
 
+export function error(header: string, msg: string, err: any = "", format: boolean = true): void {
+    __error(`${chalk.bgRed("ERROR!")} ${chalk.bold.red(header)} ${msg}`, err, format);
+}
+
+export function success(msg: string, format: boolean = true): void {
+    __log(chalk.greenBright(msg), format);
+}
+
+/* - - - - - { Client } - - - - - */
 export const client = {
-    initializing: (shards?: Shard[]): void => {
-        console.log(
-            `$_TIMESTAMP $_CLIENT ⏳ ${chalk.italic(jt.choice(STARTUP_MESSAGES))} $_DYNAMIC_SHARD`
-                .replace("$_TIMESTAMP", _TIMESTAMP())
-                .replace("$_CLIENT", _CLIENT())
-                .replace("$_DYNAMIC_SHARD", _DYNAMIC_SHARD(shards || []))
-        );
-    },
-
-    conecting: (shards?: Shard[]): void => {
-        console.log(
-            `$_TIMESTAMP $_CLIENT ⏳ ${chalk.italic("Connecting to Discord...")} $_DYNAMIC_SHARD`
-                .replace("$_TIMESTAMP", _TIMESTAMP())
-                .replace("$_CLIENT", _CLIENT())
-                .replace("$_DYNAMIC_SHARD", _DYNAMIC_SHARD(shards || []))
-        );
-    },
-
-    online: (shardCount = 0): void => {
-        console.log(
-            `$_TIMESTAMP $_CLIENT ✅ ${chalk.green("Successfuly connected to Discord!")} $_SHARD_COUNT`
-                .replace("$_TIMESTAMP", _TIMESTAMP())
-                .replace("$_CLIENT", _CLIENT())
-                .replace("$_SHARD_COUNT", _SHARD_COUNT(shardCount))
-        );
-    },
-
-    ready: (shards?: Shard[]): void => {
-        console.log(
-            `$_TIMESTAMP ${chalk`{bold {greenBright ${PROJECT}} is up and running!}`} 🎉 $_DYNAMIC_SHARD`
-                .replace("$_TIMESTAMP", _TIMESTAMP())
-                .replace("$_DYNAMIC_SHARD", _DYNAMIC_SHARD(shards || []))
-        );
-    }
+    starting: (): void => __log(`::CLIENT ⏳ ${chalk.italic(jt.choice(config.logger.STARTUP_MESSAGES))}`),
+    connecting: (): void => __log(`::CLIENT ⏳ ${chalk.italic("Connecting to Discord...")}`),
+    online: (): void => __log(`::CLIENT ✅ ${chalk.greenBright("Successfuly connected to Discord!")}`),
+    ready: () => __log(`::CLIENT ✅ ${chalk.greenBright(`${chalk.bold.underline(PROJECT)} is up and running!`)} 🎉`)
 };
 
+/* - - - - - { utils/importers } - - - - - */
 export const importer = {
-    eventImport: (name: string, path: string, enabled: boolean): void => {
-        console.log(
-            `$_TIMESTAMP $IMPORT_EVENT ${
-                enabled
-                    ? `${colorTemplates.eventName.bold(name)} ${chalk.italic.gray(path)}`
-                    : chalk.strikethrough(`${chalk.bold.dim(name)} ${chalk.italic.gray(path)}`)
-            }`
-                .replace("$_TIMESTAMP", _TIMESTAMP())
-                .replace("$IMPORT_EVENT", _IMPORT_EVENT())
-        );
+    event: (event: string, path: string, enabled: boolean): void => {
+        const _msg = `${chalk.hex(COLORS.EVENT_NAME).bold(event)} ${chalk.italic.gray(`'${path}'`)}`;
+        __log(`::IMPORT_EVENT ${chalk.bold("✔️ IMPORTED")} | ${enabled ? _msg : chalk.strikethrough(_msg)}`);
     },
 
-    commandImport: (name: string, path: string, type: "PRFX" | "SLSH" | "CTX" | "UI"): void => {
+    command: (command: string, path: string, type: "PRFX" | "SLSH" | "CTX" | "UI"): void => {
         let prefix = "";
-
-        // prettier-ignore
         switch (type) {
-            case "PRFX": prefix = config.client.PREFIX; break;
-            case "SLSH": prefix = "/"; break;
-            case "CTX": prefix = "[ContextMenu] "; break;
-            case "UI": prefix = "[UserInstallable] "; break;
+            case "PRFX":
+                prefix = config.client.PREFIX;
+                break;
+            case "SLSH":
+                prefix = "/";
+                break;
+            case "CTX":
+                prefix = "[ContextMenu] ";
+                break;
+            case "UI":
+                prefix = "[UserInstallable] ";
+                break;
         }
-
-        // prettier-ignore
-        console.log(
-            `$_TIMESTAMP $IMPORT_COMMAND ${colorTemplates.commandName.bold(`${chalk.gray(prefix)}${name}`)} ${chalk.italic.gray(path)}`
-                .replace("$_TIMESTAMP", _TIMESTAMP())
-                .replace("$IMPORT_COMMAND", _IMPORT_COMMAND())
+        __log(
+            `::IMPORT_COMMAND ${chalk.bold("✔️ IMPORTED")} | ${chalk.dim(prefix)}${chalk
+                .hex(COLORS.COMMAND_NAME)
+                .bold(command)} ${chalk.italic.gray(`'${path}'`)}`
         );
     }
 };
 
-export default {
-    debug,
-    error,
-    log,
-    success,
-
-    client,
-    importer
+export const event = (event: string, msg: string): void => {
+    __log(`::EVENT ${chalk.hex(COLORS.EVENT_NAME).bold(event)} | ${msg}`);
 };
+
+export const command = (command: string, msg: string, type: "PRFX" | "SLSH" | "CTX" | "UI"): void => {
+    let prefix = "";
+    switch (type) {
+        case "PRFX":
+            prefix = config.client.PREFIX;
+            break;
+        case "SLSH":
+            prefix = "/";
+            break;
+        case "CTX":
+            prefix = "[ContextMenu] ";
+            break;
+        case "UI":
+            prefix = "[UserInstallable] ";
+            break;
+    }
+    __log(`::COMMAND ${chalk.dim(prefix)}${chalk.hex(COLORS.COMMAND_NAME).bold(command)} | ${msg}`);
+};
+
+/* - - - - - { Test } - - - - - */
+export function test(): void {
+    log("This is a test log.");
+    debug("This is a test debug.");
+    error("[CLIENT]", "This is a test error.", "This is an error message.");
+    success("This is a test success.");
+
+    console.log();
+
+    client.starting();
+    client.connecting();
+    client.online();
+    client.ready();
+
+    console.log();
+
+    importer.event("0_setStatus", "./events/ready/0_setStatus.ts", true);
+    importer.event("9_botReady", "./events/ready/9_botReady.ts", false);
+    importer.command("cookie_PRFX", "./commands/prefix/cookie_PRFX.ts", "PRFX");
+    importer.command("cookie_SLSH", "./commands/slash/cookie_SLSH.ts", "SLSH");
+    importer.command("avatar_CTX", "./commands/special/contextMenu/avatar_CTX.ts", "CTX");
+    importer.command("pick_UI", "./commands/special/userInstallable/pick_UI.ts", "UI");
+
+    console.log();
+
+    event("9_processSlashCommand", "user: '842555247145779211' | guild: '1052726201086656612'");
+    event("9_processPrefixCommand", "user: '842555247145779211' | guild: '1052726201086656612'");
+
+    command("cookie", "user: '842555247145779211' | guild: '1052726201086656612'", "PRFX");
+    command("cookie", "user: '842555247145779211' | guild: '1052726201086656612'", "SLSH");
+    command("avatar", "user: '842555247145779211' | guild: '1052726201086656612'", "CTX");
+    command("pick", "user: '842555247145779211' | guild: '1052726201086656612'", "UI");
+
+    console.log();
+
+    log(
+        "Log Headers ::CLIENT ::ACM_LOCAL ::ACM_GLOBAL ::IMPORTER ::IMPORT_EVENT ::IMPORT_COMMAND ::COMMAND ::EVENT ::MONGO"
+    );
+
+    log(
+        "Log Headers (Raw) ::TIMESTAMP ::CLIENT ::ACM_LOCAL ::ACM_GLOBAL ::IMPORTER ::IMPORT_EVENT ::IMPORT_COMMAND ::COMMAND ::EVENT ::MONGO",
+        false
+    );
+}
+
+export default { log, debug, error, success, client, importer, event, command, test };
