@@ -38,4 +38,27 @@ export function formatThousands(num: number, sep: string = ","): string {
     return `${num}`.replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, sep);
 }
 
-export default { clamp, secToMs, msToSec, formatThousands };
+
+/** Format a number into a short, human-readable string.
+ * @param num The number to format.
+ * @param units Custom unit names to use.
+ * @example
+ * ```ts
+ * formatNumber(1000) -> "1k"
+ * formatNumber(1000000) -> "1mil"
+ * formatNumber(1000000000) -> "1bil"
+ * formatNumber(1000, [" thou", " mill", " bill"]) -> "1 thou"
+ * ``` */
+export function formatLargeNumber(num: number, units: [string, string, string] = ["k", "mil", "bil"]): string {
+    const _units = ["", ...units];
+    let index = 0;
+    while (Math.abs(num) >= 1000 && index < _units.length - 1) {
+        num /= 1000;
+        index++;
+    }
+    let result = num.toFixed(1).replace(/\.0$/, "");
+    if (result.slice(-1) === "0") result = result.slice(0, -1);
+    return result + _units[index];
+}
+
+export default { clamp, secToMs, msToSec, formatThousands, formatLargeNumber };
