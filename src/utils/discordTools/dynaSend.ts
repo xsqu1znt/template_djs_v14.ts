@@ -12,7 +12,7 @@ export interface DynaSendOptions {
      * ___3.___ `Message`: "messageReply"
      *
      * ___3.___ `GuildMember` | `User`: "dmUser" */
-    sendMethod?: SendMethod;
+    sendMethod?: SendMethod | null;
     /** Text content to send in the message. */
     content?: string;
     /** Embeds to send with the message. */
@@ -50,6 +50,7 @@ import jt from "@utils/jsTools";
 export default async function dynaSend(handler: SendHandler, options: DynaSendOptions): Promise<Message | null> {
     let _options = {
         ...{
+            sendMethod: "",
             content: "",
             embeds: [],
             components: [],
@@ -59,19 +60,6 @@ export default async function dynaSend(handler: SendHandler, options: DynaSendOp
             fetchReply: true
         },
         ...options,
-
-        sendMethod:
-            options.sendMethod ??
-            /* defaults */
-            handler instanceof BaseInteraction
-                ? "reply"
-                : handler instanceof BaseChannel
-                ? "sendInChannel"
-                : handler instanceof Message
-                ? "messageReply"
-                : handler instanceof GuildMember || handler instanceof User
-                ? "dmUser"
-                : "reply",
 
         /* Ensure all arrays are, well, arrays */
         embeds: options.embeds ? jt.forceArray(options.embeds, { filterFalsey: true }) : [],
@@ -87,11 +75,22 @@ export default async function dynaSend(handler: SendHandler, options: DynaSendOp
         }
     };
 
+    // Set SendMethod defaults
+    _options.sendMethod ||=
+        handler instanceof BaseInteraction
+            ? "reply"
+            : handler instanceof BaseChannel
+            ? "sendInChannel"
+            : handler instanceof Message
+            ? "messageReply"
+            : handler instanceof GuildMember || handler instanceof User
+            ? "dmUser"
+            : null;
+
     // Parse deleteAfter time
     _options.deleteAfter = jt.parseTime(_options.deleteAfter as string | number);
 
     /* - - - - - { Error Checking } - - - - - */
-    console.log(_options.sendMethod);
     if (_options.sendMethod) {
         if (!(handler instanceof BaseInteraction) && ["reply", "editReply", "followUp"].includes(_options.sendMethod))
             throw new TypeError("[DynaSend] Invalid SendMethod", { cause: "'handler' is not 'Interaction' based" });

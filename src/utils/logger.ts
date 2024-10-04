@@ -11,7 +11,7 @@ const { COLORS } = config.logger;
 function __format(str: string, colored: boolean = true): string {
     const { LOG_TIMESTAMPS } = config.logger;
 
-    str = str
+    return str
         .replace("::TIMESTAMP ", LOG_TIMESTAMPS ? `[${new Date().toLocaleTimeString()}] ` : "")
 
         .replace("::CLIENT", colored ? chalk.bold.gray("[CLIENT]") : "[CLIENT]")
@@ -25,8 +25,6 @@ function __format(str: string, colored: boolean = true): string {
         .replace("::COMMAND", colored ? chalk.hex(COLORS.COMMAND_NAME).bold("[⚡️COMMAND]") : "[⚡️COMMAND]")
         .replace("::EVENT", colored ? chalk.hex(COLORS.EVENT_NAME).bold("[⚡️EVENT]") : "[⚡️EVENT]")
         .replace("::MONGO", colored ? chalk.hex(COLORS.MONGO).bold("[🥭 MONGO]") : "[🥭 MONGO]");
-
-    return chalk`${str}`;
 }
 
 function __log(msg: string, format: boolean = true): void {
@@ -94,6 +92,13 @@ export const importer = {
         );
     }
 };
+
+export const db = {
+    mongo: {
+        connecting: (): void => __log(`::MONGO ⏳ ${chalk.italic("Connecting to MongoDB...")}`),
+        connected: (): void => __log(`::MONGO ✅ ${chalk.greenBright("Successfully connected to MongoDB!")}`),
+    }
+}
 
 export const event = (event: string, msg: string): void => {
     __log(`::EVENT ${chalk.hex(COLORS.EVENT_NAME).bold(event)} | ${msg}`);
@@ -163,4 +168,4 @@ export function test(): void {
     );
 }
 
-export default { log, debug, error, success, client, importer, event, command, test };
+export default { log, debug, error, success, client, importer, db, event, command, test };

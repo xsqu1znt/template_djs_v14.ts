@@ -1,7 +1,7 @@
 import { SlashCommand } from "@customTypes/commands";
 
 import { SlashCommandBuilder } from "discord.js";
-import { BetterEmbed } from "@utils/discordTools";
+import { BetterEmbed, PageNavigator } from "@utils/discordTools";
 import jt from "@utils/jsTools";
 
 const categoryIcons: { [key: string]: string } = {
@@ -103,6 +103,13 @@ export const __command: SlashCommand = {
         }
 
         /* - - - - - { Page Navigation } - - - - - */
-        return await categoryEmbeds[0][0].send(interaction);
+        const pageNav = new PageNavigator({
+            allowedParticipants: interaction.user,
+            pages: PageNavigator.resolveEmbedsToPages(categoryEmbeds)
+        });
+
+        pageNav.addSelectMenuOptions(...categoryNames.map(cat => ({ emoji: cat.icon, label: cat.name })));
+
+        return await pageNav.send(interaction, { allowedMentions: { repliedUser: false } });
     }
 };

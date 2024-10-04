@@ -26,11 +26,11 @@ export async function connect(uri: string = MONGO_URI): Promise<mongoose.Connect
     }
 
     try {
-        logger.log("::MONGO ⏳️ Connecting to MongoDB...");
+        logger.db.mongo.connecting();
         // Create a new connection to MongoDB
         connection = await mongoose.connect(uri);
         // Log success if connected
-        if (connection) logger.success("::MONGO ✅ Successfully connected to MongoDB!");
+        if (connection) logger.db.mongo.connected();
     } catch (err) {
         // Log an error if the connection failed
         logger.error("::MONGO", "Couldn't connect to MongoDB", connection);
