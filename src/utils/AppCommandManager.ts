@@ -38,7 +38,7 @@ export default class AppCommandManager {
 
         /* error */
         if (!commands.length) {
-            return logger.error("$_TIMESTAMP $_ACM_LOCAL", "No commands found to register");
+            return logger.error("::ACM_LOCAL", "No commands found to register");
         }
 
         // Fetch the guilds from the client using the provided guild IDs
@@ -49,7 +49,7 @@ export default class AppCommandManager {
         /* error */
         if (!guilds.length) {
             return logger.error(
-                "$_TIMESTAMP $_ACM_LOCAL",
+                "::ACM_LOCAL",
                 "Failed to register app commands",
                 "No guilds found with the provided IDs"
             );
@@ -73,7 +73,7 @@ export default class AppCommandManager {
             }
         });
 
-        logger.log("$_TIMESTAMP $_ACM_LOCAL ⏳ Registering app commands...");
+        logger.log("::ACM_LOCAL ⏳ Registering app commands...");
 
         // Iterate through each guild ID and register the commands
         return await Promise.all(
@@ -82,19 +82,19 @@ export default class AppCommandManager {
                 rest
                     .put(Routes.applicationGuildCommands(this.client.user?.id || "", id), { body: command_data })
                     .then(() => {
-                        logger.log(`$_TIMESTAMP $_ACM_LOCAL Registered to guild ('${id}')`);
+                        logger.success(`::ACM_LOCAL Registered to guild ('${id}')`);
                         return true;
                     })
                     .catch(err => {
-                        logger.error("$_TIMESTAMP $_ACM_LOCAL", `Failed to register app commands to guild ('${id}')`, err);
+                        logger.error("::ACM_LOCAL", `Failed to register app commands to guild ('${id}')`, err);
                         return null;
                     })
             )
         ).then(resolved => {
             let successful = resolved.filter(Boolean).length;
             // Log the number of guilds that were successfully registered
-            logger.log(
-                `$_TIMESTAMP $_ACM_LOCAL ✅ Registered app commands for ${successful} ${
+            logger.success(
+                `::ACM_LOCAL ✅ Registered app commands for ${successful} ${
                     successful === 1 ? "guild" : "guilds"
                 }`
             );
@@ -113,14 +113,14 @@ export default class AppCommandManager {
         /* error */
         if (!guilds.length) {
             return logger.error(
-                "$_TIMESTAMP $_ACM_LOCAL",
+                "::ACM_LOCAL",
                 "Failed to register app commands",
                 "No guilds found with the provided IDs"
             );
         }
 
         /* - - - - - - { Remove } - - - - -  */
-        logger.log("$_TIMESTAMP $_ACM_LOCAL ⏳ Removing app commands...");
+        logger.log("::ACM_LOCAL ⏳ Removing app commands...");
 
         // Iterate through each guild ID and register the commands
         return await Promise.all(
@@ -129,19 +129,19 @@ export default class AppCommandManager {
                 rest
                     .put(Routes.applicationGuildCommands(this.client.user?.id || "", id), { body: [] })
                     .then(() => {
-                        logger.log(`$_TIMESTAMP $_ACM_LOCAL Successfully removed from guild ('${id}')`);
+                        logger.success(`::ACM_LOCAL Successfully removed from guild ('${id}')`);
                         return true;
                     })
                     .catch(err => {
-                        logger.error("$_TIMESTAMP $_ACM_LOCAL", `Failed to remove app commands from guild ('${id}')`, err);
+                        logger.error("::ACM_LOCAL", `Failed to remove app commands from guild ('${id}')`, err);
                         return null;
                     })
             )
         ).then(resolved => {
             let successful = resolved.filter(Boolean).length;
             // Log the number of guilds that we've successfully removed the commands from
-            logger.log(
-                `$_TIMESTAMP $_ACM_LOCAL ✅ Removed app commands for ${successful} ${successful === 1 ? "guild" : "guilds"}`
+            logger.success(
+                `::ACM_LOCAL ✅ Removed app commands for ${successful} ${successful === 1 ? "guild" : "guilds"}`
             );
         });
     }
@@ -157,7 +157,7 @@ export default class AppCommandManager {
 
         /* error */
         if (!commands.length) {
-            return logger.error("$_TIMESTAMP $_ACM_GLOBAL", "No commands found to register");
+            return logger.error("::ACM_GLOBAL", "No commands found to register");
         }
 
         let command_data = commands.map(cmd => {
@@ -177,13 +177,13 @@ export default class AppCommandManager {
             }
         });
 
-        logger.log("$_TIMESTAMP $_ACM_GLOBAL ⏳ Registering app commands...");
+        logger.log("::ACM_GLOBAL ⏳ Registering app commands...");
 
         // Rest API request
         return await rest
             .put(Routes.applicationCommands(this.client.user?.id || ""), { body: command_data })
-            .then(() => logger.log("$_TIMESTAMP $_ACM_GLOBAL ✅ Registered app commands"))
-            .catch(err => logger.error("$_TIMESTAMP $_ACM_GLOBAL", "Failed to register app commands", err));
+            .then(() => logger.success("::ACM_GLOBAL ✅ Registered app commands"))
+            .catch(err => logger.error("::ACM_GLOBAL", "Failed to register app commands", err));
     }
 
     /** Remove app commands from the bot's account data.
@@ -192,12 +192,12 @@ export default class AppCommandManager {
      *
      * __NOTE__: This has no effect on app commands registered with `registerToLocal`. */
     async removeFromGlobal(): Promise<void> {
-        logger.log("$_TIMESTAMP $_ACM_GLOBAL ⏳ Removing app commands...");
+        logger.log("::ACM_GLOBAL ⏳ Removing app commands...");
 
         // Rest API request
         return await rest
             .put(Routes.applicationCommands(this.client.user?.id || ""), { body: [] })
-            .then(() => logger.log("$_TIMESTAMP $_ACM_GLOBAL ✅ Removed app commands"))
-            .catch(err => logger.error("$_TIMESTAMP $_ACM_GLOBAL", "Failed to remove app commands", err));
+            .then(() => logger.success("::ACM_GLOBAL ✅ Removed app commands"))
+            .catch(err => logger.error("::ACM_GLOBAL", "Failed to remove app commands", err));
     }
 }

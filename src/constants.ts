@@ -1,14 +1,14 @@
 import config from "@configs";
 
 /* - - - - - { CLI } - - - - -  */
-const argsv: string[] = process.argv.slice(2);
+const __argsv: string[] = process.argv.slice(2);
 
-export const cli = {
-    GUILD_IDS: argsv.find(arg => arg.startsWith("--guild="))?.split(" ") as string[],
-    PUSH_COMMANDS_LOCAL: argsv.includes("--push-local") as boolean,
-    REMOVE_COMMANDS_LOCAL: argsv.includes("--remove-local") as boolean,
-    PUSH_COMMANDS_GLOBAL: argsv.includes("--push-global") as boolean,
-    REMOVE_COMMANDS_GLOBAL: argsv.includes("--remove-global") as boolean
+export const argsv = {
+    GUILD_IDS: __argsv.find(arg => arg.startsWith("--guild="))?.split(" ") as string[],
+    PUSH_COMMANDS_LOCAL: __argsv.includes("--push-local") as boolean,
+    REMOVE_COMMANDS_LOCAL: __argsv.includes("--remove-local") as boolean,
+    PUSH_COMMANDS_GLOBAL: __argsv.includes("--push-global") as boolean,
+    REMOVE_COMMANDS_GLOBAL: __argsv.includes("--remove-global") as boolean
 };
 
 /* - - - - - { Environment } - - - - -  */
