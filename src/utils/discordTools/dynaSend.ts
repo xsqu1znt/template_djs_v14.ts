@@ -25,7 +25,7 @@ export interface DynaSendOptions {
     ephemeral?: boolean;
     /** An amount of time to wait in __milliseconds__ before deleting the message.
      *
-     * This option also utilizes `@utils/jsTools.parseTime()`, letting you use "10s" or "1m 30s" instead of a number. */
+     * This option also utilizes {@link jt.parseTime jsTools.parseTime}, letting you use "10s" or "1m 30s" instead of a number. */
     deleteAfter?: number | string;
     /** If the `Message` data is returned after replying to or editing an `Interaction`. _`true` by default._ */
     fetchReply?: boolean;

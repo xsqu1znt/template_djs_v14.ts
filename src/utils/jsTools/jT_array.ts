@@ -3,7 +3,7 @@ import * as __object from "./jT_object";
 /** Split an array into groups that don't exceed the given size.
  * @param {array} arr The array to split.
  * @param {number} size The max size before splitting.
- * @param {boolean} copy Return a deep copy of the array using {@link structuredClone()}. */
+ * @param {boolean} copy Return a deep copy of the array using {@link structuredClone}. */
 export function chunk<T extends any[]>(arr: T, size: number, copy: boolean = false): T[] {
     if (!Array.isArray(arr)) throw new TypeError("A valid array must be provided");
     if (size <= 0) throw new Error("Size cannot be 0 or negative");
@@ -40,7 +40,7 @@ export function chunk<T extends any[]>(arr: T, size: number, copy: boolean = fal
  * ```
  * @param arr The array of items to filter.
  * @param prop The nested property within each item to filter by.
- * @param copy Return a deep copy of the array using {@link structuredClone()}. */
+ * @param copy Return a deep copy of the array using {@link structuredClone}. */
 export function unique<T extends any[]>(arr: T, prop?: string, copy: boolean = false): T {
     let uniqueArray = [];
     let referenceMap = new Map();
