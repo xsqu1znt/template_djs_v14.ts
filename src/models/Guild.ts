@@ -4,14 +4,14 @@ import config from "../configs";
 interface IGuild {
     _id: string;
     prefix: string;
-    timestamp_joined: Date;
+    joinedAt: Date;
 }
 
 export const schema = new Schema<IGuild>(
     {
         _id: { type: String, required: true },
         prefix: { type: String, default: config.client.PREFIX },
-        timestamp_joined: { type: Date, default: Date.now() }
+        joinedAt: { type: Date, default: Date.now() }
     },
     { collection: "guilds" }
 );

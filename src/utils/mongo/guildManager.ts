@@ -5,15 +5,15 @@ import config from "@configs";
 
 const docUtils = new DocumentUtils(guildModel);
 
-async function fetchPrefix(guild_id: string): Promise<string> {
-    let prefix = (await docUtils.fetch(guild_id, { query: { prefix: 1 } }))?.prefix;
-    if (!prefix) return await setPrefix(guild_id, config.client.PREFIX);
+async function fetchPrefix(guildId: string): Promise<string> {
+    let prefix = (await docUtils.fetch(guildId, { query: { prefix: 1 } }))?.prefix;
+    if (!prefix) return await setPrefix(guildId, config.client.PREFIX);
     return prefix || config.client.PREFIX;
 }
 
-async function setPrefix(guild_id: string, new_prefix: string): Promise<string> {
-    await docUtils.update(guild_id, { prefix: new_prefix }, { upsert: true });
-    return new_prefix;
+async function setPrefix(guildId: string, newPrefix: string): Promise<string> {
+    await docUtils.update(guildId, { prefix: newPrefix }, { upsert: true });
+    return newPrefix;
 }
 
 export default {
