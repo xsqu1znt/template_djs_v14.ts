@@ -4,7 +4,12 @@ import { Client, Collection, SlashCommandBuilder } from "discord.js";
 
 declare module "discord.js" {
     interface Client {
+        /** The name of the client. Currently used for logging. */
+        __name?: string;
+
+        /** The client's commands. */
         commands: {
+            /** Slash commands. **`/cookie`** */
             slash: {
                 all: Collection<string, SlashCommand>;
                 public: Collection<string, SlashCommand>;
@@ -12,6 +17,7 @@ declare module "discord.js" {
                 custom: Collection<string, SlashCommand>;
             };
 
+            /** Prefix commands. **`!cookie`** */
             prefix: {
                 all: Collection<string, PrefixCommand>;
                 public: Collection<string, PrefixCommand>;
@@ -19,6 +25,7 @@ declare module "discord.js" {
                 custom: Collection<string, PrefixCommand>;
             };
 
+            /** Special commands. **`Context Menu`** | **`User Installable`** */
             special: {
                 all: Collection<string, ContextMenuCommand | UserInstallableCommand>;
                 contextMenu: Collection<string, ContextMenuCommand>;

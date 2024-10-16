@@ -116,7 +116,7 @@ import { IS_DEV_MODE } from "@constants";
  * - __`$month`__: _M or MM_
  * - __`$day`__: _D or DD_
  *
- * ___NOTE___: `Client` is also included in `RepliedInteraction` and `Message` contexts. */
+ * ___NOTE:___ `Client` is also included in `RepliedInteraction` and `Message` contexts. */
 export default class BetterEmbed {
     #embed = new EmbedBuilder();
 
@@ -452,7 +452,7 @@ export default class BetterEmbed {
 
     /** Add or replace the embed's fields.
      *
-     * ___NOTE___: You can only have a MAX of 25 fields per `Embed`. */
+     * ___NOTE:___ You can only have a MAX of 25 fields per `Embed`. */
     addFields(fieldData: APIEmbedField[] | null = this.data.fields as APIEmbedField[], replaceAll: boolean = false): this {
         let _thisFields = this.data.fields as APIEmbedField[];
 
@@ -496,7 +496,7 @@ export default class BetterEmbed {
 
     /** Delete or replace the embed's fields.
      *
-     * - **NOTE**: You can only have a MAX of 25 fields per `Embed`. */
+     * - ___NOTE:___ You can only have a MAX of 25 fields per `Embed`. */
     spliceFields(index: number, deleteCount: number, fieldData?: APIEmbedField[]): this {
         let _thisFields = this.data.fields as APIEmbedField[];
 

@@ -44,6 +44,7 @@ const client = new Client({
 
 /* - - - - - { Custom Client Properties } - - - - - */
 /* NOTE: You must define extra properties in './types/global.d.ts' before adding them here */
+client.__name = "template_djs_v14";
 
 client.commands = {
     slash: {
@@ -103,7 +104,7 @@ async function init(): Promise<void> {
 
         await mongo.connect();
 
-        logger.client.ready();
+        logger.client.ready(client);
 
         // Start the CLI
         cli(client, acm);

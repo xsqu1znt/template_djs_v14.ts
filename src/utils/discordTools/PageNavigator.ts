@@ -17,7 +17,7 @@ interface PageNavigatorOptions {
      *
      * I.E. if there's more than 5 pages, add the `Page Jump` button/reaction.
      *
-     * __NOTE__: The threshold can be confiured in the `./config.json` file. */
+     * ___NOTE:___ The threshold can be confiured in the `./config.json` file. */
     dynamic?: boolean;
     /** How long to wait before timing out. Use `undefined` to never timeout.
      *

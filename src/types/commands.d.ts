@@ -144,11 +144,11 @@ interface BaseCommandOptions {
 interface InteractionBasedCommandOptions extends BaseCommandOptions {
     /** Defer the interaction.
      *
-     * ___NOTE___: Required if the Slash Command can take longer than 3 seconds to execute. */
+     * ___NOTE:___ Required if the Slash Command can take longer than 3 seconds to execute. */
     deferReply?: boolean;
     /** Defer the interaction ephemerally.
      *
-     * ___NOTE___: Required if the Slash Command can take longer than 3 seconds to execute. */
+     * ___NOTE:___ Required if the Slash Command can take longer than 3 seconds to execute. */
     deferReplyEphemeral?: boolean;
 }
 

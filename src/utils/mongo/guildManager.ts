@@ -6,7 +6,7 @@ import config from "@configs";
 const docUtils = new DocumentUtils(guildModel);
 
 async function fetchPrefix(guildId: string): Promise<string> {
-    let prefix = (await docUtils.fetch(guildId, { query: { prefix: 1 } }))?.prefix;
+    let prefix = (await docUtils.fetch(guildId, { projection: { prefix: 1 } }))?.prefix;
     if (!prefix) return await setPrefix(guildId, config.client.PREFIX);
     return prefix || config.client.PREFIX;
 }
@@ -17,7 +17,7 @@ async function setPrefix(guildId: string, newPrefix: string): Promise<string> {
 }
 
 export default {
-    ...docUtils.exports,
+    ...docUtils.__exports,
     fetchPrefix,
     setPrefix
 };

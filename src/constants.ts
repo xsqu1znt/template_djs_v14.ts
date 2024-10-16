@@ -4,7 +4,10 @@ import config from "@configs";
 const __argsv: string[] = process.argv.slice(2);
 
 export const argsv = {
-    GUILD_IDS: __argsv.find(arg => arg.startsWith("--guild="))?.split(" ") as string[],
+    GUILD_IDS: (() => {
+        const ids = __argsv.find(arg => arg.startsWith("--guild="))?.split(" ");
+        return ids?.length ? ids : undefined;
+    })(),
     PUSH_COMMANDS_LOCAL: __argsv.includes("--push-local") as boolean,
     REMOVE_COMMANDS_LOCAL: __argsv.includes("--remove-local") as boolean,
     PUSH_COMMANDS_GLOBAL: __argsv.includes("--push-global") as boolean,

@@ -29,7 +29,7 @@ export default class AppCommandManager {
 
     /** Register app commands to one or more specific servers.
      *
-     * __NOTE__: This ___does not___ add `UserInstall` commands to user accounts. */
+     * ___NOTE:___ This ___does not___ add `UserInstall` commands to user accounts. */
     async registerToLocal(guildIds: string[], commands?: RegisterableCommand[]): Promise<void> {
         // If no commands are provided, use all public and interaction commands from the client
         commands = commands?.length
@@ -103,7 +103,7 @@ export default class AppCommandManager {
 
     /** Remove app commands from one or more specific servers.
      *
-     * __NOTE__: This has no effect on app commands registered with `registerToGlobal`. */
+     * ___NOTE:___ This has no effect on app commands registered with `registerToGlobal`. */
     async removeFromLocal(guildIds: string[]): Promise<void> {
         // Fetch the guilds from the client using the provided guild IDs
         let guilds = (await Promise.all(guildIds.map(id => this.client.guilds.fetch(id).catch(null))))
@@ -150,7 +150,7 @@ export default class AppCommandManager {
      *
      * This allows Discord to know what commands the bot has and removes the need to register commands to new servers.
      *
-     * __NOTE__: This also adds `UserInstall` commands to user accounts. */
+     * ___NOTE:___ This also adds `UserInstall` commands to user accounts. */
     async registerToGlobal(commands?: RegisterableCommand[]): Promise<void> {
         // If no commands are provided, use all public and interaction commands from the client
         commands ||= [...this.client.commands.slash.public.values(), ...this.client.commands.special.all.values()];
@@ -190,7 +190,7 @@ export default class AppCommandManager {
      *
      * This also removes `UserInstall` commands from user accounts.
      *
-     * __NOTE__: This has no effect on app commands registered with `registerToLocal`. */
+     * ___NOTE:___ This has no effect on app commands registered with `registerToLocal`. */
     async removeFromGlobal(): Promise<void> {
         logger.log("::ACM_GLOBAL ⏳ Removing app commands...");
 

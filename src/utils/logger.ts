@@ -3,8 +3,8 @@
 import jt from "@utils/jsTools";
 import chalk from "chalk";
 
-import { name as PROJECT } from "@pkgJSON";
 import config from "@configs";
+import { Client } from "discord.js";
 
 const { COLORS } = config.logger;
 
@@ -59,7 +59,8 @@ export const client = {
     starting: (): void => __log(`::CLIENT ⏳ ${chalk.italic(jt.choice(config.logger.STARTUP_MESSAGES))}`),
     connecting: (): void => __log(`::CLIENT ⏳ ${chalk.italic("Connecting to Discord...")}`),
     online: (): void => __log(`::CLIENT ✅ ${chalk.greenBright("Successfuly connected to Discord!")}`),
-    ready: () => __log(`::CLIENT ✅ ${chalk.greenBright(`${chalk.bold.underline(PROJECT)} is up and running!`)} 🎉`)
+    ready: (client: Client) =>
+        __log(`::CLIENT ✅ ${chalk.greenBright(`${chalk.bold.underline(client.__name)} is up and running!`)} 🎉`)
 };
 
 /* - - - - - { utils/importers } - - - - - */
@@ -96,9 +97,9 @@ export const importer = {
 export const db = {
     mongo: {
         connecting: (): void => __log(`::MONGO ⏳ ${chalk.italic("Connecting to MongoDB...")}`),
-        connected: (): void => __log(`::MONGO ✅ ${chalk.greenBright("Successfully connected to MongoDB!")}`),
+        connected: (): void => __log(`::MONGO ✅ ${chalk.greenBright("Successfully connected to MongoDB!")}`)
     }
-}
+};
 
 export const event = (event: string, msg: string): void => {
     __log(`::EVENT ${chalk.hex(COLORS.EVENT_NAME).bold(event)} | ${msg}`);
