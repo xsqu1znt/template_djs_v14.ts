@@ -35,32 +35,32 @@
         "ESCAPE": "\u001b",
 
         "formats": {
-            "NORMAL": 0,
-            "BOLD": 1,
-            "UNDERLINE": 2
+            "normal": 0,
+            "bold": 1,
+            "underline": 2
         },
 
         "colors": {
             "text": {
-                "GRAY": 30,
-                "RED": 31,
-                "GREEN": 32,
-                "YELLOW": 33,
-                "BLUE": 34,
-                "PINK": 35,
-                "CYAN": 36,
-                "WHITE": 37
+                "gray": 30,
+                "red": 31,
+                "green": 32,
+                "yellow": 33,
+                "blue": 34,
+                "pink": 35,
+                "cyan": 36,
+                "white": 37
             },
 
             "bg": {
-                "FIREFLY_DARK_BLUE": 40,
-                "ORANGE": 41,
-                "MARBLE_BLUE": 42,
-                "GRAYISH_TURQOUISE": 43,
-                "GRAY": 44,
-                "INDIGO": 45,
-                "LIGHT_GRAY": 46,
-                "WHITE": 47
+                "firefly_dark_blue": 40,
+                "orange": 41,
+                "marble_blue": 42,
+                "grayish_turqouise": 43,
+                "gray": 44,
+                "indigo": 45,
+                "light_gray": 46,
+                "white": 47
             }
         }
     }

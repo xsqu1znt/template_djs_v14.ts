@@ -5,11 +5,10 @@ import * as __object from "./jT_object";
  * @param {number} size The max size before splitting.
  * @param {boolean} copy Return a deep copy of the array using {@link structuredClone}. */
 export function chunk<T extends any[]>(arr: T, size: number, copy: boolean = false): T[] {
-    if (!Array.isArray(arr)) throw new TypeError("A valid array must be provided");
     if (size <= 0) throw new Error("Size cannot be 0 or negative");
     if (!arr.length || arr.length < size) return [arr];
 
-    let chunk: T[] = [];
+    const chunk: T[] = [];
 
     // Iterate through the array
     for (let i = 0; i < arr.length; i += size) {
@@ -24,7 +23,7 @@ export function chunk<T extends any[]>(arr: T, size: number, copy: boolean = fal
  *
  * If a property path isn't provided, items will be sorted by direct comparison.
  *
- * Property paths utilize {@link __object.getProp} which allows for advanced property paths.
+ * Property paths utilize {@link __object.getProp getProp} which allows for advanced property paths.
  *
  * @example
  * ```ts
@@ -42,8 +41,8 @@ export function chunk<T extends any[]>(arr: T, size: number, copy: boolean = fal
  * @param prop The nested property within each item to filter by.
  * @param copy Return a deep copy of the array using {@link structuredClone}. */
 export function unique<T extends any[]>(arr: T, prop?: string, copy: boolean = false): T {
-    let uniqueArray = [];
-    let referenceMap = new Map();
+    const uniqueArray = [];
+    const referenceMap = new Map();
 
     for (let item of arr) {
         let property = typeof item === "object" && prop ? __object.getProp(item, prop) : item;
@@ -58,21 +57,77 @@ export function unique<T extends any[]>(arr: T, prop?: string, copy: boolean = f
     return (copy ? structuredClone(uniqueArray) : uniqueArray) as T;
 }
 
+type ForcedArray<T> = T extends any[] ? T : T[];
 interface ForceArrayOptions {
+    /** Return a deep copy of the array using {@link structuredClone}. */
     copy?: boolean;
+    /** Remove falsey values from the array. */
     filterFalsey?: boolean;
 }
 
-type ForcedArray<T> = T extends any[] ? T : T[];
-
-/** Check if the given item is an array, return the item in an array if it isn't. */
+/** Convert the given item into an array if it is not already.
+ * @param item The item to be converted into an array.
+ * @param options Optional settings for the conversion. */
 export function forceArray<T>(item: T, options?: ForceArrayOptions): ForcedArray<T> {
     let itemArray = Array.isArray(item) ? item : [item];
-
     if (options?.filterFalsey) itemArray = itemArray.filter(Boolean);
     if (options?.copy) itemArray = structuredClone(itemArray);
-
     return itemArray as ForcedArray<T>;
 }
 
-export default { chunk, unique, forceArray };
+type BetterMapCallback<T extends any[]> = (
+    item: T[number],
+    extra: {
+        idx: number;
+        lastElement: T[number] | undefined;
+        newArray: T[number][];
+        originalArray: T;
+    }
+) => T[number];
+
+/** Similar to {@link Array.prototype.map}, but gives the callback access to the new array being constructed.
+ * @param arr The array to map over.
+ * @param callback The callback to run on each item in the array.
+ * @param copy Return a deep copy of the array using {@link structuredClone}. */
+function betterMap<T extends any[]>(arr: T, callback: BetterMapCallback<T>, copy = false): T {
+    const arrayOriginal: T = arr;
+    const arrayNew: any = [];
+
+    for (let idx = 0; idx < arrayOriginal.length; idx++) {
+        const lastElement = arrayNew[idx - 1];
+        arrayNew.push(callback(arrayOriginal[idx], { idx, lastElement, newArray: arrayNew, originalArray: arrayOriginal }));
+    }
+
+    return (copy ? structuredClone(arrayNew) : arrayNew) as T;
+}
+
+type ToMapCallback<T extends any[]> = (
+    item: T[number],
+    extra: {
+        idx: number;
+        lastElement: T[number] | undefined;
+        newMap: Map<any, any>;
+        originalArray: T;
+    }
+) => { key: any; value: any };
+
+/** Similar to {@link Array.prototype.map}, but instead returns a {@link Map}.
+ *
+ * The callback is given access to the new map being constructed.
+ * @param arr The array to map.
+ * @param callback The callback to run on each item in the array.
+ * @param copy Return a deep copy of the map's values using {@link structuredClone}. */
+function toMap<T extends any[]>(arr: T, callback: ToMapCallback<T>, copy = false): Map<any, any> {
+    let arrayOriginal: T = arr;
+    let mapNew: Map<any, any> = new Map();
+
+    for (let idx = 0; idx < arrayOriginal.length; idx++) {
+        const lastElement = mapNew.get(idx - 1);
+        const item = callback(arrayOriginal[idx], { idx, lastElement, newMap: mapNew, originalArray: arrayOriginal });
+        mapNew.set(item.key, copy ? structuredClone(item.value) : item.value);
+    }
+
+    return mapNew;
+}
+
+export default { chunk, unique, forceArray, betterMap, toMap };
