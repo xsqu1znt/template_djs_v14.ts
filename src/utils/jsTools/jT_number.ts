@@ -1,3 +1,23 @@
+const __object = require("./jT_object");
+
+/** Get the sum of an array of numbers. Any negative numbers will subtract from the total.
+ * @param arr The array to sum.
+ * @param path The path to a nested array property.
+ * @param ignoreNaN Ignore non-numerical values and use 0 instead. */
+function sum(arr: number[], path: string = "", ignoreNaN: boolean = false): number {
+    const _path = path.trim();
+
+    // Map the array if a path is provided
+    const _arr = _path ? arr.map(a => Number(__object.getProp(a, _path))) : arr;
+
+    return _arr.reduce((a, b) => {
+        const invalid = isNaN(b) && !ignoreNaN;
+        if (invalid) throw new TypeError(`\'${b}\' is not a valid number`);
+        if (invalid && ignoreNaN) b = 0;
+        return b < 0 ? a - -b : a + (b || 0);
+    }, 0);
+}
+
 /** Clamps a number within a specified range.
  * @param num Number to be clamped.
  * @param range The range to clamp. `min` defaults to 0. */
@@ -8,6 +28,18 @@ export function clamp(num: number, range: { min?: number; max: number } | number
     if (typeof range === "number") _range.max = range;
     else _range = { min: range.min || 0, max: range.max };
     return num < _range.min ? _range.min : num > _range.max ? _range.max : num;
+}
+
+/** Get the percentage value between two numbers.
+ * @param a The numerator.
+ * @param b The denominator.
+ * @param round Whether to round the result to the nearest integer.
+ *
+ * @example
+ * percent(50, 100) --> 50 // 50%
+ * percent(30, 40) --> 75 // 75% */
+function percent(a: number, b: number, round: boolean = true): number {
+    return round ? Math.floor((a / b) * 100) : (a / b) * 100;
 }
 
 /** Converts seconds to milliseconds.
@@ -27,28 +59,23 @@ export function msToSec(ms: number, round: boolean = true): number {
 /** Format a number adding a decimal point to each thousand's place.
  * @param num The number to format.
  * @param sep The decimal point to use.
- * ```ts
- * // returns "1,000"
- * formatThousands(1000)
  *
- * // returns "1.000"
- * formatThousands(1000, ".")
- * ``` */
+ * @example
+ * formatThousands(1000) --> "1,000"
+ * formatThousands(1000, ".") --> "1.000" */
 export function formatThousands(num: number, sep: string = ","): string {
     return `${num}`.replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, sep);
 }
 
-
 /** Format a number into a short, human-readable string.
  * @param num The number to format.
  * @param units Custom unit names to use.
+ *
  * @example
- * ```ts
  * formatNumber(1000) -> "1k"
  * formatNumber(1000000) -> "1mil"
  * formatNumber(1000000000) -> "1bil"
- * formatNumber(1000, [" thou", " mill", " bill"]) -> "1 thou"
- * ``` */
+ * formatNumber(1000, [" thou", " mill", " bill"]) -> "1 thou" */
 export function formatLargeNumber(num: number, units: [string, string, string] = ["k", "mil", "bil"]): string {
     const _units = ["", ...units];
     let index = 0;
@@ -61,4 +88,18 @@ export function formatLargeNumber(num: number, units: [string, string, string] =
     return result + _units[index];
 }
 
-export default { clamp, secToMs, msToSec, formatThousands, formatLargeNumber };
+/** Add the ordinal place to the end of a given number.
+ * @param num The number to add the ordinal to.
+ *
+ * @example
+ * ordinal(1) -> "1st"
+ * ordinal(2) -> "2nd"
+ * ordinal(3) -> "3rd"
+ * ordinal(4) -> "4th" */
+export function toOrdinal(num: number): string {
+    const endings = ["th", "st", "nd", "rd"];
+    const mod = num % 100;
+    return `${num}${endings[(mod - 20) % 10] || endings[mod] || endings[0]}`;
+}
+
+export default { sum, clamp, percent, secToMs, msToSec, formatThousands, formatLargeNumber, toOrdinal };

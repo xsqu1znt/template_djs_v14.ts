@@ -1,3 +1,31 @@
+type ForcedArray<T> = T extends any[] ? T : T[];
+interface ForceArrayOptions {
+    /** Return a deep copy of the array using {@link structuredClone}. */
+    copy?: boolean;
+    /** Remove falsey values from the array. */
+    filterFalsey?: boolean;
+}
+
+type BetterMapCallback<T extends any[]> = (
+    item: T[number],
+    extra: {
+        idx: number;
+        lastElement: T[number] | undefined;
+        newArray: T[number][];
+        originalArray: T;
+    }
+) => T[number];
+
+type ToMapCallback<T extends any[]> = (
+    item: T[number],
+    extra: {
+        idx: number;
+        lastElement: T[number] | undefined;
+        newMap: Map<any, any>;
+        originalArray: T;
+    }
+) => { key: any; value: any };
+
 import * as __object from "./jT_object";
 
 /** Split an array into groups that don't exceed the given size.
@@ -57,14 +85,6 @@ export function unique<T extends any[]>(arr: T, prop?: string, copy: boolean = f
     return (copy ? structuredClone(uniqueArray) : uniqueArray) as T;
 }
 
-type ForcedArray<T> = T extends any[] ? T : T[];
-interface ForceArrayOptions {
-    /** Return a deep copy of the array using {@link structuredClone}. */
-    copy?: boolean;
-    /** Remove falsey values from the array. */
-    filterFalsey?: boolean;
-}
-
 /** Convert the given item into an array if it is not already.
  * @param item The item to be converted into an array.
  * @param options Optional settings for the conversion. */
@@ -74,16 +94,6 @@ export function forceArray<T>(item: T, options?: ForceArrayOptions): ForcedArray
     if (options?.copy) itemArray = structuredClone(itemArray);
     return itemArray as ForcedArray<T>;
 }
-
-type BetterMapCallback<T extends any[]> = (
-    item: T[number],
-    extra: {
-        idx: number;
-        lastElement: T[number] | undefined;
-        newArray: T[number][];
-        originalArray: T;
-    }
-) => T[number];
 
 /** Similar to {@link Array.prototype.map}, but gives the callback access to the new array being constructed.
  * @param arr The array to map over.
@@ -100,16 +110,6 @@ function betterMap<T extends any[]>(arr: T, callback: BetterMapCallback<T>, copy
 
     return (copy ? structuredClone(arrayNew) : arrayNew) as T;
 }
-
-type ToMapCallback<T extends any[]> = (
-    item: T[number],
-    extra: {
-        idx: number;
-        lastElement: T[number] | undefined;
-        newMap: Map<any, any>;
-        originalArray: T;
-    }
-) => { key: any; value: any };
 
 /** Similar to {@link Array.prototype.map}, but instead returns a {@link Map}.
  *

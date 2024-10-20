@@ -1,6 +1,6 @@
 import fs from "fs";
 
-interface readDir_options {
+interface ReadDirOptions {
     /** Return nested files inside of the directory. */
     recursive?: boolean;
 }
@@ -8,13 +8,13 @@ interface readDir_options {
 /** Get an array of file paths inside of a folder.
  * @param path Path to the folder.
  * @param options Extra options. */
-export function readDir(path: string, options?: readDir_options): string[] {
-    options = { ...{ recursive: true }, ...options };
+export function readDir(path: string, options?: ReadDirOptions): string[] {
+    const _options = { recursive: true, ...options };
 
     // Check if the file path exists first
     if (!fs.existsSync(path)) return [];
 
-    if (!options.recursive) return fs.readdirSync(path);
+    if (!_options.recursive) return fs.readdirSync(path);
 
     const walk = (_dir: string, _dn?: string): string[] => {
         let results: string[] = [];
