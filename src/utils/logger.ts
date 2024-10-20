@@ -6,6 +6,8 @@ import chalk from "chalk";
 import config from "@configs";
 import { Client } from "discord.js";
 
+import { name as PROJECT } from "@pkgJSON";
+
 const { COLORS } = config.logger;
 
 function __format(str: string, colored: boolean = true): string {
@@ -59,8 +61,8 @@ export const client = {
     starting: (): void => __log(`::CLIENT ⏳ ${chalk.italic(jt.choice(config.logger.STARTUP_MESSAGES))}`),
     connecting: (): void => __log(`::CLIENT ⏳ ${chalk.italic("Connecting to Discord...")}`),
     online: (): void => __log(`::CLIENT ✅ ${chalk.greenBright("Successfuly connected to Discord!")}`),
-    ready: (client: Client) =>
-        __log(`::CLIENT ✅ ${chalk.greenBright(`${chalk.bold.underline(client.__name)} is up and running!`)} 🎉`)
+    ready: (client?: Client) =>
+        __log(`::CLIENT ✅ ${chalk.greenBright(`${chalk.bold.underline(client?.__name || PROJECT)} is up and running!`)} 🎉`)
 };
 
 /* - - - - - { utils/importers } - - - - - */
