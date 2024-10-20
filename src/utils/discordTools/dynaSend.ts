@@ -110,7 +110,7 @@ export default async function dynaSend(handler: SendHandler, options: DynaSendOp
         }
 
         // Interaction "editReply" fallback
-        if (handler instanceof BaseInteraction && _options.sendMethod === "reply" && handler.replied)
+        if (handler instanceof BaseInteraction && _options.sendMethod === "reply" && (handler.replied || handler.deferred))
             _options.sendMethod = "editReply";
     } else throw new TypeError("[DynaSend] Invalid SendMethod", { cause: "'sendMethod' cannot be null or undefined" });
 
