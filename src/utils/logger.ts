@@ -62,7 +62,7 @@ export const client = {
     connecting: (): void => __log(`::CLIENT ⏳ ${chalk.italic("Connecting to Discord...")}`),
     online: (): void => __log(`::CLIENT ✅ ${chalk.greenBright("Successfuly connected to Discord!")}`),
     ready: (client?: Client) =>
-        __log(`::CLIENT ✅ ${chalk.greenBright(`${chalk.bold.underline(client?.__name || PROJECT)} is up and running!`)} 🎉`)
+        __log(`::CLIENT ✅ ${chalk.greenBright(`${chalk.bold.underline(client?.__name ?? PROJECT)} is up and running!`)} 🎉`)
 };
 
 /* - - - - - { utils/importers } - - - - - */
