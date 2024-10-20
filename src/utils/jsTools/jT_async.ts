@@ -6,7 +6,7 @@ export async function sleep(ms: string | number): Promise<void> {
     return await setTimeout(__date.parseTime(ms));
 }
 
-class LoopInterval<T extends (...args: any) => any> {
+export class LoopInterval<T extends (...args: any) => any> {
     #onCallback: (...args: any) => any;
     #loop: boolean;
 

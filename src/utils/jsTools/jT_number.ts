@@ -1,10 +1,10 @@
-const __object = require("./jT_object");
+import __object from "./jT_object";
 
 /** Get the sum of an array of numbers. Any negative numbers will subtract from the total.
  * @param arr The array to sum.
  * @param path The path to a nested array property.
  * @param ignoreNaN Ignore non-numerical values and use 0 instead. */
-function sum(arr: number[], path: string = "", ignoreNaN: boolean = false): number {
+export function sum(arr: number[], path: string = "", ignoreNaN: boolean = false): number {
     const _path = path.trim();
 
     // Map the array if a path is provided

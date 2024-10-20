@@ -12,13 +12,10 @@
  * ```
  * @param obj The object.
  * @param path Path to the nested property within the object. */
-export function getProp<T>(obj: {}, path: string): T {
-    if (typeof obj !== "object") throw new TypeError("You must provide a valid object");
-    if (typeof path !== "string") throw new TypeError("You must provide a valid path string");
-
+export function getProp(obj: {}, path: string): any {
     let _obj: any = obj;
 
-    let _path = path
+    const _path = path
         // Strip whitespace
         .trim()
         // Replace array indexes with property index values
@@ -29,12 +26,12 @@ export function getProp<T>(obj: {}, path: string): T {
         .split(".");
 
     // Used for debugging where we were at before throwing an error
-    let debug_path = [];
+    const debug_path = [];
 
     // Iterate through each property path strings
     for (let i = 0; i < _path.length; ++i) {
         // Get the current property path we're at
-        let prop = _path[i];
+        const prop = _path[i];
 
         // DEBUGGING
         debug_path.push(prop);

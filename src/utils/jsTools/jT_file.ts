@@ -6,8 +6,8 @@ interface ReadDirOptions {
 }
 
 /** Get an array of file paths inside of a folder.
- * @param path Path to the folder.
- * @param options Extra options. */
+ * @param path The path to the folder.
+ * @param options An optional object to configure the behavior of the function. */
 export function readDir(path: string, options?: ReadDirOptions): string[] {
     const _options = { recursive: true, ...options };
 

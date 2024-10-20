@@ -14,7 +14,7 @@ type BetterMapCallback<T extends any[]> = (
         newArray: T[number][];
         originalArray: T;
     }
-) => T[number];
+) => any;
 
 type ToMapCallback<T extends any[]> = (
     item: T[number],
@@ -99,16 +99,16 @@ export function forceArray<T>(item: T, options?: ForceArrayOptions): ForcedArray
  * @param arr The array to map over.
  * @param callback The callback to run on each item in the array.
  * @param copy Return a deep copy of the array using {@link structuredClone}. */
-function betterMap<T extends any[]>(arr: T, callback: BetterMapCallback<T>, copy = false): T {
-    const arrayOriginal: T = arr;
-    const arrayNew: any = [];
+export function betterMap<T extends any[]>(arr: T, callback: BetterMapCallback<T>, copy = false): T {
+    const originalArray = arr;
+    const newArray: any = [];
 
-    for (let idx = 0; idx < arrayOriginal.length; idx++) {
-        const lastElement = arrayNew[idx - 1];
-        arrayNew.push(callback(arrayOriginal[idx], { idx, lastElement, newArray: arrayNew, originalArray: arrayOriginal }));
+    for (let idx = 0; idx < originalArray.length; idx++) {
+        const lastElement = newArray[idx - 1];
+        newArray.push(callback(originalArray[idx], { idx, lastElement, newArray, originalArray }));
     }
 
-    return (copy ? structuredClone(arrayNew) : arrayNew) as T;
+    return copy ? structuredClone(newArray) : newArray;
 }
 
 /** Similar to {@link Array.prototype.map}, but instead returns a {@link Map}.
@@ -117,7 +117,7 @@ function betterMap<T extends any[]>(arr: T, callback: BetterMapCallback<T>, copy
  * @param arr The array to map.
  * @param callback The callback to run on each item in the array.
  * @param copy Return a deep copy of the map's values using {@link structuredClone}. */
-function toMap<T extends any[]>(arr: T, callback: ToMapCallback<T>, copy = false): Map<any, any> {
+export function toMap<T extends any[]>(arr: T, callback: ToMapCallback<T>, copy = false): Map<any, any> {
     let arrayOriginal: T = arr;
     let mapNew: Map<any, any> = new Map();
 
