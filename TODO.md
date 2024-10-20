@@ -1,2 +1,0 @@
-- allow SendHandler to be of type User to support dming a user
-- refactor logger.ts

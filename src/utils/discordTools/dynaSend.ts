@@ -1,4 +1,4 @@
-import { EmbedResolveable, SendHandler, SendMethod } from "./types";
+import { EmbedResolveable, SendHandler, SendMethod, SendableTextChannel } from "./types";
 
 export interface DynaSendOptions {
     /** The method used to send the message.
@@ -14,7 +14,7 @@ export interface DynaSendOptions {
      * ___3.___ `GuildMember` | `User`: "dmUser" */
     sendMethod?: SendMethod | null;
     /** Text content to send in the message. */
-    content?: string;
+    messageContent?: string;
     /** Embeds to send with the message. */
     embeds?: EmbedResolveable | EmbedResolveable[];
     /** Components to send with the message. */
@@ -40,7 +40,6 @@ import {
     MessageActionRowComponentBuilder,
     MessageMentionOptions,
     RepliableInteraction,
-    TextBasedChannel,
     User
 } from "discord.js";
 import deleteMessageAfter from "./deleteMessageAfter";
@@ -123,7 +122,7 @@ export default async function dynaSend(handler: SendHandler, options: DynaSendOp
 
     // Create the send data object
     let sendData = {
-        content: _options.content,
+        content: _options.messageContent,
         embeds: _options.embeds.map(e => e.toJSON()),
         components: _options.components,
         allowedMentions: _options.allowedMentions,
@@ -157,7 +156,7 @@ export default async function dynaSend(handler: SendHandler, options: DynaSendOp
             break;
 
         case "sendInChannel":
-            message = await (handler as TextBasedChannel | GuildMember | User).send(sendData).catch(err => {
+            message = await (handler as SendableTextChannel | GuildMember | User).send(sendData).catch(err => {
                 logger.error("$_TIMESTAMP [DYNASEND]", "SEND_IN_CHANNEL | SendMethod: 'sendInChannel'", err);
                 return null;
             });

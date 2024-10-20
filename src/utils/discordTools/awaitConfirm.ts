@@ -72,7 +72,7 @@ export default async function awaitConfirm(handler: SendHandler, options: AwaitC
 
     /* - - - - - { Send the Message } - - - - - */
     const message = await dynaSend(handler, {
-        content: _options.content,
+        messageContent: _options.messageContent,
         embeds: embed,
         allowedMentions: _options.allowedMentions,
         components: actionRow,

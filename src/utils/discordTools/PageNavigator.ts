@@ -361,7 +361,7 @@ export default class PageNavigator {
                 if (chosenPageNumber > 0 && chosenPageNumber <= this.options.pages.length) {
                     fuckedUp = true;
                     dynaSend(msg, {
-                        content: _acf(config.navigator.ASK_PAGE_NUMBER_ERROR, msg),
+                        messageContent: _acf(config.navigator.ASK_PAGE_NUMBER_ERROR, msg),
                         deleteAfter: _timeouts.error,
                         fetchReply: false
                     });
@@ -829,7 +829,7 @@ export default class PageNavigator {
         // Send with dynaSend
         this.data.message = await dynaSend(handler, {
             ...options,
-            content: this.data.page.currentMessageContent,
+            messageContent: this.data.page.currentMessageContent,
             embeds: this.data.page.currentEmbed as EmbedResolveable,
             components: this.data.messageActionRows
         });
@@ -866,7 +866,7 @@ export default class PageNavigator {
         // Edit the message with dynaSend
         this.data.message = await dynaSend(this.data.message, {
             sendMethod: "messageEdit",
-            content: this.data.page.currentMessageContent,
+            messageContent: this.data.page.currentMessageContent,
             embeds: this.data.page.currentEmbed as EmbedResolveable,
             components: this.data.messageActionRows
         });

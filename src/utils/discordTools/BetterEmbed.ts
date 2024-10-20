@@ -7,6 +7,7 @@ interface BetterEmbedData {
         interaction?: InteractionResolveable | null;
         channel?: TextBasedChannel | null;
         message?: Message | null;
+        user?: GuildMember | User | null;
     } | null;
 
     /** Author of the `Embed`. */
@@ -121,7 +122,7 @@ export default class BetterEmbed {
     #embed = new EmbedBuilder();
 
     #dataInit: BetterEmbedData = {
-        context: { client: null, interaction: null, channel: null, message: null },
+        context: { client: null, interaction: null, channel: null, message: null, user: null },
         author: { context: null, text: "", icon: null, hyperlink: null },
         title: { text: "", hyperlink: null },
         thumbnailURL: null,
@@ -135,7 +136,7 @@ export default class BetterEmbed {
     };
 
     data: BetterEmbedData = {
-        context: { client: null, interaction: null, channel: null, message: null },
+        context: { client: null, interaction: null, channel: null, message: null, user: null },
         author: { context: null, text: "", icon: null, hyperlink: null },
         title: { text: "", hyperlink: null },
         thumbnailURL: null,
@@ -157,12 +158,20 @@ export default class BetterEmbed {
         let date: Date = new Date();
 
         /// Shorthand author context
-        let _authorContext = (this.data.author as BetterEmbedAuthor).context;
+        if (!this.data.context?.user) {
+            let _authorContext = (this.data.author as BetterEmbedAuthor).context;
 
-        if (_authorContext instanceof User) user = _authorContext;
-        if (_authorContext instanceof GuildMember) {
-            user = _authorContext.user;
-            guildMember = _authorContext;
+            if (_authorContext instanceof User) user = _authorContext;
+            if (_authorContext instanceof GuildMember) {
+                user = _authorContext.user;
+                guildMember = _authorContext;
+            }
+        } else {
+            if (this.data.context.user instanceof User) user = this.data.context.user;
+            if (this.data.context.user instanceof GuildMember) {
+                user = this.data.context.user.user;
+                guildMember = this.data.context.user;
+            }
         }
 
         /* - - - - - { Author Context } - - - - - */
@@ -544,6 +553,10 @@ export default class BetterEmbed {
     async send(handler: SendHandler, options?: DynaSendOptions, data?: BetterEmbedData): Promise<Message | null> {
         let _embed: BetterEmbed = this;
         this.#parseData();
+
+        // Apply ACF to message content
+        if (options?.messageContent && this.data.acf)
+            options.messageContent = this.#applyContextFormatting(options.messageContent);
 
         // Clone the embed
         if (data) _embed = this.clone(data);
