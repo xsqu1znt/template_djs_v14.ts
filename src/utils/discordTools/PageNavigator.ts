@@ -288,12 +288,12 @@ export default class PageNavigator {
         if (this.options.useReactions) {
             /* as reactions */
             this.data.navigation.reactions = navTypes.map(type =>
-                jt.getProp<{ name: string; id: string }>(config.navigator.buttons, `${type}.emoji`)
+                jt.getProp(config.navigator.buttons, `${type}.emoji`) as { name: string; id: string }
             );
         } else {
             /* as buttons */
             this.data.components.actionRows.navigation.setComponents(
-                ...navTypes.map(type => jt.getProp<ButtonBuilder>(this.data.components.navigation, type))
+                ...navTypes.map(type => jt.getProp(this.data.components.navigation, type) as ButtonBuilder)
             );
         }
 
