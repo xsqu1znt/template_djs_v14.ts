@@ -22,7 +22,8 @@ function getStaffGuildAdminBypass(commandName: string): string[] {
     let result: string[] = [];
     let bypass = _staff.BYPASSERS.find(b => b.COMMAND_NAME === commandName);
 
-    if (_staff.IGNORES_GUILD_ADMIN.AllBotStaff) return [_staff.OWNER_ID, ..._staff.SUPERUSERS, ...(bypass ? bypass.USER_IDS : [])];
+    if (_staff.IGNORES_GUILD_ADMIN.AllBotStaff)
+        return [_staff.OWNER_ID, ..._staff.SUPERUSERS, ...(bypass ? bypass.USER_IDS : [])];
     if (_staff.IGNORES_GUILD_ADMIN.BotOwner) result.push(_staff.OWNER_ID);
     if (_staff.IGNORES_GUILD_ADMIN.SuperUsers) result.push(..._staff.SUPERUSERS);
     if (_staff.IGNORES_GUILD_ADMIN.Bypassers) result.push(...(bypass ? bypass.USER_IDS : []));
@@ -65,7 +66,7 @@ export const __event: InteractionEventModule = {
         let interactionCommand =
             client.commands.slash.all.get(interaction.commandName) ||
             client.commands.special.all.get(interaction.commandName);
-        
+
         // Command doesn't exist
         if (!interactionCommand) {
             return await interaction
@@ -163,6 +164,14 @@ export const __event: InteractionEventModule = {
 
         try {
             return await _execute(client, interaction).then(async message => {
+                // Show an error if nothing happened
+                if (!message && !interaction.replied && !interaction.deferred) {
+                    return await interaction.reply({
+                        content: `Something went wrong! **\`/${interaction.commandName}\`** didn't finish executing.`,
+                        ephemeral: true
+                    });
+                }
+
                 /* TODO: run code here after the command finished executing... */
             });
         } catch (err) {
