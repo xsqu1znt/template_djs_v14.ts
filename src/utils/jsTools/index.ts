@@ -5,6 +5,7 @@ import * as __file from "./jT_file";
 import * as __number from "./jT_number";
 import * as __object from "./jT_object";
 import * as __random from "./jT_random";
+import * as __string from "./jT_string";
 
 export default {
     ...__async,
@@ -13,5 +14,6 @@ export default {
     ...__file,
     ...__number,
     ...__object,
-    ...__random
+    ...__random,
+    ...__string
 };
