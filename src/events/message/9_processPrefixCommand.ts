@@ -217,7 +217,7 @@ export const __event: MessageCreateEventModule = {
             // prettier-ignore
             // Log the error to the console
             return logger.error(
-                `$_TIMESTAMP $_COMMAND`,
+                `::COMMAND`,
                 `name: ${prefix}${commandName} | guild: '${message.guildId}' | user: '${message.author.id}'`,
                 err
             );

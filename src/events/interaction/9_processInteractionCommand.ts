@@ -71,7 +71,7 @@ export const __event: InteractionEventModule = {
         if (!interactionCommand) {
             return await interaction
                 .reply({ content: `**/\`${interaction.commandName}\`** is not a command.`, ephemeral: true })
-                .catch(err => logger.error("$_TIMESTAMP $_COMMAND", `'/${interaction.commandName}' is not a command.`, err));
+                .catch(err => logger.error("::COMMAND", `'/${interaction.commandName}' is not a command.`, err));
         }
 
         /* - - - - - { Parse Command Options } - - - - - */
@@ -212,7 +212,7 @@ export const __event: InteractionEventModule = {
             // prettier-ignore
             // Log the error to the console
             return logger.error(
-                `$_TIMESTAMP $_COMMAND`,
+                `::COMMAND`,
                 `name: /${interaction.commandName} | guild: '${interaction.guildId || "n/a"}' | user: '${interaction.user.id}'`,
                 err
             );

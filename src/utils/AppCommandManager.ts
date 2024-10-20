@@ -7,13 +7,13 @@ type RegisterableCommand = SlashCommand | ContextMenuCommand | UserInstallableCo
 import { Client, ContextMenuCommandBuilder, Guild, REST, Routes, SlashCommandBuilder } from "discord.js";
 import logger from "./logger";
 
-import { TOKEN } from "@constants";
-
-// Create an instance of the REST API
-const rest = new REST().setToken(TOKEN);
-
 export default class AppCommandManager {
-    constructor(public client: Client) {}
+    rest: REST;
+
+    constructor(public client: Client) {
+        // Create an instance of the REST API
+        this.rest = new REST().setToken(client.token as string);
+    }
 
     static isSlashCommand(cmd: any): cmd is SlashCommand {
         return "builder" in cmd && !("type" in cmd) && cmd.builder instanceof SlashCommandBuilder;
@@ -48,11 +48,7 @@ export default class AppCommandManager {
 
         /* error */
         if (!guilds.length) {
-            return logger.error(
-                "::ACM_LOCAL",
-                "Failed to register app commands",
-                "No guilds found with the provided IDs"
-            );
+            return logger.error("::ACM_LOCAL", "Failed to register app commands", "No guilds found with the provided IDs");
         }
 
         /* - - - - - - { Register } - - - - -  */
@@ -79,7 +75,7 @@ export default class AppCommandManager {
         return await Promise.all(
             guilds.map(({ id }) =>
                 // Rest API request
-                rest
+                this.rest
                     .put(Routes.applicationGuildCommands(this.client.user?.id || "", id), { body: command_data })
                     .then(() => {
                         logger.success(`::ACM_LOCAL Registered to guild ('${id}')`);
@@ -94,9 +90,7 @@ export default class AppCommandManager {
             let successful = resolved.filter(Boolean).length;
             // Log the number of guilds that were successfully registered
             logger.success(
-                `::ACM_LOCAL ✅ Registered app commands for ${successful} ${
-                    successful === 1 ? "guild" : "guilds"
-                }`
+                `::ACM_LOCAL ✅ Registered app commands for ${successful} ${successful === 1 ? "guild" : "guilds"}`
             );
         });
     }
@@ -112,11 +106,7 @@ export default class AppCommandManager {
 
         /* error */
         if (!guilds.length) {
-            return logger.error(
-                "::ACM_LOCAL",
-                "Failed to register app commands",
-                "No guilds found with the provided IDs"
-            );
+            return logger.error("::ACM_LOCAL", "Failed to register app commands", "No guilds found with the provided IDs");
         }
 
         /* - - - - - - { Remove } - - - - -  */
@@ -126,7 +116,7 @@ export default class AppCommandManager {
         return await Promise.all(
             guilds.map(({ id }) =>
                 // Rest API request
-                rest
+                this.rest
                     .put(Routes.applicationGuildCommands(this.client.user?.id || "", id), { body: [] })
                     .then(() => {
                         logger.success(`::ACM_LOCAL Successfully removed from guild ('${id}')`);
@@ -140,9 +130,7 @@ export default class AppCommandManager {
         ).then(resolved => {
             let successful = resolved.filter(Boolean).length;
             // Log the number of guilds that we've successfully removed the commands from
-            logger.success(
-                `::ACM_LOCAL ✅ Removed app commands for ${successful} ${successful === 1 ? "guild" : "guilds"}`
-            );
+            logger.success(`::ACM_LOCAL ✅ Removed app commands for ${successful} ${successful === 1 ? "guild" : "guilds"}`);
         });
     }
 
@@ -180,7 +168,7 @@ export default class AppCommandManager {
         logger.log("::ACM_GLOBAL ⏳ Registering app commands...");
 
         // Rest API request
-        return await rest
+        return await this.rest
             .put(Routes.applicationCommands(this.client.user?.id || ""), { body: command_data })
             .then(() => logger.success("::ACM_GLOBAL ✅ Registered app commands"))
             .catch(err => logger.error("::ACM_GLOBAL", "Failed to register app commands", err));
@@ -195,7 +183,7 @@ export default class AppCommandManager {
         logger.log("::ACM_GLOBAL ⏳ Removing app commands...");
 
         // Rest API request
-        return await rest
+        return await this.rest
             .put(Routes.applicationCommands(this.client.user?.id || ""), { body: [] })
             .then(() => logger.success("::ACM_GLOBAL ✅ Removed app commands"))
             .catch(err => logger.error("::ACM_GLOBAL", "Failed to remove app commands", err));

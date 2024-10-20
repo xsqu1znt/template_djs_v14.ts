@@ -485,7 +485,7 @@ export default class PageNavigator {
                             return await this.refresh();
                     }
                 } catch (err) {
-                    logger.error("$_TIMESTAMP [PageNavigator>#collectComponents]", "", err);
+                    logger.error("[PageNavigator>#collectComponents]", "", err);
                 }
             });
 
@@ -564,7 +564,7 @@ export default class PageNavigator {
                             return await this.refresh();
                     }
                 } catch (err) {
-                    logger.error("$_TIMESTAMP [PageNavigator>#collectReactions]", "", err);
+                    logger.error("[PageNavigator>#collectReactions]", "", err);
                 }
             });
 

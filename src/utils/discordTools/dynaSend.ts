@@ -134,7 +134,7 @@ export default async function dynaSend(handler: SendHandler, options: DynaSendOp
         case "reply":
             let _reply = await (handler as RepliableInteraction)
                 .reply(sendData)
-                .catch(err => logger.error("$_TIMESTAMP [DYNASEND]", "REPLY_TO_INTERACTION | SendMethod: 'reply'", err));
+                .catch(err => logger.error("[DYNASEND]", "REPLY_TO_INTERACTION | SendMethod: 'reply'", err));
             let _replyInGuild = (handler as RepliableInteraction).inGuild();
             message = _options.fetchReply && _replyInGuild && _reply ? await _reply.fetch() : null;
             break;
@@ -142,7 +142,7 @@ export default async function dynaSend(handler: SendHandler, options: DynaSendOp
         case "editReply":
             let _editReply = await (handler as RepliableInteraction)
                 .editReply(sendData)
-                .catch(err => logger.error("$_TIMESTAMP [DYNASEND]", "EDIT_INTERACTION | SendMethod: 'editReply'", err));
+                .catch(err => logger.error("[DYNASEND]", "EDIT_INTERACTION | SendMethod: 'editReply'", err));
             let _editReplyInGuild = (handler as RepliableInteraction).inGuild();
             message = _options.fetchReply && _editReplyInGuild && _editReply ? await _editReply.fetch() : null;
             break;
@@ -150,21 +150,21 @@ export default async function dynaSend(handler: SendHandler, options: DynaSendOp
         case "followUp":
             let _followUp = await (handler as RepliableInteraction)
                 .followUp({ ...sendData, fetchReply: _options.fetchReply })
-                .catch(err => logger.error("$_TIMESTAMP [DYNASEND]", "FOLLOW_UP_INTERACTION | SendMethod: 'followUp'", err));
+                .catch(err => logger.error("[DYNASEND]", "FOLLOW_UP_INTERACTION | SendMethod: 'followUp'", err));
             let _followUpInGuild = (handler as RepliableInteraction).inGuild();
             message = _options.fetchReply && _followUpInGuild && _followUp ? _followUp : null;
             break;
 
         case "sendInChannel":
             message = await (handler as SendableTextChannel | GuildMember | User).send(sendData).catch(err => {
-                logger.error("$_TIMESTAMP [DYNASEND]", "SEND_IN_CHANNEL | SendMethod: 'sendInChannel'", err);
+                logger.error("[DYNASEND]", "SEND_IN_CHANNEL | SendMethod: 'sendInChannel'", err);
                 return null;
             });
             break;
 
         case "messageReply":
             message = await (handler as Message).reply(sendData).catch(err => {
-                logger.error("$_TIMESTAMP [DYNASEND]", "REPLY_TO_MESSAGE | SendMethod: 'messageReply'", err);
+                logger.error("[DYNASEND]", "REPLY_TO_MESSAGE | SendMethod: 'messageReply'", err);
                 return null;
             });
             break;
@@ -176,14 +176,14 @@ export default async function dynaSend(handler: SendHandler, options: DynaSendOp
                 break;
             }
             message = await (handler as Message).edit(sendData).catch(err => {
-                logger.error("$_TIMESTAMP [DYNASEND]", "EDIT_MESSAGE | SendMethod: 'messageEdit'", err);
+                logger.error("[DYNASEND]", "EDIT_MESSAGE | SendMethod: 'messageEdit'", err);
                 return null;
             });
             break;
 
         case "dmUser":
             message = await (handler as GuildMember | User).send(sendData).catch(err => {
-                logger.error("$_TIMESTAMP [DYNASEND]", "DM_USER | SendMethod: 'dmUser'", err);
+                logger.error("[DYNASEND]", "DM_USER | SendMethod: 'dmUser'", err);
                 return null;
             });
             break;

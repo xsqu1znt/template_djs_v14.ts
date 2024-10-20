@@ -334,7 +334,7 @@ export default class BetterEmbed {
                     url: this.#embed.data.author?.url // NOT-USED
                 });
             } catch (err) {
-                logger.error("$_TIMESTAMP [BetterEmbed]", `INVALID_AUTHOR_ICON | '${_thisAuthor.icon}'`, err);
+                logger.error("[BetterEmbed]", `INVALID_AUTHOR_ICON | '${_thisAuthor.icon}'`, err);
             }
         }
 
@@ -347,7 +347,7 @@ export default class BetterEmbed {
                     url: (_thisAuthor.hyperlink as string) || undefined
                 });
             } catch (err) {
-                logger.error("$_TIMESTAMP [BetterEmbed]", `INVALID_AUTHOR_HYPERLINK | '${_thisAuthor.hyperlink}'`, err);
+                logger.error("[BetterEmbed]", `INVALID_AUTHOR_HYPERLINK | '${_thisAuthor.hyperlink}'`, err);
             }
         }
 
@@ -379,7 +379,7 @@ export default class BetterEmbed {
             try {
                 this.#embed.setURL(_thisTitle.hyperlink || null);
             } catch (err) {
-                logger.error("$_TIMESTAMP [BetterEmbed]", `INVALID_TITLE_HYPERLINK | '${_thisTitle.hyperlink}'`, err);
+                logger.error("[BetterEmbed]", `INVALID_TITLE_HYPERLINK | '${_thisTitle.hyperlink}'`, err);
             }
         }
 
@@ -393,7 +393,7 @@ export default class BetterEmbed {
         try {
             this.#embed.setThumbnail(url);
         } catch (err) {
-            logger.error("$_TIMESTAMP [BetterEmbed]", `INVALID_THUMBNAIL_URL | '${this.data.thumbnailURL}'`);
+            logger.error("[BetterEmbed]", `INVALID_THUMBNAIL_URL | '${this.data.thumbnailURL}'`);
             return this;
         }
 
@@ -416,7 +416,7 @@ export default class BetterEmbed {
         try {
             this.#embed.setImage(url);
         } catch {
-            logger.error("$_TIMESTAMP [BetterEmbed]", `INVALID_IMAGE_URL | '${this.data.imageURL}'`);
+            logger.error("[BetterEmbed]", `INVALID_IMAGE_URL | '${this.data.imageURL}'`);
             return this;
         }
 
@@ -452,7 +452,7 @@ export default class BetterEmbed {
                     iconURL: (_thisFooter.icon as string) || undefined
                 });
             } catch (err) {
-                logger.error("$_TIMESTAMP [BetterEmbed]", `INVALID_FOOTER_ICON | '${_thisFooter.icon}'`, err);
+                logger.error("[BetterEmbed]", `INVALID_FOOTER_ICON | '${_thisFooter.icon}'`, err);
             }
         }
 
@@ -481,7 +481,7 @@ export default class BetterEmbed {
             // Trim the array
             fieldData = fieldData.slice(0, 25);
             // prettier-ignore
-            logger.log(`$_TIMESTAMP [BetterEmbed] You can only have a MAX of 25 fields. ${_trimLength} ${_trimLength === 1 ? "field has" : "fields have"} been trimmed`);
+            logger.log(`[BetterEmbed] You can only have a MAX of 25 fields. ${_trimLength} ${_trimLength === 1 ? "field has" : "fields have"} been trimmed`);
         }
 
         // Apply ACF
@@ -526,7 +526,7 @@ export default class BetterEmbed {
         try {
             this.#embed.setColor(_color || null);
         } catch {
-            logger.error("$_TIMESTAMP [BetterEmbed]", `INVALID_COLOR | '${this.data.color}'`);
+            logger.error("[BetterEmbed]", `INVALID_COLOR | '${this.data.color}'`);
             return this;
         }
 
@@ -541,7 +541,7 @@ export default class BetterEmbed {
         try {
             this.#embed.setTimestamp(timestamp as Date | number | null);
         } catch {
-            logger.error("$_TIMESTAMP [BetterEmbed]", `INVALID_TIMESTAMP | '${this.data.timestamp}'`);
+            logger.error("[BetterEmbed]", `INVALID_TIMESTAMP | '${this.data.timestamp}'`);
             return this;
         }
 
