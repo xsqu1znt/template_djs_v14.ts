@@ -252,7 +252,7 @@ export function etaYMDHMS(unix: number | string, options?: ETAOptions): string |
  * @param unix The Unix timestamp in milliseconds to convert.
  * @param options An optional object to configure the behavior of the function.
  * @copyright *Code written by **@fujimori_*** */
-export function etaDigitial(unix: number | string, options?: ETAOptions): string | null {
+export function etaDigital(unix: number | string, options?: ETAOptions): string | null {
     const _options = {
         ignorePast: false,
         nullIfPast: false,
@@ -306,4 +306,4 @@ export function etaDigitial(unix: number | string, options?: ETAOptions): string
     return result.join(":");
 }
 
-export default { parseTime, eta, etaHMS, etaYMDHMS, etaDigitial };
+export default { parseTime, eta, etaHMS, etaYMDHMS, etaDigital };
