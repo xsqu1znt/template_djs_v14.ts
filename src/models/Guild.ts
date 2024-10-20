@@ -1,5 +1,5 @@
 import { Schema, model as Model } from "mongoose";
-import config from "../configs";
+import config from "@configs";
 
 interface IGuild {
     _id: string;
