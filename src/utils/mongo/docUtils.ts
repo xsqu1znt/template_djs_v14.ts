@@ -82,13 +82,13 @@ export default class DocumentUtils<T> {
 
     /** Count the number of documents in the collection.
      * @param filter An optional filter to count only the documents that match it. */
-    async count(filter?: RootFilterQuery<T>): Promise<number> {
+    count = async (filter?: RootFilterQuery<T>): Promise<number> => {
         return await this.model.countDocuments(filter);
     }
 
     /** Check if a document exists in the collection based on the provided filter.
      * @param filter The filter used to find the document. It can be a string representing the document's `_id` or an object representing the document's properties. */
-    async exists(filter: string | RootFilterQuery<T>): Promise<boolean> {
+    exists = async (filter: string | RootFilterQuery<T>): Promise<boolean> => {
         switch (typeof filter) {
             case "string":
                 return (await this.model.exists({ _id: filter })) ? true : false;
@@ -103,7 +103,7 @@ export default class DocumentUtils<T> {
      * @param _id The unique identifier for the document.
      * @param upsertQuery The query to use for the upsert operation.
      * @param upsertOptions Optional parameters for the upsert operation. `lean` is `true` by default. */
-    async insertOrUpdate(_id: string, upsertQuery: Partial<T> = {}, upsertOptions: DocumentUpsertOptions<T> = {}) {
+    insertOrUpdate = async (_id: string, upsertQuery: Partial<T> = {}, upsertOptions: DocumentUpsertOptions<T> = {}) => {
         const _upsertOptions = { ...upsertOptions, lean: upsertOptions?.lean ?? true };
         if ((upsertOptions.checkExists ?? true) && (await this.exists(_id)))
             return await this.update(_id, upsertQuery, _upsertOptions);
@@ -112,7 +112,7 @@ export default class DocumentUtils<T> {
 
     /** Delete a document from the collection based on the provided `_id` or filter.
      * @param filter The filter used to find the document. It can be a string representing the document's `_id` or an object representing the document's properties. */
-    async delete(filter: string | RootFilterQuery<T>) {
+    delete = async (filter: string | RootFilterQuery<T>) => {
         if (typeof filter === "string") {
             return await this.model.findByIdAndDelete(filter);
         } else {
@@ -122,35 +122,35 @@ export default class DocumentUtils<T> {
 
     /** Delete all documents from the collection that match the provided filter.
      * @param filter The filter used to find the documents to delete. */
-    async deleteAll(filter: RootFilterQuery<T>) {
+    deleteAll = async (filter: RootFilterQuery<T>) => {
         return await this.model.deleteMany(filter);
     }
 
     /** Fetch a document from the collection based on the provided `_id` or filter.
      * @param filter The filter used to find the document. It can be a string representing the document's `_id` or an object representing the document's properties.
      * @param options Optional parameters for filtering and querying the document. `lean` is `true` by default. */
-    async fetch(filter: string | RootFilterQuery<T>, options: DocumentQueryOptions<T> = {}) {
+    fetch = async (filter: string | RootFilterQuery<T>, options: DocumentQueryOptions<T> = {}) => {
         const _options = { ...options, projection: undefined, lean: options?.lean ?? true };
         if (typeof filter === "string") {
             return await this.model.findById(filter, options?.projection, _options);
         } else {
-            return await this.model.findOne(filter, options?.projection, _options);
+            return await this.model?.findOne(filter, options?.projection, _options);
         }
     }
 
     /** Fetch all documents from the collection that match the provided filter.
      * @param filter The filter used to find the documents to fetch.
      * @param options Optional parameters for filtering and querying the document. `lean` is `true` by default. */
-    async fetchAll(filter: RootFilterQuery<T>, options: DocumentQueryOptions<T> = {}) {
+    fetchAll = async (filter: RootFilterQuery<T>, options: DocumentQueryOptions<T> = {}) => {
         const _options = { ...options, projection: undefined, lean: options?.lean ?? true };
         return await this.model.find(filter, options?.projection, _options);
-    }
+    };
 
     /** Update a document in the collection based on the provided filter.
      * @param filter The filter used to find the document. It can be a string representing the document's `_id` or an object representing the document's properties.
      * @param updateQuery The update operations to be applied to the document.
      * @param options Optional parameters for the update operation. `lean` is `true` by default. */
-    async update(filter: string | RootFilterQuery<T>, updateQuery: UpdateQuery<T>, options: DocumentQueryOptions<T> = {}) {
+    update = async (filter: string | RootFilterQuery<T>, updateQuery: UpdateQuery<T>, options: DocumentQueryOptions<T> = {}) => {
         const _options = { ...options, lean: options?.lean ?? true };
         if (typeof filter === "string") {
             return await this.model.findByIdAndUpdate(filter, updateQuery, _options);
@@ -162,7 +162,7 @@ export default class DocumentUtils<T> {
     /** Update a document in the collection based on the provided filter.
      * @param filter The filter used to find the documents to update.
      * @param updateQuery The update operations to be applied to the document. */
-    async updateAll(filter: RootFilterQuery<T>, updateQuery: UpdateQuery<T>) {
+    updateAll = async (filter: RootFilterQuery<T>, updateQuery: UpdateQuery<T>) => {
         return await this.model.updateMany(filter, updateQuery);
     }
 }
