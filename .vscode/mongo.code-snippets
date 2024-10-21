@@ -6,7 +6,7 @@
         "body": [
             "import { Schema, model as Model } from \"mongoose\";\n",
 
-            "interface ${1:I${TM_FILENAME_BASE}} {",
+            "export interface ${1:I${TM_FILENAME_BASE}} {",
             "    _id: string;",
             "};\n",
 

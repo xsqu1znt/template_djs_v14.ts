@@ -1,7 +1,7 @@
 import { Schema, model as Model } from "mongoose";
 import config from "@configs";
 
-interface IGuild {
+export interface IGuild {
     _id: string;
     prefix: string;
     joinedAt: Date;
