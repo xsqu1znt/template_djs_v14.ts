@@ -23,6 +23,13 @@ export interface DocumentQueryOptions<T> extends QueryOptions {
     projection?: Partial<ProjectionTemplate<T>>;
 }
 
+export interface DocumentUpsertOptions<T> extends DocumentQueryOptions<T> {
+    /** If `true`, the document will be checked if it already exists before continuing the operation. Defaults to `true`.
+     *
+     * Setting to `false` saves a call to the database if you're already checking existance beforehand. */
+    checkExists?: boolean;
+}
+
 export default class DocumentUtils<T> {
     constructor(public model: Model<T>) {}
 
@@ -41,6 +48,14 @@ export default class DocumentUtils<T> {
              * @param upsertQuery The query to use for the upsert operation.
              * @param upsertOptions Optional parameters for the upsert operation. `lean` is `true` by default. */
             __insertOrUpdate: this.insertOrUpdate,
+
+            /** Delete a document from the collection based on the provided `_id` or filter.
+             * @param filter The filter used to find the document. It can be a string representing the document's `_id` or an object representing the document's properties. */
+            __delete: this.delete,
+
+            /** Delete all documents from the collection that match the provided filter.
+             * @param filter The filter used to find the documents to delete. */
+            __deleteAll: this.deleteAll,
 
             /** Fetch a document from the collection based on the provided `_id` or filter.
              * @param filter The filter used to find the document. It can be a string representing the document's `_id` or an object representing the document's properties.
@@ -88,10 +103,27 @@ export default class DocumentUtils<T> {
      * @param _id The unique identifier for the document.
      * @param upsertQuery The query to use for the upsert operation.
      * @param upsertOptions Optional parameters for the upsert operation. `lean` is `true` by default. */
-    async insertOrUpdate(_id: string, upsertQuery: Partial<T> = {}, upsertOptions: DocumentQueryOptions<T> = {}) {
+    async insertOrUpdate(_id: string, upsertQuery: Partial<T> = {}, upsertOptions: DocumentUpsertOptions<T> = {}) {
         const _upsertOptions = { ...upsertOptions, lean: upsertOptions?.lean ?? true };
-        if (await this.exists(_id)) return await this.update(_id, upsertQuery, _upsertOptions);
+        if ((upsertOptions.checkExists ?? true) && (await this.exists(_id)))
+            return await this.update(_id, upsertQuery, _upsertOptions);
         return await new this.model({ _id, ...upsertQuery }).save();
+    }
+
+    /** Delete a document from the collection based on the provided `_id` or filter.
+     * @param filter The filter used to find the document. It can be a string representing the document's `_id` or an object representing the document's properties. */
+    async delete(filter: string | RootFilterQuery<T>) {
+        if (typeof filter === "string") {
+            return await this.model.findByIdAndDelete(filter);
+        } else {
+            return await this.model.deleteOne(filter);
+        }
+    }
+
+    /** Delete all documents from the collection that match the provided filter.
+     * @param filter The filter used to find the documents to delete. */
+    async deleteAll(filter: RootFilterQuery<T>) {
+        return await this.model.deleteMany(filter);
     }
 
     /** Fetch a document from the collection based on the provided `_id` or filter.
@@ -107,7 +139,7 @@ export default class DocumentUtils<T> {
     }
 
     /** Fetch all documents from the collection that match the provided filter.
-     * @param filter The filter used to find the documents.
+     * @param filter The filter used to find the documents to fetch.
      * @param options Optional parameters for filtering and querying the document. `lean` is `true` by default. */
     async fetchAll(filter: RootFilterQuery<T>, options: DocumentQueryOptions<T> = {}) {
         const _options = { ...options, projection: undefined, lean: options?.lean ?? true };
@@ -128,7 +160,7 @@ export default class DocumentUtils<T> {
     }
 
     /** Update a document in the collection based on the provided filter.
-     * @param filter The filter used to find the document. It can be a string representing the document's `_id` or an object representing the document's properties.
+     * @param filter The filter used to find the documents to update.
      * @param updateQuery The update operations to be applied to the document. */
     async updateAll(filter: RootFilterQuery<T>, updateQuery: UpdateQuery<T>) {
         return await this.model.updateMany(filter, updateQuery);
