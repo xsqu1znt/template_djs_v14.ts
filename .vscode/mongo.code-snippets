@@ -19,5 +19,23 @@
 
             "export const model = Model<${1:I${TM_FILENAME_BASE}}>(\"${2:${TM_FILENAME_BASE}s}\", schema);\n"
         ]
+    },
+
+    "Mongo Manager": {
+        "scope": "typescript",
+        "prefix": "mongo-manager",
+        "description": "A collection manager template using docUtils.",
+        "body": [
+            "import { guildModel } from \"@models\";",
+            "import DocumentUtils from \"./docUtils\";\n",
+
+            "const docUtils = new DocumentUtils(guildModel);\n",
+
+            "$0\n",
+
+            "export default {",
+            "    ...docUtils.__exports,",
+            "};\n"
+        ]
     }
 }

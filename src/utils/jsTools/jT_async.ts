@@ -10,7 +10,7 @@ export class LoopInterval<T extends (...args: any) => any> {
     #onCallback: (...args: any) => any;
     #loop: boolean;
 
-    /** Run a callback function every interval.
+    /** Run a callback function every interval. This will wait for async callbacks to complete before running it back.
      * @param callback The callback that will be ran at each interval.
      * @param delay The time to wait before running the callback again.
      *
