@@ -91,7 +91,7 @@ export const importer = {
         __log(
             `::IMPORT_COMMAND ${chalk.bold("✔️ IMPORTED")} | ${chalk.dim(prefix)}${chalk
                 .hex(COLORS.COMMAND_NAME)
-                .bold(command)} ${chalk.italic.gray(`'${path}'`)}`
+                .bold(command)} ${path ? chalk.italic.gray(`'${path}'`) : ""}`
         );
     }
 };
