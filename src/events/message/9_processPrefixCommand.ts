@@ -67,7 +67,7 @@ function getOptionFromMessageContent(str: string, prefix: string, name: string, 
         match = str.match(new RegExp(`${name} (.)`));
     }
 
-    return match ? match[0] : null;
+    return match ? match[0].replace(name, "").trim() : null;
 }
 
 export const __event: MessageCreateEventModule = {
