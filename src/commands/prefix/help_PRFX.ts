@@ -20,7 +20,10 @@ export const __command: PrefixCommand = {
 
     execute: async (client, message, { prefix }) => {
         // Get the current prefix commands and filter out ones that are set to be hidden
-        let commands = [...client.commands.prefix.all.values()].filter(cmd => !cmd?.options?.hidden);
+        let commands = jt.unique(
+            [...client.commands.prefix.all.values()].filter(cmd => !cmd?.options?.hidden),
+            "name"
+        );
 
         /* error */
         if (!commands.length) {
