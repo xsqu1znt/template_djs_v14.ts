@@ -35,7 +35,7 @@ async function importEventModules() {
     return modules.filter(m => m.module) as { module: BaseEventModule; path: string }[];
 }
 
-export default async function (client: Client): Promise<void> {
+export default async function (client: Client<true>): Promise<void> {
     // Import event files
     let events = await importEventModules();
     if (!events.length) {

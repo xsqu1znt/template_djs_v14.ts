@@ -3,7 +3,7 @@ import * as importEvents from "./importEvents";
 import * as importCommands from "./importCommands";
 import logger from "@utils/logger";
 
-export default async function (client: Client) {
+export default async function (client: Client<true>) {
     await Promise.all([
         importEvents
             .default(client)

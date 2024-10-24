@@ -195,7 +195,7 @@ async function importInteractionCommands() {
     return importedCommands;
 }
 
-export default async function (client: Client): Promise<void> {
+export default async function (client: Client<true>): Promise<void> {
     const importedCommands = {
         slash: await importSlashCommands(),
         prefix: await importPrefixCommands(),
