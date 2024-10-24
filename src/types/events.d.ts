@@ -8,13 +8,13 @@ export interface BaseEventModule {
     /** Whether this event will be executed or not. ***Default: true*** */
     enabled?: boolean;
     /** The asyncrous function to be executed. */
-    execute: (client: Client, ...args: any[]) => Promise<Message | void | null>;
+    execute: (client: Client<true>, ...args: any[]) => Promise<Message | void | null>;
 }
 
 export interface MessageCreateEventModule extends BaseEventModule {
-    execute: (client: Client, message: Message) => Promise<Message | void | null>;
+    execute: (client: Client<true>, message: Message) => Promise<Message | void | null>;
 }
 
 export interface InteractionEventModule extends BaseEventModule {
-    execute: (client: Client, interaction: BaseInteraction) => Promise<InteractionResponse | Message | void | null>;
+    execute: (client: Client<true>, interaction: BaseInteraction) => Promise<InteractionResponse | Message | void | null>;
 }

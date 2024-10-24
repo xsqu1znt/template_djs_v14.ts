@@ -23,7 +23,7 @@ export interface SlashCommand {
     /** Extra options for this command. */
     options?: InteractionBasedCommandOptions;
     /** Executed when the command is used. */
-    execute: (client: Client, interaction: CommandInteraction) => Promise<InteractionResponse | Message | void | null>;
+    execute: (client: Client<true>, interaction: CommandInteraction) => Promise<InteractionResponse | Message | void | null>;
 }
 
 export interface PrefixCommand {
@@ -40,7 +40,7 @@ export interface PrefixCommand {
     /** Extra options for this command. */
     options?: PrefixCommandOptions;
     /** Executed when the command is used. */
-    execute: (client: Client, message: Message, extra: PrefixCommandParams) => Promise<Message | void | null>;
+    execute: (client: Client<true>, message: Message, extra: PrefixCommandParams) => Promise<Message | void | null>;
 }
 
 export interface ContextMenuCommand {
@@ -52,7 +52,7 @@ export interface ContextMenuCommand {
     options?: Omit<InteractionBasedCommandOptions, "emoji" | "hidden" | "guildOnly">;
     /** Executed when the command is used. */
     execute: (
-        client: Client,
+        client: Client<true>,
         interaction: UserContextMenuCommandInteraction | MessageContextMenuCommandInteraction
     ) => Promise<Message | void | null>;
 }
@@ -86,7 +86,7 @@ export interface UserInstallableCommand {
     /** Extra options for this command. */
     options?: Omit<InteractionBasedCommandOptions, "emoji" | "hidden">;
     /** Executed when the command is used. */
-    execute: (client: Client, interaction: CommandInteraction) => Promise<Message | void | null>;
+    execute: (client: Client<true>, interaction: CommandInteraction) => Promise<Message | void | null>;
 }
 
 /* - - - - - { Options } - - - - - */
