@@ -56,18 +56,18 @@ function hasRequiredPermissions(member: GuildMember, required: PermissionResolva
     return { has, missing, passed: has.length === required.length };
 }
 
-function getOptionFromMessageContent(str: string, prefix: string, name: string, allowSpaces: boolean = false) {
-    let match: RegExpMatchArray | null;
+function getOptionFromMessageContent(str: string, prefix: string, name: string, allowSpaces: boolean = false): string | null {
+    let match: string | undefined;
 
     if (allowSpaces) {
-        /* NOTE: matches until the first occurrence of the flagPrefix */
-        match = str.match(new RegExp(`${name} (.[^${prefix}]*)`));
+        /* NOTE: matches until the first occurrence of the prefix */
+        match = str.match(new RegExp(`${prefix}${name} ((?:(?!${prefix}).)*)`))?.[1];
     } else {
         /* NOTE: matches until the first occurrence of a space */
-        match = str.match(new RegExp(`${name} (.)`));
+        match = str.match(new RegExp(`${prefix}${name} (\\S*)`))?.[1];
     }
 
-    return match ? match[0].replace(name, "").trim() : null;
+    return match ?? null;
 }
 
 export const __event: MessageCreateEventModule = {
