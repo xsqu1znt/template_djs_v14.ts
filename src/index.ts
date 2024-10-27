@@ -24,7 +24,7 @@ if (!TOKEN) {
 }
 
 // prettier-ignore
-if (IS_DEV_MODE) logger.debug("DEV_MODE is enabled! You can change this by setting {bold DEV_MODE} to false in either .env or config_client.json");
+if (IS_DEV_MODE) logger.debug("DEV_MODE is enabled! You can change this by setting DEV_MODE to false in either .env or config_client.json");
 
 /* - - - - - { Setup Client } - - - - - */
 logger.client.starting();
@@ -71,7 +71,7 @@ client.commands = {
 /* - - - - - { Import & Connect } - - - - - */
 async function init(): Promise<void> {
     // Run Importers
-    await importers(client);
+    await importers(client as Client<true>);
 
     // Log the next step to console
     logger.client.connecting();
