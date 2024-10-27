@@ -163,5 +163,5 @@ interface PrefixCommandParams {
     /** Message content without the command name. */
     cleanContent: string;
     /** Helper function to get an optional parameter from the message's content. */
-    getCommandOption: (prefix: string, name: string, allowSpaces: boolean) => any | void | null;
+    getCommandOption: (prefix: string, name: string, allowSpaces?: boolean) => any | void | null;
 }
