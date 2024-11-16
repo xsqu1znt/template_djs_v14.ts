@@ -334,7 +334,7 @@ export default class PageNavigator {
 
         let messageReply = await this.data.message
             .reply({ content: _acf(config.navigator.ASK_PAGE_NUMBER_MESSAGE) })
-            .catch(null);
+            .catch(() => null);
 
         /* erorr */
         if (!messageReply) return null;
@@ -368,22 +368,22 @@ export default class PageNavigator {
                 }
 
                 // Delete the user's reply
-                if (msg.deletable) msg.delete().catch(null);
+                if (msg.deletable) msg.delete().catch(Boolean);
                 // Delete the message reply
-                if (messageReply.deletable) messageReply.delete().catch(null);
+                if (messageReply.deletable) messageReply.delete().catch(Boolean);
 
                 return fuckedUp ? null : chosenPageNumber;
             })
             .catch(() => {
                 // Delete the message reply
-                if (messageReply.deletable) messageReply.delete().catch(null);
+                if (messageReply.deletable) messageReply.delete().catch(Boolean);
                 return null;
             });
     }
 
     async #navComponents_removeFromMessage(): Promise<void> {
         if (!this.data.message?.editable) return;
-        await this.data.message.edit({ components: [] }).catch(null);
+        await this.data.message.edit({ components: [] }).catch(Boolean);
     }
 
     async #navReactions_addToMessage(): Promise<void> {
@@ -399,13 +399,13 @@ export default class PageNavigator {
             await this.#navReactions_removeFromMessage();
 
             // React to the message
-            for (let r of this.data.navigation.reactions) await this.data.message.react(r.id).catch(null);
+            for (let r of this.data.navigation.reactions) await this.data.message.react(r.id).catch(Boolean);
         }
     }
 
     async #navReactions_removeFromMessage(): Promise<void> {
         if (!this.data.message) return;
-        await this.data.message.reactions.removeAll().catch(null);
+        await this.data.message.reactions.removeAll().catch(Boolean);
     }
 
     async #collect_components(): Promise<void> {
@@ -434,7 +434,7 @@ export default class PageNavigator {
                 if (!i.isStringSelectMenu() && !i.isButton()) return;
 
                 // Defer the interaction
-                await i.deferUpdate().catch(null);
+                await i.deferUpdate().catch(Boolean);
                 // Reset the collector's timer
                 collector.resetTimer();
 
@@ -604,14 +604,14 @@ export default class PageNavigator {
             /* > error prevention ( END ) */
 
             // Delete the message
-            if (this.data.message?.deletable) this.data.message = await this.data.message.delete().catch(null);
+            if (this.data.message?.deletable) this.data.message = await this.data.message.delete().catch(() => null);
         }
 
         if (this.data.message && this.data.message.editable && !this.options.postTimeout.deleteMessage) {
             // Disable components
             if (this.options.postTimeout.disableComponents) {
                 this.data.messageActionRows.forEach(ar => ar.components.forEach(c => c.setDisabled(true)));
-                this.data.message.edit({ components: this.data.messageActionRows }).catch(null);
+                this.data.message.edit({ components: this.data.messageActionRows }).catch(Boolean);
             }
 
             if (this.options.postTimeout.clearComponentsOrReactions) {

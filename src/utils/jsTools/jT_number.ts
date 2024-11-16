@@ -38,7 +38,7 @@ export function clamp(num: number, range: { min?: number; max: number } | number
  * @example
  * percent(50, 100) --> 50 // 50%
  * percent(30, 40) --> 75 // 75% */
-function percent(a: number, b: number, round: boolean = true): number {
+export function percent(a: number, b: number, round: boolean = true): number {
     return round ? Math.floor((a / b) * 100) : (a / b) * 100;
 }
 
