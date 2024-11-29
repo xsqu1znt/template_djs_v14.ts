@@ -16,7 +16,7 @@
         "paths": {
             "@customTypes/*": ["./src/types/*"],
 
-            "@configs": ["./src/configs"],
+            "@configs": ["configs"],
             "@events/*": ["./src/events/*"],
             "@models": ["./src/models"],
 

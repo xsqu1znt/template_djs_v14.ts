@@ -17,7 +17,7 @@ function resolveGuildIds(client: Client, args: string[]) {
     }
 
     return guildIds;
-};
+}
 
 export default async function (client: Client, acm: AppCommandManager): Promise<void> {
     const rl = createInterface({

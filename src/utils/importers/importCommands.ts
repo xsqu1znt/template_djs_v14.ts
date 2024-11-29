@@ -34,12 +34,12 @@ type CommandType = "slash" | "prefix" | "contextMenu" | "userInstall";
 type ImportedCommandModule<T> = T extends "slash"
     ? { module: SlashCommand | null; path: string }
     : T extends "prefix"
-    ? { module: PrefixCommand | null; path: string }
-    : T extends "contextMenu"
-    ? { module: ContextMenuCommand | null; path: string }
-    : T extends "userInstall"
-    ? { module: UserInstallableCommand | null; path: string }
-    : never;
+      ? { module: PrefixCommand | null; path: string }
+      : T extends "contextMenu"
+        ? { module: ContextMenuCommand | null; path: string }
+        : T extends "userInstall"
+          ? { module: UserInstallableCommand | null; path: string }
+          : never;
 
 async function importCommandModules<T extends CommandType>(commandType: T): Promise<ImportedCommandModule<T>[]> {
     let _moduleDirectory: string = "";

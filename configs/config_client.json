@@ -4,9 +4,11 @@
 
     "TOKEN_DEV": "",
     "MONGO_URI_DEV": "",
-    "DEV_MODE": false,
+    "DEV_MODE": true,
 
-    "PREFIX": "!!",
+    "MAX_DB_CONNECTION_ATTEMPTS": 5,
+
+    "PREFIX": "!",
 
     "staff": {
         "OWNER_ID": "",

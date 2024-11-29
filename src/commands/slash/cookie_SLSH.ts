@@ -8,9 +8,7 @@ export const __command: SlashCommand = {
     category: "Fun",
     options: { emoji: "🍪" },
 
-    builder: new SlashCommandBuilder()
-        .setName("cookie")
-        .setDescription("Get a cookie or a glass of milk."),
+    builder: new SlashCommandBuilder().setName("cookie").setDescription("Get a cookie or a glass of milk."),
 
     execute: async (client, interaction) => {
         // Create an array of responses

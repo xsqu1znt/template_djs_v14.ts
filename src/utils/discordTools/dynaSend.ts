@@ -79,12 +79,12 @@ export default async function dynaSend(handler: SendHandler, options: DynaSendOp
         handler instanceof BaseInteraction
             ? "reply"
             : handler instanceof BaseChannel
-            ? "sendInChannel"
-            : handler instanceof Message
-            ? "messageReply"
-            : handler instanceof GuildMember || handler instanceof User
-            ? "dmUser"
-            : null;
+              ? "sendInChannel"
+              : handler instanceof Message
+                ? "messageReply"
+                : handler instanceof GuildMember || handler instanceof User
+                  ? "dmUser"
+                  : null;
 
     // Parse deleteAfter time
     _options.deleteAfter = jt.parseTime(_options.deleteAfter as string | number);

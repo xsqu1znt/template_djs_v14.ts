@@ -15,7 +15,7 @@ import { BetterEmbed } from "@utils/discordTools";
 import { guildManager } from "@utils/mongo";
 import logger from "@utils/logger";
 
-import config from "@configs";
+import config from "configs";
 
 function getStaffGuildAdminBypass(commandName: string): string[] {
     let _staff = config.client.staff;
@@ -54,20 +54,6 @@ function hasRequiredPermissions(member: GuildMember, required: PermissionResolva
     }
 
     return { has, missing, passed: has.length === required.length };
-}
-
-function getOptionFromMessageContent(str: string, prefix: string, name: string, allowSpaces: boolean = false): string | null {
-    let match: string | undefined;
-
-    if (allowSpaces) {
-        /* NOTE: matches until the first occurrence of the prefix */
-        match = str.match(new RegExp(`${prefix}${name} ((?:(?!${prefix}).)*)`))?.[1];
-    } else {
-        /* NOTE: matches until the first occurrence of a space */
-        match = str.match(new RegExp(`${prefix}${name} (\\S*)`))?.[1];
-    }
-
-    return match ?? null;
 }
 
 export const __event: MessageCreateEventModule = {
@@ -168,13 +154,7 @@ export const __event: MessageCreateEventModule = {
 
         /* - - - - - { Execute the Command } - - - - - */
         try {
-            const extra: PrefixCommandParams = {
-                prefix,
-                commandName,
-                cleanContent,
-                getCommandOption: (prefix: string, name: string, allowSpaces: boolean = false) =>
-                    getOptionFromMessageContent(cleanContent, prefix, name, allowSpaces)
-            };
+            const extra: PrefixCommandParams = { prefix, commandName, cleanContent };
 
             return await prefixCommand.execute(client, message, extra).then(async message => {
                 /* TODO: run code here after the command finished executing... */

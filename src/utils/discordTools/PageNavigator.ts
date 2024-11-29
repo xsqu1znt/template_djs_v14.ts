@@ -171,7 +171,9 @@ export default class PageNavigator {
         timeout: Array<{ listener: Function; once: boolean }>;
     };
 
-    public static resolveEmbedsToPages(embeds: EmbedResolveable | EmbedResolveable[] | EmbedResolveable[][]): Array<PageData | NestedPageData> {
+    public static resolveEmbedsToPages(
+        embeds: EmbedResolveable | EmbedResolveable[] | EmbedResolveable[][]
+    ): Array<PageData | NestedPageData> {
         const _pages = jt.forceArray(embeds);
         let resolvedPages: Array<PageData | NestedPageData> = [];
 
@@ -287,8 +289,8 @@ export default class PageNavigator {
         // Convert types to reactions/buttons
         if (this.options.useReactions) {
             /* as reactions */
-            this.data.navigation.reactions = navTypes.map(type =>
-                jt.getProp(config.navigator.buttons, `${type}.emoji`) as { name: string; id: string }
+            this.data.navigation.reactions = navTypes.map(
+                type => jt.getProp(config.navigator.buttons, `${type}.emoji`) as { name: string; id: string }
             );
         } else {
             /* as buttons */
@@ -751,7 +753,7 @@ export default class PageNavigator {
                 label: data.label || `page ${this.data.selectMenu.optionIds.length + 1}`,
                 description: data.description || "",
                 value: data.value || `ssm_o_${this.data.selectMenu.optionIds.length + 1}`,
-                default: data.default ?? this.data.selectMenu.optionIds.length === 0 ? true : false
+                default: (data.default ?? this.data.selectMenu.optionIds.length === 0) ? true : false
             };
 
             // Create a new StringSelectMenuOption

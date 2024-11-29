@@ -1,4 +1,4 @@
-import config from "@configs";
+import config from "configs";
 
 /* - - - - - { CLI } - - - - -  */
 const __argsv: string[] = process.argv.slice(2);
@@ -15,8 +15,12 @@ export const argsv = {
 };
 
 /* - - - - - { Environment } - - - - -  */
-/** Whether the environment is in development mode. */
-export const IS_DEV_MODE: boolean = process.env.DEV_MODE === "true" ? true : config.client.DEV_MODE;
+/** Whether the environment is in development mode. Forced `false` if the CWD is in the `dist` directory. */
+export const IS_DEV_MODE: boolean = __dirname.includes("dist")
+    ? false
+    : process.env.DEV_MODE === "true"
+      ? true
+      : config.client.DEV_MODE;
 
 /* - - - - - { Discord Token } - - - - -  */
 const TOKEN_PROD: string = process.env.TOKEN || config.client.TOKEN;

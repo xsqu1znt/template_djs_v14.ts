@@ -26,6 +26,16 @@ export interface SlashCommand {
     execute: (client: Client<true>, interaction: CommandInteraction) => Promise<InteractionResponse | Message | void | null>;
 }
 
+export interface SlashCommandCached extends SlashCommand {
+    /** Extra options for this command. */
+    options?: InteractionBasedCommandOptions & { guildOnly: true };
+    /** Executed when the command is used. */
+    execute: (
+        client: Client<true>,
+        interaction: CommandInteraction<"cached">
+    ) => Promise<InteractionResponse | Message | void | null>;
+}
+
 export interface PrefixCommand {
     /** Name of the command. */
     name: string;
@@ -43,17 +53,34 @@ export interface PrefixCommand {
     execute: (client: Client<true>, message: Message, extra: PrefixCommandParams) => Promise<Message | void | null>;
 }
 
+export interface PrefixCommandCached extends PrefixCommand {
+    /** Extra options for this command. */
+    options?: InteractionBasedCommandOptions & { guildOnly: true };
+    /** Executed when the command is used. */
+    execute: (client: Client<true>, message: Message<true>, extra: PrefixCommandParams) => Promise<Message | void | null>;
+}
+
 export interface ContextMenuCommand {
     /** Context menu builder. */
     builder: ContextMenuCommandBuilder;
     /** The category to place the command inside the help command list. */
     category?: string;
     /** Extra options for this command. */
-    options?: Omit<InteractionBasedCommandOptions, "emoji" | "hidden" | "guildOnly">;
+    options?: Omit<InteractionBasedCommandOptions, "emoji" | "hidden">;
     /** Executed when the command is used. */
     execute: (
         client: Client<true>,
         interaction: UserContextMenuCommandInteraction | MessageContextMenuCommandInteraction
+    ) => Promise<Message | void | null>;
+}
+
+export interface ContextMenuCommandCached extends ContextMenuCommand {
+    /** Extra options for this command. */
+    options?: Omit<InteractionBasedCommandOptions, "emoji" | "hidden"> & { guildOnly: true };
+    /** Executed when the command is used. */
+    execute: (
+        client: Client<true>,
+        interaction: UserContextMenuCommandInteraction<"cached"> | MessageContextMenuCommandInteraction<"cached">
     ) => Promise<Message | void | null>;
 }
 
@@ -87,6 +114,13 @@ export interface UserInstallableCommand {
     options?: Omit<InteractionBasedCommandOptions, "emoji" | "hidden">;
     /** Executed when the command is used. */
     execute: (client: Client<true>, interaction: CommandInteraction) => Promise<Message | void | null>;
+}
+
+export interface UserInstallableCommandCached extends UserInstallableCommand {
+    /** Extra options for this command. */
+    options?: Omit<InteractionBasedCommandOptions, "emoji" | "hidden"> & { guildOnly: true };
+    /** Executed when the command is used. */
+    execute: (client: Client<true>, interaction: CommandInteraction<"cached">) => Promise<Message | void | null>;
 }
 
 /* - - - - - { Options } - - - - - */
@@ -162,6 +196,4 @@ interface PrefixCommandParams {
     commandName: string;
     /** Message content without the command name. */
     cleanContent: string;
-    /** Helper function to get an optional parameter from the message's content. */
-    getCommandOption: (prefix: string, name: string, allowSpaces?: boolean) => string | null;
 }

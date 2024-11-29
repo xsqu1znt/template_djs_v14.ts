@@ -1,5 +1,6 @@
-import mongoose from "mongoose";
 import logger from "@utils/logger";
+import mongoose from "mongoose";
+import configs from "configs";
 
 import { MONGO_URI, IS_DEV_MODE } from "@constants";
 
@@ -11,10 +12,13 @@ import guildManager from "./guildManager";
 export { guildManager };
 
 /* - - - - - { Meta Functions } - - - - - */
+let connectionAttempts = 0;
+
+let connecting: Promise<mongoose.Mongoose> | null = null;
 let connection: mongoose.Mongoose | null = null;
 
 /** Connect to MongoDB. */
-export async function connect(uri: string = MONGO_URI): Promise<mongoose.Connection | null> {
+export async function connect(uri: string = MONGO_URI): Promise<mongoose.Mongoose | null> {
     if (!uri) {
         logger.error("::MONGO", "MONGO_URI is not set");
         return null;
@@ -25,15 +29,31 @@ export async function connect(uri: string = MONGO_URI): Promise<mongoose.Connect
         return null;
     }
 
+    if (connecting) {
+        await connecting;
+        connecting = null;
+        return connection;
+    }
+
     try {
         logger.db.mongo.connecting();
         // Create a new connection to MongoDB
-        connection = await mongoose.connect(uri);
+        connecting = mongoose.connect(uri);
+        connection = await connecting;
         // Log success if connected
         if (connection) logger.db.mongo.connected();
     } catch (err) {
+        connecting = null;
+
         // Log an error if the connection failed
-        logger.error("::MONGO", "Couldn't connect to MongoDB", connection);
+        logger.error("::MONGO", "Couldn't connect to MongoDB. Retrying...", connection);
+
+        if (connectionAttempts < configs.client.MAX_DB_CONNECTION_ATTEMPTS) {
+            connectionAttempts++;
+            return await connect(uri);
+        } else {
+            return null;
+        }
     }
 
     return null;

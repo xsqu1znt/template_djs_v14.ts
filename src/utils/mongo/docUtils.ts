@@ -84,7 +84,7 @@ export default class DocumentUtils<T> {
      * @param filter An optional filter to count only the documents that match it. */
     count = async (filter?: RootFilterQuery<T>): Promise<number> => {
         return await this.model.countDocuments(filter);
-    }
+    };
 
     /** Check if a document exists in the collection based on the provided filter.
      * @param filter The filter used to find the document. It can be a string representing the document's `_id` or an object representing the document's properties. */
@@ -97,7 +97,7 @@ export default class DocumentUtils<T> {
             default:
                 return false;
         }
-    }
+    };
 
     /** Insert a document into the collection if it doesn't already exist, or updates it if it does.
      * @param _id The unique identifier for the document.
@@ -108,7 +108,7 @@ export default class DocumentUtils<T> {
         if ((upsertOptions.checkExists ?? true) && (await this.exists(_id)))
             return await this.update(_id, upsertQuery, _upsertOptions);
         return await new this.model({ _id, ...upsertQuery }).save();
-    }
+    };
 
     /** Delete a document from the collection based on the provided `_id` or filter.
      * @param filter The filter used to find the document. It can be a string representing the document's `_id` or an object representing the document's properties. */
@@ -118,13 +118,13 @@ export default class DocumentUtils<T> {
         } else {
             return await this.model.deleteOne(filter);
         }
-    }
+    };
 
     /** Delete all documents from the collection that match the provided filter.
      * @param filter The filter used to find the documents to delete. */
     deleteAll = async (filter: RootFilterQuery<T>) => {
         return await this.model.deleteMany(filter);
-    }
+    };
 
     /** Fetch a document from the collection based on the provided `_id` or filter.
      * @param filter The filter used to find the document. It can be a string representing the document's `_id` or an object representing the document's properties.
@@ -136,7 +136,7 @@ export default class DocumentUtils<T> {
         } else {
             return await this.model?.findOne(filter, options?.projection, _options);
         }
-    }
+    };
 
     /** Fetch all documents from the collection that match the provided filter.
      * @param filter The filter used to find the documents to fetch.
@@ -150,19 +150,23 @@ export default class DocumentUtils<T> {
      * @param filter The filter used to find the document. It can be a string representing the document's `_id` or an object representing the document's properties.
      * @param updateQuery The update operations to be applied to the document.
      * @param options Optional parameters for the update operation. `lean` is `true` by default. */
-    update = async (filter: string | RootFilterQuery<T>, updateQuery: UpdateQuery<T>, options: DocumentQueryOptions<T> = {}) => {
+    update = async (
+        filter: string | RootFilterQuery<T>,
+        updateQuery: UpdateQuery<T>,
+        options: DocumentQueryOptions<T> = {}
+    ) => {
         const _options = { ...options, lean: options?.lean ?? true };
         if (typeof filter === "string") {
             return await this.model.findByIdAndUpdate(filter, updateQuery, _options);
         } else {
             return await this.model.findOneAndUpdate(filter, updateQuery, _options);
         }
-    }
+    };
 
     /** Update a document in the collection based on the provided filter.
      * @param filter The filter used to find the documents to update.
      * @param updateQuery The update operations to be applied to the document. */
     updateAll = async (filter: RootFilterQuery<T>, updateQuery: UpdateQuery<T>) => {
         return await this.model.updateMany(filter, updateQuery);
-    }
+    };
 }

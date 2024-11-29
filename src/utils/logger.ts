@@ -3,10 +3,10 @@
 import jt from "@utils/jsTools";
 import chalk from "chalk";
 
-import config from "@configs";
+import config from "configs";
 import { Client } from "discord.js";
 
-import { name as PROJECT } from "@pkgJSON";
+import { version as PROJECT_VERSION, name as PROJECT_NAME } from "@pkgJSON";
 
 const { COLORS } = config.logger;
 
@@ -62,7 +62,9 @@ export const client = {
     connecting: (): void => __log(`::CLIENT ⏳ ${chalk.italic("Connecting to Discord...")}`),
     online: (): void => __log(`::CLIENT ✅ ${chalk.greenBright("Successfuly connected to Discord!")}`),
     ready: (client?: Client) =>
-        __log(`::CLIENT ✅ ${chalk.greenBright(`${chalk.bold.underline(client?.__name ?? PROJECT)} is up and running!`)} 🎉`)
+        __log(
+            `::CLIENT ✅ ${chalk.greenBright(`${chalk.bold.underline(client?.__name ?? PROJECT_NAME)} v${PROJECT_VERSION} is up and running!`)} 🎉`
+        )
 };
 
 /* - - - - - { utils/importers } - - - - - */
