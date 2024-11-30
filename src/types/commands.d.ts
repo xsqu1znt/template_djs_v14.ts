@@ -53,9 +53,9 @@ export interface PrefixCommand {
     execute: (client: Client<true>, message: Message, extra: PrefixCommandParams) => Promise<Message | void | null>;
 }
 
-export interface PrefixCommandCached extends PrefixCommand {
+export interface GuildPrefixCommand extends PrefixCommand {
     /** Extra options for this command. */
-    options?: InteractionBasedCommandOptions & { guildOnly: true };
+    options?: PrefixCommandOptions & { guildOnly: true };
     /** Executed when the command is used. */
     execute: (client: Client<true>, message: Message<true>, extra: PrefixCommandParams) => Promise<Message | void | null>;
 }
@@ -74,7 +74,7 @@ export interface ContextMenuCommand {
     ) => Promise<Message | void | null>;
 }
 
-export interface ContextMenuCommandCached extends ContextMenuCommand {
+export interface GuildContextMenuCommand extends ContextMenuCommand {
     /** Extra options for this command. */
     options?: Omit<InteractionBasedCommandOptions, "emoji" | "hidden"> & { guildOnly: true };
     /** Executed when the command is used. */
@@ -116,7 +116,7 @@ export interface UserInstallableCommand {
     execute: (client: Client<true>, interaction: CommandInteraction) => Promise<Message | void | null>;
 }
 
-export interface UserInstallableCommandCached extends UserInstallableCommand {
+export interface GuildUserInstallableCommand extends UserInstallableCommand {
     /** Extra options for this command. */
     options?: Omit<InteractionBasedCommandOptions, "emoji" | "hidden"> & { guildOnly: true };
     /** Executed when the command is used. */
