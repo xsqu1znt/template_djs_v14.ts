@@ -93,10 +93,6 @@ import BetterEmbed from "./BetterEmbed";
 // this will be used as a filter when getting the current reactions from the message
 const paginationReactionNames = Object.values(config.navigator.buttons).map(data => data.emoji.name);
 
-function isPageData(pageData: any): pageData is PageData {
-    return Object.hasOwn(pageData, "embed");
-}
-
 function isNestedPageData(pageData: any): pageData is NestedPageData {
     return Object.hasOwn(pageData, "nestedEmbeds");
 }
@@ -422,7 +418,7 @@ export default class PageNavigator {
 
         // Create the component collector
         const collector = this.data.message.createMessageComponentCollector({
-            filter: i => allowedParticipantIds.includes(i.user.id),
+            filter: i => (allowedParticipantIds.length ? allowedParticipantIds.includes(i.user.id) : true),
             ...(this.options.timeout ? { idle: this.options.timeout } : {})
         }) as InteractionCollector<ButtonInteraction | StringSelectMenuInteraction>;
 
@@ -528,7 +524,7 @@ export default class PageNavigator {
                 if (user.id !== reaction.message.guild?.members?.me?.id) await reaction.users.remove(user.id);
 
                 // Ignore reactions that weren't from the allowed users
-                if (!allowedParticipantIds.includes(user.id)) return;
+                if (allowedParticipantIds.length && !allowedParticipantIds.includes(user.id)) return;
 
                 // Reset the collector's timer
                 collector.resetTimer();
