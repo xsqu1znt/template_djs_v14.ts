@@ -37,8 +37,6 @@ export class LoopInterval<T extends (...args: any) => any> {
         } else {
             sleep(__date.parseTime(delay)).then(() => runItBack());
         }
-
-        runItBack();
     }
 
     /** Stop the loop. */
