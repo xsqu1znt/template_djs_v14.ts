@@ -292,6 +292,10 @@ export default class PageNavigator {
                     ...navTypes.map(type => jt.getProp(this.data.components.navigation, type) as ButtonBuilder)
                 );
             }
+        } else {
+            // Delete all the buttons in the action row, so extra buttons don't get duplicated
+            /* This is only needed if there are no navigation buttons in the action row */
+            this.data.components.actionRows.navigation.setComponents([]);
         }
 
         // Add extra buttons, if any
