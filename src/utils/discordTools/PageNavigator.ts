@@ -72,7 +72,6 @@ import {
     ButtonInteraction,
     ButtonStyle,
     ComponentEmojiResolvable,
-    EmbedBuilder,
     GuildMember,
     InteractionCollector,
     Message,
@@ -87,7 +86,6 @@ import logger from "@utils/logger";
 import jt from "@utils/jsTools";
 
 import * as config from "./config.json";
-import BetterEmbed from "./BetterEmbed";
 
 // Get the name of each pagination reaction emoji
 // this will be used as a filter when getting the current reactions from the message
@@ -251,48 +249,49 @@ export default class PageNavigator {
 
     #configure_navigation(): void {
         this.data.navigation.reactions = [];
-        if (!this.data.navigation.required) return;
 
-        let navTypes = [];
+        if (this.data.navigation.required) {
+            let navTypes = [];
 
-        // prettier-ignore
-        switch (this.options.type) {
-            case "short":
-                navTypes = ["back", "next"];                                                    // Short ( STATIC )
-                break;
+            // prettier-ignore
+            switch (this.options.type) {
+                case "short":
+                    navTypes = ["back", "next"];                                                    // Short ( STATIC )
+                    break;
+    
+                case "shortJump":
+                    navTypes = this.options.dynamic
+                        ? this.data.navigation.canJump
+                            ? ["back", "jump", "next"]                                              // Short Jump ( DYNAMIC )
+                            : ["back", "next"]                                                      // Short ( DYNAMIC )
+                        : ["back", "jump", "next"];                                                 // Short Jump ( STATIC )
+                    break;
+    
+                case "long":
+                    navTypes = ["to_first", "back", "next", "to_last"];                             // Long ( STATIC )
+                    break;
+    
+                case "longJump":
+                    navTypes = this.options.dynamic
+                        ? this.data.navigation.canJump
+                            ? ["to_first", "back", "jump", "next", "to_last"]                       // Long Jump ( DYNAMIC )
+                            : ["to_first", "back", "next", "to_last"]                               // Long ( DYNAMIC )
+                        : ["to_first", "back", "jump", "next", "to_last"];                          // Long Jump ( STATIC )
+                    break;
+            }
 
-            case "shortJump":
-                navTypes = this.options.dynamic
-                    ? this.data.navigation.canJump
-                        ? ["back", "jump", "next"]                                              // Short Jump ( DYNAMIC )
-                        : ["back", "next"]                                                      // Short ( DYNAMIC )
-                    : ["back", "jump", "next"];                                                 // Short Jump ( STATIC )
-                break;
-
-            case "long":
-                navTypes = ["to_first", "back", "next", "to_last"];                             // Long ( STATIC )
-                break;
-
-            case "longJump":
-                navTypes = this.options.dynamic
-                    ? this.data.navigation.canJump
-                        ? ["to_first", "back", "jump", "next", "to_last"]                       // Long Jump ( DYNAMIC )
-                        : ["to_first", "back", "next", "to_last"]                               // Long ( DYNAMIC )
-                    : ["to_first", "back", "jump", "next", "to_last"];                          // Long Jump ( STATIC )
-                break;
-        }
-
-        // Convert types to reactions/buttons
-        if (this.options.useReactions) {
-            /* as reactions */
-            this.data.navigation.reactions = navTypes.map(
-                type => jt.getProp(config.navigator.buttons, `${type}.emoji`) as { name: string; id: string }
-            );
-        } else {
-            /* as buttons */
-            this.data.components.actionRows.navigation.setComponents(
-                ...navTypes.map(type => jt.getProp(this.data.components.navigation, type) as ButtonBuilder)
-            );
+            // Convert types to reactions/buttons
+            if (this.options.useReactions) {
+                /* as reactions */
+                this.data.navigation.reactions = navTypes.map(
+                    type => jt.getProp(config.navigator.buttons, `${type}.emoji`) as { name: string; id: string }
+                );
+            } else {
+                /* as buttons */
+                this.data.components.actionRows.navigation.setComponents(
+                    ...navTypes.map(type => jt.getProp(this.data.components.navigation, type) as ButtonBuilder)
+                );
+            }
         }
 
         // Add extra buttons, if any
@@ -311,7 +310,7 @@ export default class PageNavigator {
         }
 
         // Add button navigation, if needed
-        if (this.data.navigation.required && !this.options.useReactions) {
+        if ((this.data.navigation.required && !this.options.useReactions) || this.data.extraUserButtons.length) {
             this.data.messageActionRows.push(this.data.components.actionRows.navigation);
         }
     }
