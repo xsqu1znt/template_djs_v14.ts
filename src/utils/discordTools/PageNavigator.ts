@@ -434,14 +434,13 @@ export default class PageNavigator {
                 // Ignore interactions that aren't StringSelectMenu/Button
                 if (!i.isStringSelectMenu() && !i.isButton()) return;
 
-                // Defer the interaction
-                await i.deferUpdate().catch(Boolean);
                 // Reset the collector's timer
                 collector.resetTimer();
 
                 try {
                     switch (i.customId) {
                         case "ssm_pageSelect":
+                            await i.deferUpdate().catch(Boolean);
                             let _ssmOptionIndex = this.data.selectMenu.optionIds.indexOf(
                                 (i as StringSelectMenuInteraction).values[0]
                             );
@@ -456,17 +455,20 @@ export default class PageNavigator {
                             return await this.refresh();
 
                         case "btn_to_first":
+                            await i.deferUpdate().catch(Boolean);
                             this.#setPage(this.data.page.index.current, 0);
                             this.#callEventStack("pageChanged", this.data.page.currentData, this.data.page.index.nested);
                             return await this.refresh();
 
                         case "btn_back":
+                            await i.deferUpdate().catch(Boolean);
                             this.#setPage(this.data.page.index.current, this.data.page.index.nested - 1);
                             this.#callEventStack("pageBack", this.data.page.currentData, this.data.page.index.nested);
                             this.#callEventStack("pageChanged", this.data.page.currentData, this.data.page.index.nested);
                             return await this.refresh();
 
                         case "btn_jump":
+                            await i.deferUpdate().catch(Boolean);
                             let jumpIndex = await this.#askPageNumber(i.user);
                             if (jumpIndex === null) return;
                             this.#setPage(this.data.page.index.current, jumpIndex);
@@ -475,12 +477,14 @@ export default class PageNavigator {
                             return await this.refresh();
 
                         case "btn_next":
+                            await i.deferUpdate().catch(Boolean);
                             this.#setPage(this.data.page.index.current, this.data.page.index.nested + 1);
                             this.#callEventStack("pageNext", this.data.page.currentData, this.data.page.index.nested);
                             this.#callEventStack("pageChanged", this.data.page.currentData, this.data.page.index.nested);
                             return await this.refresh();
 
                         case "btn_to_last":
+                            await i.deferUpdate().catch(Boolean);
                             this.#setPage(this.data.page.index.current, this.options.pages.length - 1);
                             this.#callEventStack("pageChanged", this.data.page.currentData, this.data.page.index.nested);
                             return await this.refresh();
@@ -752,7 +756,7 @@ export default class PageNavigator {
                 label: data.label || `page ${this.data.selectMenu.optionIds.length + 1}`,
                 description: data.description || "",
                 value: data.value || `ssm_o_${this.data.selectMenu.optionIds.length + 1}`,
-                default: (data.default ?? this.data.selectMenu.optionIds.length === 0) ? true : false
+                default: data.default ?? this.data.selectMenu.optionIds.length === 0 ? true : false
             };
 
             // Create a new StringSelectMenuOption
