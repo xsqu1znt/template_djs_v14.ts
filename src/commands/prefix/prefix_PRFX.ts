@@ -26,7 +26,7 @@ export const __command: PrefixCommand = {
 
         // Reply to the user with the new prefix
         return await message.reply({
-            content: `Prefix has been set to \`${prefix}\``,
+            content: `My prefix has been changed to \`${prefix}\`.`,
             allowedMentions: { repliedUser: false }
         });
     }
