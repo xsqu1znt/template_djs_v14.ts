@@ -11,6 +11,10 @@ interface AwaitConfirmOptions extends Omit<DynaSendOptions, "embeds" | "componen
      *
      * This option also utilizes {@link jt.parseTime}, letting you use "10s" or "1m 30s" instead of a number. */
     timeout?: number | string | null;
+    buttons?: {
+        confirm?: { label?: string; emoji?: string };
+        cancel?: { label?: string; emoji?: string };
+    };
     onResolve?: {
         /** Delete the message after the `confirm` button is pressed. Default is `true`. */
         deleteOnConfirm?: boolean;
@@ -21,7 +25,7 @@ interface AwaitConfirmOptions extends Omit<DynaSendOptions, "embeds" | "componen
     };
 }
 
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType } from "discord.js";
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType, Message } from "discord.js";
 
 import dynaSend, { DynaSendOptions } from "./dynaSend";
 import BetterEmbed from "./BetterEmbed";
@@ -33,7 +37,10 @@ import config from "./config.json";
 /** Send a confirmation message and await the user's response.
 
  * This function utilizes {@link BetterEmbed} and {@link dynaSend}. */
-export default async function awaitConfirm(handler: SendHandler, options: AwaitConfirmOptions): Promise<boolean> {
+export default async function awaitConfirm(
+    handler: SendHandler,
+    options: AwaitConfirmOptions
+): Promise<{ message: Message | null; confirmed: boolean }> {
     const _options = {
         onResolve: {
             deleteOnConfirm: true,
@@ -59,13 +66,23 @@ export default async function awaitConfirm(handler: SendHandler, options: AwaitC
                   description: config.await_confirm.DEFAULT_EMBED_DESCRIPTION
               })
             : _options.embed === null
-              ? undefined
-              : _options.embed;
+            ? undefined
+            : _options.embed;
 
     /* - - - - - { Action Row  } - - - - - */
     const buttons = {
-        confirm: new ButtonBuilder({ label: "Confirm", style: ButtonStyle.Success, custom_id: "btn_confirm" }),
-        cancel: new ButtonBuilder({ label: "Cancel", style: ButtonStyle.Danger, custom_id: "btn_cancel" })
+        confirm: new ButtonBuilder({
+            label: "Confirm",
+            style: ButtonStyle.Success,
+            ...options.buttons?.confirm,
+            custom_id: "btn_confirm"
+        }),
+        cancel: new ButtonBuilder({
+            label: "Cancel",
+            style: ButtonStyle.Danger,
+            ...options.buttons?.cancel,
+            custom_id: "btn_cancel"
+        })
     };
 
     const actionRow = new ActionRowBuilder<ButtonBuilder>({ components: [buttons.confirm, buttons.cancel] });
@@ -81,10 +98,10 @@ export default async function awaitConfirm(handler: SendHandler, options: AwaitC
     });
 
     // Cancel if the message failed to send
-    if (!message) return false;
+    if (!message) return { message: null, confirmed: false };
 
     /* - - - - - { Await the User's Decision } - - - - - */
-    const cleanUp = async (resolve: (value: boolean) => void, confirmed: boolean) => {
+    const cleanUp = async (resolve: (...args: any) => void, confirmed: boolean) => {
         // Delete the message ( CONFIRM )
         if (confirmed && _options.onResolve.deleteOnConfirm) {
             if (message?.deletable) await message.delete().catch(null);
@@ -104,7 +121,7 @@ export default async function awaitConfirm(handler: SendHandler, options: AwaitC
             await message?.edit({ components: [actionRow] }).catch(null);
 
             // Resolve the promise
-            return resolve(confirmed);
+            return resolve({ message, confirmed });
         }
     };
 
