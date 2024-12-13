@@ -35,9 +35,9 @@ interface PageNavigatorOptions {
      *
      * ___4.___ `deleteMessage`: Delete the message. (default: `false`) */
     postTimeout?: {
-        disableComponents: boolean;
-        clearComponentsOrReactions: boolean;
-        deleteMessage: boolean;
+        disableComponents?: boolean;
+        clearComponentsOrReactions?: boolean;
+        deleteMessage?: boolean;
     };
 }
 
@@ -661,8 +661,8 @@ export default class PageNavigator {
                     ? jt.parseTime(options.timeout)
                     : jt.parseTime(config.timeouts.PAGINATION),
             postTimeout: {
-                disableComponents: false,
-                clearComponentsOrReactions: true,
+                disableComponents: true,
+                clearComponentsOrReactions: false,
                 deleteMessage: false
             }
         };
@@ -756,7 +756,7 @@ export default class PageNavigator {
                 label: data.label || `page ${this.data.selectMenu.optionIds.length + 1}`,
                 description: data.description || "",
                 value: data.value || `ssm_o_${this.data.selectMenu.optionIds.length + 1}`,
-                default: data.default ?? this.data.selectMenu.optionIds.length === 0 ? true : false
+                default: (data.default ?? this.data.selectMenu.optionIds.length === 0) ? true : false
             };
 
             // Create a new StringSelectMenuOption

@@ -1,10 +1,12 @@
 {
-    "TOKEN": "",
-    "MONGO_URI": "",
+    "AUTO_DEV_MODE": true,
+    "DEV_MODE_OVERRIDE": null,
 
+    "TOKEN": "",
     "TOKEN_DEV": "",
+
+    "MONGO_URI": "",
     "MONGO_URI_DEV": "",
-    "DEV_MODE": true,
 
     "MAX_DB_CONNECTION_ATTEMPTS": 5,
 

@@ -1,6 +1,14 @@
+import AnsiBuilder_default from "./AnsiBuilder";
+export * from "./AnsiBuilder";
+export const AnsiBuilder = AnsiBuilder_default;
+
 import BetterEmbed_default from "./BetterEmbed";
 export * from "./BetterEmbed";
 export const BetterEmbed = BetterEmbed_default;
+
+import CanvasBuilder_default from "./CanvasBuilder";
+export * from "./CanvasBuilder";
+export const CanvasBuilder = CanvasBuilder_default;
 
 import PageNavigator_default from "./PageNavigator";
 export * from "./PageNavigator";
@@ -21,7 +29,3 @@ export const deleteMessageAfter = deleteMessageAfter_default;
 import extractWordsFromMessage_default from "./extractWordsFromMessage";
 export * from "./extractWordsFromMessage";
 export const extractWordsFromMessage = extractWordsFromMessage_default;
-
-import AnsiBuilder_default from "./AnsiBuilder";
-export * from "./AnsiBuilder";
-export const AnsiBuilder = AnsiBuilder_default;

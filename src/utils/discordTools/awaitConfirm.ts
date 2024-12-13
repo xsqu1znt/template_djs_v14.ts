@@ -66,8 +66,8 @@ export default async function awaitConfirm(
                   description: config.await_confirm.DEFAULT_EMBED_DESCRIPTION
               })
             : _options.embed === null
-            ? undefined
-            : _options.embed;
+              ? undefined
+              : _options.embed;
 
     /* - - - - - { Action Row  } - - - - - */
     const buttons = {

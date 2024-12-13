@@ -87,7 +87,7 @@ import logger from "@utils/logger";
 import jt from "@utils/jsTools";
 
 import { INVIS_CHAR, EMBED_COLOR, EMBED_COLOR_DEV } from "./config.json";
-import { IS_DEV_MODE } from "@constants";
+import { IN_DEV_MODE } from "@constants";
 
 /** A powerful wrapper for `EmbedBuilder` that introduces useful features.
  *
@@ -129,7 +129,7 @@ export default class BetterEmbed {
         imageURL: null,
         description: null,
         footer: { text: "", icon: null },
-        color: (jt.choice(IS_DEV_MODE ? EMBED_COLOR_DEV : EMBED_COLOR) as HexColorString) || null,
+        color: (jt.choice(IN_DEV_MODE ? EMBED_COLOR_DEV : EMBED_COLOR) as HexColorString) || null,
         timestamp: null,
         fields: [],
         acf: true
@@ -143,7 +143,7 @@ export default class BetterEmbed {
         imageURL: null,
         description: null,
         footer: { text: "", icon: null },
-        color: (jt.choice(IS_DEV_MODE ? EMBED_COLOR_DEV : EMBED_COLOR) as HexColorString) || null,
+        color: (jt.choice(IN_DEV_MODE ? EMBED_COLOR_DEV : EMBED_COLOR) as HexColorString) || null,
         timestamp: null,
         fields: [],
         acf: true

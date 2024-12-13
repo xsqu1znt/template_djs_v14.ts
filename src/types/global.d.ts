@@ -5,7 +5,7 @@ import { Client, Collection, SlashCommandBuilder } from "discord.js";
 declare module "discord.js" {
     interface Client {
         /** The name of the client. Currently used for logging. */
-        __name?: string;
+        __name: string;
 
         /** The client's commands. */
         commands: {

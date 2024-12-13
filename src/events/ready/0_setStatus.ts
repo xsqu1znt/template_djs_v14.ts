@@ -4,7 +4,7 @@ import { ActivityData, ClientActivity } from "@customTypes/misc";
 import { ActivityType } from "discord.js";
 import jt from "@utils/jsTools";
 
-import { IS_DEV_MODE } from "@constants";
+import { IN_DEV_MODE } from "@constants";
 import config from "configs";
 
 export const __event: BaseEventModule = {
@@ -12,7 +12,7 @@ export const __event: BaseEventModule = {
     event: "ready",
 
     execute: async client => {
-        let clientActivity: ClientActivity = IS_DEV_MODE
+        let clientActivity: ClientActivity = IN_DEV_MODE
             ? config.client.client_activity.dev
             : config.client.client_activity.default;
 

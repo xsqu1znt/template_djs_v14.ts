@@ -11,12 +11,12 @@
         /* Modules */
         "resolveJsonModule": true,
         "module": "commonjs",
-        "rootDir": "./src",
+        "rootDir": "./",
         "baseUrl": "./",
         "paths": {
             "@customTypes/*": ["./src/types/*"],
 
-            "@configs": ["configs"],
+            "@configs": ["./configs"],
             "@events/*": ["./src/events/*"],
             "@models": ["./src/models"],
 

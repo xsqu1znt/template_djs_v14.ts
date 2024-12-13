@@ -2,7 +2,7 @@ import logger from "@utils/logger";
 import mongoose from "mongoose";
 import configs from "configs";
 
-import { MONGO_URI, IS_DEV_MODE } from "@constants";
+import { MONGO_URI, IN_DEV_MODE } from "@constants";
 
 /* - - - - - { Models } - - - - - */
 export * as models from "@models";
@@ -24,7 +24,7 @@ export async function connect(uri: string = MONGO_URI): Promise<mongoose.Mongoos
         return null;
     }
 
-    if (IS_DEV_MODE && !MONGO_URI) {
+    if (IN_DEV_MODE && !MONGO_URI) {
         logger.error("::MONGO", "DEV_MODE is enabled, but MONGO_URI_DEV is not set");
         return null;
     }

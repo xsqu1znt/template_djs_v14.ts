@@ -38,6 +38,45 @@
         ]
     },
 
+    "DJS Command (SLSH) [GuildOnly]": {
+        "scope": "typescript",
+        "prefix": "gcmd-slash",
+        "description": "A slash command template. [GuildOnly]",
+        "body": [
+            "import { GuildSlashCommand } from \"@customTypes/commands\";\n",
+
+            "import { SlashCommandBuilder } from \"discord.js\";",
+            "import { BetterEmbed } from \"@utils/discordTools\";",
+            "import jt from \"@utils/jsTools\";\n",
+
+            "export const __command: GuildSlashCommand = {",
+            "    category: \"Fun\",",
+            "    options: { emoji: \"🍪\", guildOnly: true },\n",
+
+            "    builder: new SlashCommandBuilder()",
+            "        .setName(\"${1:cookie}\")",
+            "        .setDescription(\"${2:Get a cookie or a glass of milk.}\"),\n",
+
+            "    execute: async (client, interaction) => {",
+            "        // Create an array of responses",
+            "        let choices = [",
+            "            \"What's up, **\\$USER_NAME**! Have a cookie! :cookie:\",",
+            "            \"Hey, **\\$USER_NAME**! Have a glass of milk! :milk:\"",
+            "        ];\n",
+
+            "        // Create the embed ( Cookie )",
+            "        let embed_${1:cookie} = new BetterEmbed({",
+            "            context: { interaction },",
+            "            description: jt.choice(choices)",
+            "        });\n",
+
+            "        // Reply to the interaction with the embed",
+            "        return await embed_${1:cookie}.send(interaction);$0",
+            "    }",
+            "};\n"
+        ]
+    },
+
     "DJS Command (CMD)": {
         "scope": "typescript",
         "prefix": "cmd-prefix",
@@ -74,6 +113,42 @@
         ]
     },
 
+    "DJS Command (CMD) [GuildOnly]": {
+        "scope": "typescript",
+        "prefix": "gcmd-prefix",
+        "description": "A prefix command template. [GuildOnly]",
+        "body": [
+            "import { GuildPrefixCommand } from \"@customTypes/commands\";\n",
+
+            "import { BetterEmbed } from \"@utils/discordTools\";",
+            "import jt from \"@utils/jsTools\";\n",
+
+            "export const __command: GuildPrefixCommand = {",
+            "    name: \"${1:cookie}\",",
+            "    description: \"${2:Get a cookie or a glass of milk.}\",",
+            "    category: \"Fun\",",
+            "    options: { emoji: \"🍪\", guildOnly: true },\n",
+
+            "    execute: async (client, message, { }) => {",
+            "        // Create an array of responses",
+            "        let choices = [",
+            "            \"What's up, **\\$USER_NAME**! Have a cookie! :cookie:\",",
+            "            \"Hey, **\\$USER_NAME**! Have a glass of milk! :milk:\"",
+            "        ];\n",
+
+            "        // Create the embed ( Cookie )",
+            "        let embed_${1:cookie} = new BetterEmbed({",
+            "            context: { message },",
+            "            description: jt.choice(choices)",
+            "        });\n",
+
+            "        // Reply to the message with the embed",
+            "        return await embed_${1:cookie}.send(message, { allowedMentions: { repliedUser: false } });$0",
+            "    }",
+            "};\n"
+        ]
+    },
+
     "DJS Command (CTX)": {
         "scope": "typescript",
         "prefix": "cmd-ctx",
@@ -81,14 +156,48 @@
         "body": [
             "import { ContextMenuCommand } from \"@customTypes/commands\";\n",
 
-            "import { ApplicationCommandType, ContextMenuCommandBuilder } from \"discord.js\";",
+            "import { ApplicationCommandType, ContextMenuCommandBuilder, ContextMenuCommandType } from \"discord.js\";",
             "import { BetterEmbed } from \"@utils/discordTools\";\n",
 
             "export const __command: ContextMenuCommand = {",
             "    category: \"Fun\",\n",
 
             "    builder: new ContextMenuCommandBuilder().setName(\"${1:View Avatar}\")",
-            "        .setType(ApplicationCommandType.${2|User,Message|}),\n",
+            "        .setType(ApplicationCommandType.${2|User,Message|} as ContextMenuCommandType),\n",
+
+            "    execute: async (client, interaction) => {",
+            "        // Defines the type of context menu command",
+            "        if (!interaction.is${2|User,Message|}ContextMenuCommand()) return;\n",
+
+            "        // Create the embed ( Avatar )",
+            "        let embed_${4:avatar} = new BetterEmbed({",
+            "            title: `${interaction.${3|targetUser,targetMessage.member?.user|}.username}'s Avatar`,",
+            "            imageURL: interaction.${3|targetUser,targetMessage.member?.user|}.displayAvatarURL({ size: 4096 })",
+            "        });\n",
+
+            "        // Reply to the interaction with the embed",
+            "        return await embed_${4:avatar}.send(interaction);$0",
+            "    }",
+            "};\n"
+        ]
+    },
+
+    "DJS Command (CTX) [GuildOnly]": {
+        "scope": "typescript",
+        "prefix": "gcmd-ctx",
+        "description": "A context menu command template. [GuildOnly]",
+        "body": [
+            "import { GuildContextMenuCommand } from \"@customTypes/commands\";\n",
+
+            "import { ApplicationCommandType, ContextMenuCommandBuilder, ContextMenuCommandType } from \"discord.js\";",
+            "import { BetterEmbed } from \"@utils/discordTools\";\n",
+
+            "export const __command: GuildContextMenuCommand = {",
+            "    category: \"Fun\",",
+            "    options: { guildOnly: true },\n",
+
+            "    builder: new ContextMenuCommandBuilder().setName(\"${1:View Avatar}\")",
+            "        .setType(ApplicationCommandType.${2|User,Message|} as ContextMenuCommandType),\n",
 
             "    execute: async (client, interaction) => {",
             "        // Defines the type of context menu command",
@@ -130,6 +239,48 @@
             "    type: 1,",
             "    integration_types: [0, 1],",
             "    contexts: [0, 1, 2],\n",
+
+            "    execute: async (client, interaction) => {",
+            "        // Get the user's choices from the interaction",
+            "        let choices = interaction.options.get(\"choices\", true).value as string;\n",
+
+            "        // Create the embed ( Pick )",
+            "        let embed_${1:pick} = new BetterEmbed({",
+            "            context: { interaction },",
+            "            description: jt.choice(choices.split(\",\")).trim()",
+            "        });\n",
+
+            "        // Reply to the interaction with the embed",
+            "        return await embed_${1:pick}.send(interaction);$0",
+            "    }",
+            "};\n"
+        ]
+    },
+
+    "DJS Command (UI) [GuildOnly]": {
+        "scope": "typescript",
+        "prefix": "gcmd-ui",
+        "description": "A user installable command template. [GuildOnly]",
+        "body": [
+            "import { GuildUserInstallableCommand } from \"@customTypes/commands\";\n",
+
+            "import { SlashCommandBuilder } from \"discord.js\";",
+            "import { BetterEmbed } from \"@utils/discordTools\";",
+            "import jt from \"@utils/jsTools\";\n",
+
+            "export const __command: GuildUserInstallableCommand = {",
+            "    builder: new SlashCommandBuilder()",
+            "        .setName(\"${1:pick}\")",
+            "        .setDescription(\"${2:Have me make that decision for you. Separate by comma.}\")\n",
+
+            "        .addStringOption(option =>",
+            "            option.setName(\"choices\").setDescription(\"Choices to choose from (separate by comma).\").setRequired(true)",
+            "        ),\n",
+
+            "    type: 1,",
+            "    integration_types: [0, 1],",
+            "    contexts: [0, 1, 2],",
+            "    options: { guildOnly: true },\n",
 
             "    execute: async (client, interaction) => {",
             "        // Get the user's choices from the interaction",

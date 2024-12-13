@@ -1,12 +1,14 @@
 import { ContextMenuCommand } from "@customTypes/commands";
 
-import { ApplicationCommandType, ContextMenuCommandBuilder } from "discord.js";
+import { ApplicationCommandType, ContextMenuCommandBuilder, ContextMenuCommandType } from "discord.js";
 import { BetterEmbed } from "@utils/discordTools";
 
 export const __command: ContextMenuCommand = {
     category: "Fun",
 
-    builder: new ContextMenuCommandBuilder().setName("View Avatar").setType(ApplicationCommandType.User),
+    builder: new ContextMenuCommandBuilder()
+        .setName("View Avatar")
+        .setType(ApplicationCommandType.User as ContextMenuCommandType),
 
     execute: async (client, interaction) => {
         // Defines the type of context menu command

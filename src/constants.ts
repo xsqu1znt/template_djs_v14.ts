@@ -15,21 +15,25 @@ export const argsv = {
 };
 
 /* - - - - - { Environment } - - - - -  */
-/** Whether the environment is in development mode. Forced `false` if the CWD is in the `dist` directory. */
-export const IS_DEV_MODE: boolean = __dirname.includes("dist")
-    ? false
-    : process.env.DEV_MODE === "true"
-      ? true
-      : config.client.DEV_MODE;
+const USING_AUTO_DEV_MODE = process.env.AUTO_DEV_MODE ?? config.client.AUTO_DEV_MODE;
+const AUTO_AND_IS_IN_DIST = USING_AUTO_DEV_MODE ? (__dirname.includes("dist") ? true : false) : null;
+
+/** Whether the environment is in development mode. */
+export const IN_DEV_MODE =
+    AUTO_AND_IS_IN_DIST !== null
+        ? !AUTO_AND_IS_IN_DIST // Inversed because if we're not in the dist folder then put us in dev mode
+        : process.env.DEV_MODE_OVERRIDE !== undefined
+          ? process.env.DEV_MODE_OVERRIDE === "true"
+          : (config.client.DEV_MODE_OVERRIDE ?? false);
 
 /* - - - - - { Discord Token } - - - - -  */
 const TOKEN_PROD: string = process.env.TOKEN || config.client.TOKEN;
 const TOKEN_DEV: string = process.env.TOKEN_DEV || config.client.TOKEN_DEV;
 /** The token used to authenticate with `Discord`. */
-export const TOKEN: string = IS_DEV_MODE ? TOKEN_DEV : TOKEN_PROD;
+export const TOKEN: string = IN_DEV_MODE ? TOKEN_DEV : TOKEN_PROD;
 
 /* - - - - - { Mongo URI } - - - - -  */
 const MONGO_URI_PROD: string = process.env.MONGO_URI || config.client.MONGO_URI;
 const MONGO_URI_DEV: string = process.env.MONGO_URI_DEV || config.client.MONGO_URI_DEV;
 /** The URI used for `MongoDB` connections. */
-export const MONGO_URI: string = IS_DEV_MODE ? MONGO_URI_DEV : MONGO_URI_PROD;
+export const MONGO_URI: string = IN_DEV_MODE ? MONGO_URI_DEV : MONGO_URI_PROD;

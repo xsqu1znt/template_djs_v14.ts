@@ -10,10 +10,10 @@ import logger from "@utils/logger";
 import mongo from "@utils/mongo";
 import cli from "@utils/cli";
 
-import { TOKEN, IS_DEV_MODE, argsv } from "@constants";
+import { TOKEN, IN_DEV_MODE, argsv } from "@constants";
 
 /* - - - - - { Check for TOKEN } - - - - - */
-if (IS_DEV_MODE && !TOKEN) {
+if (IN_DEV_MODE && !TOKEN) {
     logger.error("TOKEN Missing", "DEV_MODE is enabled, but TOKEN_DEV is not set");
     process.exit(0);
 }
@@ -24,7 +24,7 @@ if (!TOKEN) {
 }
 
 // prettier-ignore
-if (IS_DEV_MODE) logger.debug("DEV_MODE is enabled! You can change this by setting DEV_MODE to false in either .env or config_client.json");
+if (IN_DEV_MODE) logger.debug("DEV_MODE is enabled! You can change this by setting DEV_MODE to false in either .env or config_client.json");
 
 /* - - - - - { Setup Client } - - - - - */
 logger.client.starting();

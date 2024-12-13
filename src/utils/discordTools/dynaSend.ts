@@ -105,7 +105,7 @@ export default async function dynaSend(handler: SendHandler, options: DynaSendOp
 
         // Ephemeral fallback
         if (["reply", "followUp"].includes(_options.sendMethod) && _options.ephemeral) {
-            logger.log("[DynaSend] Ephemeral can only be used with the 'reply' SendMethod");
+            logger.log("[DynaSend] Ephemeral can only be used with the 'reply' or 'followUp' SendMethod");
             _options.ephemeral = false;
         }
 
