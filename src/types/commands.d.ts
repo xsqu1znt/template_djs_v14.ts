@@ -26,7 +26,7 @@ export interface SlashCommand {
     execute: (client: Client<true>, interaction: CommandInteraction) => Promise<InteractionResponse | Message | void | null>;
 }
 
-export interface SlashCommandCached extends SlashCommand {
+export interface GuildSlashCommand extends SlashCommand {
     /** Extra options for this command. */
     options?: InteractionBasedCommandOptions & { guildOnly: true };
     /** Executed when the command is used. */
