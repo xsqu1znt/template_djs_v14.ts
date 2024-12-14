@@ -5,7 +5,7 @@ import { ActivityType } from "discord.js";
 import jt from "@utils/jsTools";
 
 import { IN_DEV_MODE } from "@constants";
-import config from "configs";
+import config from "@configs";
 
 export const __event: BaseEventModule = {
     name: "setClientActivity",

@@ -1,7 +1,7 @@
 import { guildModel } from "@models";
 import DocumentUtils from "./docUtils";
 
-import config from "configs";
+import config from "@configs";
 
 const docUtils = new DocumentUtils(guildModel);
 

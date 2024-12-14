@@ -1,6 +1,6 @@
 import logger from "@utils/logger";
 import mongoose from "mongoose";
-import configs from "configs";
+import config from "@configs";
 
 import { MONGO_URI, IN_DEV_MODE } from "@constants";
 
@@ -48,7 +48,7 @@ export async function connect(uri: string = MONGO_URI): Promise<mongoose.Mongoos
         // Log an error if the connection failed
         logger.error("::MONGO", "Couldn't connect to MongoDB. Retrying...", connection);
 
-        if (connectionAttempts < configs.client.MAX_DB_CONNECTION_ATTEMPTS) {
+        if (connectionAttempts < config.client.MAX_DB_CONNECTION_ATTEMPTS) {
             connectionAttempts++;
             return await connect(uri);
         } else {

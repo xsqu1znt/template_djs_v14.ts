@@ -15,7 +15,7 @@ import { BetterEmbed } from "@utils/discordTools";
 import { guildManager } from "@utils/mongo";
 import logger from "@utils/logger";
 
-import config from "configs";
+import config from "@configs";
 
 function getStaffGuildAdminBypass(commandName: string): string[] {
     let _staff = config.client.staff;

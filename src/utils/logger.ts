@@ -3,7 +3,7 @@
 import jt from "@utils/jsTools";
 import chalk from "chalk";
 
-import config from "configs";
+import config from "@configs";
 import { Client } from "discord.js";
 
 import { version as PROJECT_VERSION, name as PROJECT_NAME } from "@pkgJSON";

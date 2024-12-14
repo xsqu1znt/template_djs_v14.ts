@@ -1,4 +1,4 @@
-import config from "configs";
+import config from "@configs";
 
 /* - - - - - { CLI } - - - - -  */
 const __argsv: string[] = process.argv.slice(2);
