@@ -29,3 +29,6 @@ export const deleteMessageAfter = deleteMessageAfter_default;
 import extractWordsFromMessage_default from "./extractWordsFromMessage";
 export * from "./extractWordsFromMessage";
 export const extractWordsFromMessage = extractWordsFromMessage_default;
+
+import config_default from  "./config.json";
+export const dTConfig = config_default;
