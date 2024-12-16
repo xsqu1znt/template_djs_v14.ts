@@ -27,7 +27,7 @@
             "@utils/*": ["./src/utils/*"],
 
             "@constants": ["./src/constants.ts"],
-            "@pkgJSON": ["./package.json"]
+            "@pkgJSON": ["./src/../package.json"]
         },
 
         /* Emit */
