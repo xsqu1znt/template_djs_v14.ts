@@ -1,69 +1,107 @@
 /** @file Reusable functions for using `console.log()`, but in 4k ultra HD retrocolor. */
 
+/** */
+interface FormatStyle {
+    name: string;
+    text: () => string;
+    color: chalk.Chalk | null;
+    condition?: () => boolean;
+}
+
+interface LogOptions {
+    /** Format the message using the preset styles. Defaults to `true`. */
+    format?: boolean;
+    /** Add a timestamp before the message. Defaults to `true`. */
+    timestamp?: boolean;
+    /** Make the message bold. */
+    bold?: boolean;
+    /** Make the message italic. */
+    italic?: boolean;
+}
+
+import { Client } from "discord.js";
 import jt from "@utils/jsTools";
 import chalk from "chalk";
 
+import { VERSION } from "@constants";
+
 import config from "@configs";
-import { Client } from "discord.js";
-
-import { version as PROJECT_VERSION, name as PROJECT_NAME } from "@pkgJSON";
-
 const { COLORS } = config.logger;
 
-function __format(str: string, colored: boolean = true): string {
-    const { LOG_TIMESTAMPS } = config.logger;
+const FORMAT_PRESETS: FormatStyle[] = [
+    {
+        name: "::TIMESTAMP",
+        text: () => `[${new Date().toLocaleTimeString()}]`,
+        color: chalk.dim,
+        condition: () => config.logger.LOG_TIMESTAMPS
+    },
 
-    return str
-        .replace("::TIMESTAMP ", LOG_TIMESTAMPS ? `[${new Date().toLocaleTimeString()}] ` : "")
+    { name: "::CLIENT", text: () => `[CLIENT]`, color: chalk.bold.white },
+    { name: "::ACM_LOCAL", text: () => `[ACM/LOCAL]`, color: chalk.bold.dim },
+    { name: "::ACM_GLOBAL", text: () => `[ACM/GLOBAL]`, color: chalk.bold.dim },
+    { name: "::CLI", text: () => `[CLI]`, color: chalk.bold.white },
 
-        .replace("::CLIENT", colored ? chalk.bold.gray("[CLIENT]") : "[CLIENT]")
-        .replace("::ACM_LOCAL", colored ? chalk.bold.dim("[ACM/LOCAL]") : "[ACM/LOCAL]")
-        .replace("::ACM_GLOBAL", colored ? chalk.bold.dim("[ACM/GLOBAL]") : "[ACM/GLOBAL]")
+    { name: "::IMPORTER", text: () => `[IMPORTER]`, color: chalk.bold.dim },
+    { name: "::IMPORT_EVENT", text: () => `[~/EVENT]`, color: chalk.bold.gray },
+    { name: "::IMPORT_COMMAND", text: () => `[~/COMMAND]`, color: chalk.bold.gray },
 
-        .replace("::IMPORTER", colored ? chalk.bold.dim("[IMPORTER]") : "[IMPORTER]")
-        .replace("::IMPORT_EVENT", colored ? chalk.bold.gray("[~/EVENT]") : "[~/EVENT]")
-        .replace("::IMPORT_COMMAND", colored ? chalk.bold.gray("[~/COMMAND]") : "[~/COMMAND]")
+    { name: "::COMMAND", text: () => `[⚡️COMMAND]`, color: chalk.hex(COLORS.COMMAND_NAME).bold },
+    { name: "::EVENT", text: () => `[⚡️EVENT]`, color: chalk.hex(COLORS.EVENT_NAME).bold },
+    { name: "::MONGO", text: () => `[🥭 MONGO]`, color: chalk.hex(COLORS.MONGO).bold }
+];
 
-        .replace("::COMMAND", colored ? chalk.hex(COLORS.COMMAND_NAME).bold("[⚡️COMMAND]") : "[⚡️COMMAND]")
-        .replace("::EVENT", colored ? chalk.hex(COLORS.EVENT_NAME).bold("[⚡️EVENT]") : "[⚡️EVENT]")
-        .replace("::MONGO", colored ? chalk.hex(COLORS.MONGO).bold("[🥭 MONGO]") : "[🥭 MONGO]");
+function __formatPresets(str: string, colored: boolean = true): string {
+    for (const FORMAT of FORMAT_PRESETS) {
+        if (FORMAT.condition && !FORMAT.condition()) {
+            str = str.replace(FORMAT.name, "");
+            continue;
+        }
+        str = str.replace(FORMAT.name, colored && FORMAT.color ? FORMAT.color(FORMAT.text()) : FORMAT.text());
+    }
+    return str;
 }
 
-function __log(msg: string, format: boolean = true): void {
-    const timestamp = __format("::TIMESTAMP ");
-    console.log(`${timestamp}${format ? __format(`${msg}`) : `${msg}`}`);
-}
-
-function __error(msg: string, err: any, format: boolean = true): void {
-    const timestamp = __format("::TIMESTAMP ");
-    console.error(`${timestamp}${format ? __format(`${msg}`) : `${msg}`}`, err);
+function __formatOptions(msg: string, options?: LogOptions) {
+    let msg_f = (options?.format ?? true) ? __formatPresets(`${msg}`) : `${msg}`;
+    if (options?.bold) msg_f = chalk.bold(msg_f);
+    if (options?.italic) msg_f = chalk.italic(msg_f);
+    return msg_f;
 }
 
 /* - - - - - { Base } - - - - - */
-export function log(msg: string, format: boolean = true): void {
-    __log(chalk.gray(msg), format);
+export function log(msg: string, options?: LogOptions): void {
+    const timestamp_f = (options?.timestamp ?? true) ? __formatPresets("::TIMESTAMP ") : "";
+    const msg_f = __formatOptions(msg, options);
+    console.log(`${timestamp_f}${msg_f}`);
 }
 
-export function debug(msg: string, format: boolean = true): void {
-    __log(chalk.hex(COLORS.DEBUG)(msg), format);
+export function debug(msg: string, options?: LogOptions): void {
+    const timestamp_f = (options?.timestamp ?? true) ? __formatPresets("::TIMESTAMP ") : "";
+    const msg_f = __formatOptions(msg, options);
+    console.log(`${timestamp_f}${chalk.hex(COLORS.DEBUG)(msg_f)}`);
 }
 
-export function error(header: string, msg: string, err: any = "", format: boolean = true): void {
-    __error(`${chalk.bgRed("ERROR!")} ${chalk.bold.red(__format(header, false))} ${msg}`, err, format);
+export function success(msg: string, options?: LogOptions): void {
+    const timestamp_f = (options?.timestamp ?? true) ? __formatPresets("::TIMESTAMP ") : "";
+    const msg_f = __formatOptions(msg, options);
+    console.log(chalk.greenBright(`${timestamp_f}${msg_f}`));
 }
 
-export function success(msg: string, format: boolean = true): void {
-    __log(chalk.greenBright(msg), format);
+export function error(header: string, msg: string, err?: any, options?: LogOptions): void {
+    const timestamp_f = (options?.timestamp ?? true) ? __formatPresets("::TIMESTAMP ") : "";
+    const header_f = __formatOptions(header, options);
+    const msg_f = __formatOptions(msg, options);
+    console.log(`${chalk.red(timestamp_f)}${chalk.bgRed("ERROR!")} ${chalk.bold.red(header_f)} ${msg_f}`, err);
 }
 
 /* - - - - - { Client } - - - - - */
 export const client = {
-    starting: (): void => __log(`::CLIENT ⏳ ${chalk.italic(jt.choice(config.logger.STARTUP_MESSAGES))}`),
-    connecting: (): void => __log(`::CLIENT ⏳ ${chalk.italic("Connecting to Discord...")}`),
-    online: (): void => __log(`::CLIENT ✅ ${chalk.greenBright("Successfuly connected to Discord!")}`),
+    starting: (): void => log(`::CLIENT ⏳ ${chalk.italic(jt.choice(config.logger.STARTUP_MESSAGES))}`),
+    connecting: (): void => log(`::CLIENT ⏳ ${chalk.italic("Connecting to Discord...")}`),
+    online: (): void => log(`::CLIENT ✅ ${chalk.greenBright("Successfuly connected to Discord!")}`),
     ready: (client?: Client) =>
-        __log(
-            `::CLIENT ✅ ${chalk.greenBright(`${chalk.bold.underline(client?.__name ?? PROJECT_NAME)} v${PROJECT_VERSION} is up and running!`)} 🎉`
+        log(
+            `::CLIENT ✅ ${chalk.greenBright(`${chalk.bold.underline(client?.__name || "Discord Bot")} v${VERSION} is up and running!`)} 🎉`
         )
 };
 
@@ -71,7 +109,7 @@ export const client = {
 export const importer = {
     event: (event: string, path: string, enabled: boolean): void => {
         const _msg = `${chalk.hex(COLORS.EVENT_NAME).bold(event)} ${chalk.italic.gray(`'${path}'`)}`;
-        __log(`::IMPORT_EVENT ${chalk.bold("✔️ IMPORTED")} | ${enabled ? _msg : chalk.strikethrough(_msg)}`);
+        log(`::IMPORT_EVENT ${chalk.bold("✔️ IMPORTED")} | ${enabled ? _msg : chalk.strikethrough(_msg)}`);
     },
 
     command: (command: string, path: string, type: "PRFX" | "SLSH" | "CTX" | "UI"): void => {
@@ -90,7 +128,7 @@ export const importer = {
                 prefix = "[UserInstallable] ";
                 break;
         }
-        __log(
+        log(
             `::IMPORT_COMMAND ${chalk.bold("✔️ IMPORTED")} | ${chalk.dim(prefix)}${chalk
                 .hex(COLORS.COMMAND_NAME)
                 .bold(command)} ${path ? chalk.italic.gray(`'${path}'`) : ""}`
@@ -100,13 +138,13 @@ export const importer = {
 
 export const db = {
     mongo: {
-        connecting: (): void => __log(`::MONGO ⏳ ${chalk.italic("Connecting to MongoDB...")}`),
-        connected: (): void => __log(`::MONGO ✅ ${chalk.greenBright("Successfully connected to MongoDB!")}`)
+        connecting: (): void => log(`::MONGO ⏳ ${chalk.italic("Connecting to MongoDB...")}`),
+        connected: (): void => log(`::MONGO ✅ ${chalk.greenBright("Successfully connected to MongoDB!")}`)
     }
 };
 
 export const event = (event: string, msg: string): void => {
-    __log(`::EVENT ${chalk.hex(COLORS.EVENT_NAME).bold(event)} | ${msg}`);
+    log(`::EVENT ${chalk.hex(COLORS.EVENT_NAME).bold(event)} | ${msg}`);
 };
 
 export const command = (command: string, msg: string, type: "PRFX" | "SLSH" | "CTX" | "UI"): void => {
@@ -125,7 +163,7 @@ export const command = (command: string, msg: string, type: "PRFX" | "SLSH" | "C
             prefix = "[UserInstallable] ";
             break;
     }
-    __log(`::COMMAND ${chalk.dim(prefix)}${chalk.hex(COLORS.COMMAND_NAME).bold(command)} | ${msg}`);
+    log(`::COMMAND ${chalk.dim(prefix)}${chalk.hex(COLORS.COMMAND_NAME).bold(command)} | ${msg}`);
 };
 
 /* - - - - - { Test } - - - - - */
@@ -163,14 +201,8 @@ export function test(): void {
 
     console.log();
 
-    log(
-        "Log Headers ::CLIENT ::ACM_LOCAL ::ACM_GLOBAL ::IMPORTER ::IMPORT_EVENT ::IMPORT_COMMAND ::COMMAND ::EVENT ::MONGO"
-    );
-
-    log(
-        "Log Headers (Raw) ::TIMESTAMP ::CLIENT ::ACM_LOCAL ::ACM_GLOBAL ::IMPORTER ::IMPORT_EVENT ::IMPORT_COMMAND ::COMMAND ::EVENT ::MONGO",
-        false
-    );
+    log(`Log Headers ${FORMAT_PRESETS.map(f => f.name).join(" ")}`);
+    log(`Log Headers (Raw) ${FORMAT_PRESETS.map(f => f.name).join(" ")}`, { format: false });
 }
 
-export default { log, debug, error, success, client, importer, db, event, command, test };
+export default { log, debug, success, error, client, importer, db, event, command, test };

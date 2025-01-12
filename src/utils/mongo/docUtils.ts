@@ -134,7 +134,7 @@ export default class DocumentUtils<T> {
         if (typeof filter === "string") {
             return await this.model.findById(filter, options?.projection, _options);
         } else {
-            return await this.model?.findOne(filter, options?.projection, _options);
+            return await this.model.findOne(filter, options?.projection, _options);
         }
     };
 

@@ -1,4 +1,6 @@
 {
+    "VERSION": "0.1a",
+
     "AUTO_DEV_MODE": true,
     "DEV_MODE_OVERRIDE": null,
 

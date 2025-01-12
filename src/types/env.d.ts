@@ -1,5 +1,7 @@
 declare namespace NodeJS {
     interface ProcessEnv {
+        /** The version of the project. */
+        VERSION: string;
         /** Sets the enviroment to development mode when running from the 'src' directory and production mode when running from the 'dist' directory. */
         AUTO_DEV_MODE: "true" | "false";
         /** Force the environment to be in development mode. */
