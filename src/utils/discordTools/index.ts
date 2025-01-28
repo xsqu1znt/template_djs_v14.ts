@@ -30,9 +30,9 @@ import extractWordsFromMessage_default from "./extractWordsFromMessage";
 export * from "./extractWordsFromMessage";
 export const extractWordsFromMessage = extractWordsFromMessage_default;
 
-import dToolbox_default from "./dToolbox";
-export * from "./dToolbox";
-export const dToolbox = dToolbox_default;
+import dTools_default from "./dTools";
+export * from "./dTools";
+export const dTools = dTools_default;
 
 import config_default from "./config.json";
 export const dTConfig = config_default;
