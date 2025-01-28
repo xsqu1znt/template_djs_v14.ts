@@ -33,15 +33,19 @@ export async function connect(uri: string = MONGO_URI): Promise<mongoose.Mongoos
         await connecting;
         connecting = null;
         return connection;
+    } else if (connection) {
+        return connection;
     }
 
     try {
         logger.db.mongo.connecting();
         // Create a new connection to MongoDB
-        connecting = mongoose.connect(uri);
+        connecting = mongoose.connect(uri, { serverSelectionTimeoutMS: 0, socketTimeoutMS: 0, connectTimeoutMS: 0 });
         connection = await connecting;
         // Log success if connected
-        if (connection) logger.db.mongo.connected();
+        if (connection) {
+            logger.db.mongo.connected();
+        }
     } catch (err) {
         connecting = null;
 

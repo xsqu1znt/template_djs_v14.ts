@@ -5,11 +5,9 @@
     "main": "dist/index.js",
     "scripts": {
         "start": "node dist/index.js",
-        "start-local": "node dist/index.js --push-local",
-        "start-global": "node dist/index.js --push-global",
-        "dev": "nodemon src/index.ts",
-        "dev-local": "nodemon src/index.ts --push-local",
-        "dev-global": "nodemon src/index.ts --push-global",
+        "start:ts": "ts-node src/index.ts",
+        "dev": "nodemon dist/index.js",
+        "dev:ts": "nodemon src/index.ts",
         "build": "tsc && tsc-alias",
         "check": "tsc --noEmit",
         "pretty": "prettier --write \"./**/*.{ts,json}\""
