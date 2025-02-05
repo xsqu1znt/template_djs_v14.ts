@@ -35,7 +35,6 @@ export function __zero(str?: string | undefined | null): string {
  * 
  * Looks for formats like `<@123456789>`, or a numeric string with at least 6 digits.
  * @param str The string to check. */
-
 export function isMentionOrSnowflake(str: string): boolean {
     return str.match(/<@[#&]?[\d]{6,}>/) || str.match(/\d{6,}/) ? true : false;
 }
