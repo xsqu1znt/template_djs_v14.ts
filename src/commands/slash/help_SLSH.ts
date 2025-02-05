@@ -105,7 +105,7 @@ export const __command: SlashCommand = {
         /* - - - - - { Page Navigation } - - - - - */
         const pageNav = new PageNavigator({
             allowedParticipants: interaction.user,
-            pages: PageNavigator.resolveEmbedsToPages(categoryEmbeds)
+            pages: categoryEmbeds
         });
 
         pageNav.addSelectMenuOptions(...categoryNames.map(cat => ({ emoji: cat.icon, label: cat.name })));

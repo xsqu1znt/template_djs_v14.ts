@@ -3,6 +3,7 @@ import { DynaSendOptions } from "./dynaSend";
 
 type PaginationEvent = "pageChanged" | "pageBack" | "pageNext" | "pageJumped" | "selectMenuOptionPicked" | "timeout";
 type PaginationType = "short" | "shortJump" | "long" | "longJump";
+type PageResolveable = EmbedResolveable | EmbedResolveable[] | PageData | NestedPageData;
 
 interface PageNavigatorOptions {
     /** The type of pagination. Defaults to `short`. */
@@ -10,14 +11,14 @@ interface PageNavigatorOptions {
     /** The user or users that are allowed to interact with the navigator. */
     allowedParticipants: UserResolvable | UserResolvable[];
     /** The pages to be displayed. */
-    pages: PageData | NestedPageData | Array<PageData | NestedPageData>;
+    pages: PageResolveable | PageResolveable[];
     /** Whether or not to use reactions instead of buttons. */
     useReactions?: boolean;
     /** Whether to only add the `Page Jump` action when needed.
      *
      * I.E. if there's more than 5 pages, add the `Page Jump` button/reaction.
      *
-     * ___NOTE:___ The threshold can be confiured in the `./config.json` file. */
+     * ___NOTE:___ The threshold can be configured in the `./config.json` file. */
     dynamic?: boolean;
     /** How long to wait before timing out. Use `undefined` to never timeout.
      *
@@ -90,6 +91,10 @@ import * as config from "./config.json";
 // Get the name of each pagination reaction emoji
 // this will be used as a filter when getting the current reactions from the message
 const paginationReactionNames = Object.values(config.navigator.buttons).map(data => data.emoji.name);
+
+function isPageData(pageData: any): pageData is PageData {
+    return Object.hasOwn(pageData, "embed");
+}
 
 function isNestedPageData(pageData: any): pageData is NestedPageData {
     return Object.hasOwn(pageData, "nestedEmbeds");
@@ -165,21 +170,31 @@ export default class PageNavigator {
         timeout: Array<{ listener: Function; once: boolean }>;
     };
 
-    public static resolveEmbedsToPages(
-        embeds: EmbedResolveable | EmbedResolveable[] | EmbedResolveable[][]
+    private resolveEmbedsToPages(
+        embeds: PageResolveable | PageResolveable[] | PageResolveable[][]
     ): Array<PageData | NestedPageData> {
         const _pages = jt.forceArray(embeds);
-        let resolvedPages: Array<PageData | NestedPageData> = [];
+        const resolvedPages: Array<PageData | NestedPageData> = [];
 
         for (let p of _pages) {
-            if (Array.isArray(p)) resolvedPages.push({ nestedEmbeds: p as EmbedResolveable[] });
-            else resolvedPages.push({ embed: p as EmbedResolveable });
+            // No change
+            if (isPageData(p) || isNestedPageData(p)) {
+                resolvedPages.push(p);
+            }
+            // Nested array
+            else if (Array.isArray(p)) {
+                resolvedPages.push({ nestedEmbeds: p as EmbedResolveable[] });
+            }
+            // Single array
+            else {
+                resolvedPages.push({ embed: p as EmbedResolveable });
+            }
         }
 
         return resolvedPages;
     }
 
-    #createButton(data: { custom_id: string; emoji?: ComponentEmojiResolvable; label: string }): ButtonBuilder {
+    private createButton(data: { custom_id: string; emoji?: ComponentEmojiResolvable; label: string }): ButtonBuilder {
         let button = new ButtonBuilder({ custom_id: data.custom_id, style: ButtonStyle.Secondary });
         if (data.label) button.setLabel(data.label);
         else if (data.emoji) button.setEmoji(data.emoji);
@@ -190,7 +205,10 @@ export default class PageNavigator {
         return button;
     }
 
-    #setPage(pageIndex: number = this.data.page.index.current, nestedPageIndex: number = this.data.page.index.nested): void {
+    private setPage(
+        pageIndex: number = this.data.page.index.current,
+        nestedPageIndex: number = this.data.page.index.nested
+    ): void {
         // Clamp page index to the number of pages
         this.data.page.index.current = jt.clamp(pageIndex, this.options.pages.length - 1);
 
@@ -235,7 +253,7 @@ export default class PageNavigator {
             isNestedPageData(pageData) && pageData.nestedEmbeds.length >= CAN_USE_LONG_THRESHOLD;
     }
 
-    #callEventStack(event: PaginationEvent, ...args: any): void {
+    private callEventStack(event: PaginationEvent, ...args: any): void {
         if (!this.#events[event].length) return;
 
         // Iterate through the event listeners
@@ -247,7 +265,7 @@ export default class PageNavigator {
         }
     }
 
-    #configure_navigation(): void {
+    private configure_navigation(): void {
         this.data.navigation.reactions = [];
 
         if (this.data.navigation.required) {
@@ -304,7 +322,7 @@ export default class PageNavigator {
         }
     }
 
-    #configure_components(): void {
+    private configure_components(): void {
         this.data.messageActionRows = [];
 
         // Add select menu navigation, if needed
@@ -319,13 +337,13 @@ export default class PageNavigator {
         }
     }
 
-    #configure_all(): void {
-        this.#setPage();
-        this.#configure_navigation();
-        this.#configure_components();
+    private configure_all(): void {
+        this.setPage();
+        this.configure_navigation();
+        this.configure_components();
     }
 
-    async #askPageNumber(requestedBy: GuildMember | User): Promise<number | null> {
+    private async askPageNumber(requestedBy: GuildMember | User): Promise<number | null> {
         if (!this.data.message) throw new Error("[EmbedNavigator>#askPageNumber]: 'this.data.message' is undefined.");
 
         // prettier-ignore
@@ -382,12 +400,12 @@ export default class PageNavigator {
             });
     }
 
-    async #navComponents_removeFromMessage(): Promise<void> {
+    private async navComponents_removeFromMessage(): Promise<void> {
         if (!this.data.message?.editable) return;
         await this.data.message.edit({ components: [] }).catch(Boolean);
     }
 
-    async #navReactions_addToMessage(): Promise<void> {
+    private async navReactions_addToMessage(): Promise<void> {
         if (!this.data.message || !this.options.useReactions || !this.data.navigation.reactions.length) return;
 
         const reactionNames = Object.values(config.navigator.buttons).map(d => d.emoji.name);
@@ -397,19 +415,19 @@ export default class PageNavigator {
 
         // Check if the cached reactions are the same as the ones required
         if (_reactions.size !== this.data.navigation.reactions.length) {
-            await this.#navReactions_removeFromMessage();
+            await this.navReactions_removeFromMessage();
 
             // React to the message
             for (let r of this.data.navigation.reactions) await this.data.message.react(r.id).catch(Boolean);
         }
     }
 
-    async #navReactions_removeFromMessage(): Promise<void> {
+    private async navReactions_removeFromMessage(): Promise<void> {
         if (!this.data.message) return;
         await this.data.message.reactions.removeAll().catch(Boolean);
     }
 
-    async #collect_components(): Promise<void> {
+    private async collect_components(): Promise<void> {
         if (!this.data.message) return;
         if (!this.data.messageActionRows.length) return;
         if (this.data.collectors.component) {
@@ -444,49 +462,49 @@ export default class PageNavigator {
                             let _ssmOptionIndex = this.data.selectMenu.optionIds.indexOf(
                                 (i as StringSelectMenuInteraction).values[0]
                             );
-                            this.#setPage(_ssmOptionIndex);
-                            this.#callEventStack(
+                            this.setPage(_ssmOptionIndex);
+                            this.callEventStack(
                                 "selectMenuOptionPicked",
                                 this.data.page.currentData,
                                 this.data.components.selectMenu.options[_ssmOptionIndex],
                                 this.data.page.index.current
                             );
-                            this.#callEventStack("pageChanged", this.data.page.currentData, this.data.page.index.current);
+                            this.callEventStack("pageChanged", this.data.page.currentData, this.data.page.index.current);
                             return await this.refresh();
 
                         case "btn_to_first":
                             await i.deferUpdate().catch(Boolean);
-                            this.#setPage(this.data.page.index.current, 0);
-                            this.#callEventStack("pageChanged", this.data.page.currentData, this.data.page.index.nested);
+                            this.setPage(this.data.page.index.current, 0);
+                            this.callEventStack("pageChanged", this.data.page.currentData, this.data.page.index.nested);
                             return await this.refresh();
 
                         case "btn_back":
                             await i.deferUpdate().catch(Boolean);
-                            this.#setPage(this.data.page.index.current, this.data.page.index.nested - 1);
-                            this.#callEventStack("pageBack", this.data.page.currentData, this.data.page.index.nested);
-                            this.#callEventStack("pageChanged", this.data.page.currentData, this.data.page.index.nested);
+                            this.setPage(this.data.page.index.current, this.data.page.index.nested - 1);
+                            this.callEventStack("pageBack", this.data.page.currentData, this.data.page.index.nested);
+                            this.callEventStack("pageChanged", this.data.page.currentData, this.data.page.index.nested);
                             return await this.refresh();
 
                         case "btn_jump":
                             await i.deferUpdate().catch(Boolean);
-                            let jumpIndex = await this.#askPageNumber(i.user);
+                            let jumpIndex = await this.askPageNumber(i.user);
                             if (jumpIndex === null) return;
-                            this.#setPage(this.data.page.index.current, jumpIndex);
-                            this.#callEventStack("pageJumped", this.data.page.currentData, this.data.page.index.nested);
-                            this.#callEventStack("pageChanged", this.data.page.currentData, this.data.page.index.nested);
+                            this.setPage(this.data.page.index.current, jumpIndex);
+                            this.callEventStack("pageJumped", this.data.page.currentData, this.data.page.index.nested);
+                            this.callEventStack("pageChanged", this.data.page.currentData, this.data.page.index.nested);
                             return await this.refresh();
 
                         case "btn_next":
                             await i.deferUpdate().catch(Boolean);
-                            this.#setPage(this.data.page.index.current, this.data.page.index.nested + 1);
-                            this.#callEventStack("pageNext", this.data.page.currentData, this.data.page.index.nested);
-                            this.#callEventStack("pageChanged", this.data.page.currentData, this.data.page.index.nested);
+                            this.setPage(this.data.page.index.current, this.data.page.index.nested + 1);
+                            this.callEventStack("pageNext", this.data.page.currentData, this.data.page.index.nested);
+                            this.callEventStack("pageChanged", this.data.page.currentData, this.data.page.index.nested);
                             return await this.refresh();
 
                         case "btn_to_last":
                             await i.deferUpdate().catch(Boolean);
-                            this.#setPage(this.data.page.index.current, this.options.pages.length - 1);
-                            this.#callEventStack("pageChanged", this.data.page.currentData, this.data.page.index.nested);
+                            this.setPage(this.data.page.index.current, this.options.pages.length - 1);
+                            this.callEventStack("pageChanged", this.data.page.currentData, this.data.page.index.nested);
                             return await this.refresh();
                     }
                 } catch (err) {
@@ -497,13 +515,13 @@ export default class PageNavigator {
             // Collector ( END )
             collector.on("end", async () => {
                 this.data.collectors.component = null;
-                this.#handlePostTimeout();
+                this.handlePostTimeout();
                 resolve();
             });
         });
     }
 
-    async #collect_reactions(): Promise<void> {
+    private async collect_reactions(): Promise<void> {
         if (!this.data.message) return;
         if (!this.data.navigation.reactions.length) return;
         if (this.data.collectors.reaction) {
@@ -539,33 +557,33 @@ export default class PageNavigator {
                 try {
                     switch (reaction.emoji.name) {
                         case config.navigator.buttons.to_first.emoji.name:
-                            this.#setPage(this.data.page.index.current, 0);
-                            this.#callEventStack("pageChanged", this.data.page.currentData, this.data.page.index.current);
+                            this.setPage(this.data.page.index.current, 0);
+                            this.callEventStack("pageChanged", this.data.page.currentData, this.data.page.index.current);
                             return await this.refresh();
 
                         case config.navigator.buttons.back.emoji.name:
-                            this.#setPage(this.data.page.index.current, this.data.page.index.nested - 1);
-                            this.#callEventStack("pageBack", this.data.page.currentData, this.data.page.index.nested);
-                            this.#callEventStack("pageChanged", this.data.page.currentData, this.data.page.index.current);
+                            this.setPage(this.data.page.index.current, this.data.page.index.nested - 1);
+                            this.callEventStack("pageBack", this.data.page.currentData, this.data.page.index.nested);
+                            this.callEventStack("pageChanged", this.data.page.currentData, this.data.page.index.current);
                             return await this.refresh();
 
                         case config.navigator.buttons.jump.emoji.name:
-                            let jumpIndex = await this.#askPageNumber(user);
+                            let jumpIndex = await this.askPageNumber(user);
                             if (jumpIndex === null) return;
-                            this.#setPage(this.data.page.index.current, jumpIndex);
-                            this.#callEventStack("pageJumped", this.data.page.currentData, this.data.page.index.nested);
-                            this.#callEventStack("pageChanged", this.data.page.currentData, this.data.page.index.current);
+                            this.setPage(this.data.page.index.current, jumpIndex);
+                            this.callEventStack("pageJumped", this.data.page.currentData, this.data.page.index.nested);
+                            this.callEventStack("pageChanged", this.data.page.currentData, this.data.page.index.current);
                             return await this.refresh();
 
                         case config.navigator.buttons.next.emoji.name:
-                            this.#setPage(this.data.page.index.current, this.data.page.index.nested + 1);
-                            this.#callEventStack("pageNext", this.data.page.currentData, this.data.page.index.nested);
-                            this.#callEventStack("pageChanged", this.data.page.currentData, this.data.page.index.current);
+                            this.setPage(this.data.page.index.current, this.data.page.index.nested + 1);
+                            this.callEventStack("pageNext", this.data.page.currentData, this.data.page.index.nested);
+                            this.callEventStack("pageChanged", this.data.page.currentData, this.data.page.index.current);
                             return await this.refresh();
 
                         case config.navigator.buttons.to_last.emoji.name:
-                            this.#setPage(this.data.page.index.current, this.options.pages.length - 1);
-                            this.#callEventStack("pageChanged", this.data.page.currentData, this.data.page.index.current);
+                            this.setPage(this.data.page.index.current, this.options.pages.length - 1);
+                            this.callEventStack("pageChanged", this.data.page.currentData, this.data.page.index.current);
                             return await this.refresh();
                     }
                 } catch (err) {
@@ -576,17 +594,17 @@ export default class PageNavigator {
             // Collector ( END )
             collector.on("end", async () => {
                 this.data.collectors.reaction = null;
-                this.#handlePostTimeout();
+                this.handlePostTimeout();
                 resolve();
             });
         });
     }
 
-    async #collect_all(): Promise<[void, void]> {
-        return await Promise.all([this.#collect_components(), this.#collect_reactions()]);
+    private async collect_all(): Promise<[void, void]> {
+        return await Promise.all([this.collect_components(), this.collect_reactions()]);
     }
 
-    async #handlePostTimeout(): Promise<void> {
+    private async handlePostTimeout(): Promise<void> {
         if (this.options.postTimeout.deleteMessage) {
             /* > error prevention ( START ) */
             // Get options that are not "deleteMessage"
@@ -622,16 +640,16 @@ export default class PageNavigator {
             if (this.options.postTimeout.clearComponentsOrReactions) {
                 if (!this.options.useReactions) {
                     // Clear message components
-                    this.#navComponents_removeFromMessage();
+                    this.navComponents_removeFromMessage();
                 } else {
                     // Clear message reactions
-                    this.#navReactions_removeFromMessage();
+                    this.navReactions_removeFromMessage();
                 }
             }
         }
 
         // Call events ( TIMEOUT )
-        this.#callEventStack("timeout", this.data.message);
+        this.callEventStack("timeout", this.data.message);
     }
 
     constructor(options: PageNavigatorOptions) {
@@ -652,7 +670,7 @@ export default class PageNavigator {
         this.options = {
             ...options,
             allowedParticipants: jt.forceArray(options.allowedParticipants),
-            pages: jt.forceArray(options.pages),
+            pages: this.resolveEmbedsToPages(options.pages),
             type: options.type || "short",
             useReactions: options.useReactions || false,
             dynamic: options.dynamic || false,
@@ -704,11 +722,11 @@ export default class PageNavigator {
 
                 selectMenu: new StringSelectMenuBuilder().setCustomId("ssm_pageSelect"),
                 navigation: {
-                    to_first: this.#createButton({ custom_id: "btn_to_first", ...config.navigator.buttons.to_first }),
-                    back: this.#createButton({ custom_id: "btn_back", ...config.navigator.buttons.back }),
-                    jump: this.#createButton({ custom_id: "btn_jump", ...config.navigator.buttons.jump }),
-                    next: this.#createButton({ custom_id: "btn_next", ...config.navigator.buttons.next }),
-                    to_last: this.#createButton({ custom_id: "btn_to_last", ...config.navigator.buttons.to_last })
+                    to_first: this.createButton({ custom_id: "btn_to_first", ...config.navigator.buttons.to_first }),
+                    back: this.createButton({ custom_id: "btn_back", ...config.navigator.buttons.back }),
+                    jump: this.createButton({ custom_id: "btn_jump", ...config.navigator.buttons.jump }),
+                    next: this.createButton({ custom_id: "btn_next", ...config.navigator.buttons.next }),
+                    to_last: this.createButton({ custom_id: "btn_to_last", ...config.navigator.buttons.to_last })
                 }
             }
         };
@@ -723,7 +741,7 @@ export default class PageNavigator {
         };
 
         /// Configure
-        this.#configure_all();
+        this.configure_all();
     }
 
     on(event: "pageChanged", listener: (page: PageData | NestedPageData, index: number) => any, once: boolean): this;
@@ -829,7 +847,7 @@ export default class PageNavigator {
     /** Send the PageNavigator. */
     async send(handler: SendHandler, options?: SendOptions): Promise<Message | null> {
         // Pre-configure
-        this.#configure_all();
+        this.configure_all();
 
         // Send with dynaSend
         this.data.message = await dynaSend(handler, {
@@ -842,10 +860,10 @@ export default class PageNavigator {
         if (this.data.message) {
             // Add reactions, if applicable
             /* NOTE: this is not awaited so we're able to interact with the reactions before they're fully added */
-            this.#navReactions_addToMessage();
+            this.navReactions_addToMessage();
 
             // Start collectors
-            this.#collect_all();
+            this.collect_all();
         }
 
         // Return the message, if it exists
@@ -866,7 +884,7 @@ export default class PageNavigator {
         /* > error prevention ( END ) */
 
         // Pre-configure
-        this.#configure_all();
+        this.configure_all();
 
         // Edit the message with dynaSend
         this.data.message = await dynaSend(this.data.message, {
@@ -879,7 +897,7 @@ export default class PageNavigator {
         if (this.data.message) {
             // Refresh reactions, if applicable
             /* NOTE: this is not awaited so we're able to interact with the reactions before they're fully added */
-            this.#navReactions_removeFromMessage().then(() => this.#navReactions_addToMessage());
+            this.navReactions_removeFromMessage().then(() => this.navReactions_addToMessage());
         }
 
         // Return the message, if it exists

@@ -122,7 +122,7 @@ export const __command: PrefixCommand = {
         /* - - - - - { Page Navigation } - - - - - */
         const pageNav = new PageNavigator({
             allowedParticipants: message.author,
-            pages: PageNavigator.resolveEmbedsToPages(categoryEmbeds)
+            pages: categoryEmbeds
         });
 
         pageNav.addSelectMenuOptions(...categoryNames.map(cat => ({ emoji: cat.icon, label: cat.name })));
