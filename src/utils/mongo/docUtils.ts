@@ -149,7 +149,7 @@ export default class DocumentUtils<T> {
     /** Fetch all documents from the collection that match the provided filter.
      * @param filter The filter used to find the documents to fetch.
      * @param options Optional parameters for filtering and querying the document. `lean` is `true` by default. */
-    fetchAll = async (filter: RootFilterQuery<T>, options: DocumentQueryOptions<T> = {}) => {
+    fetchAll = async (filter: RootFilterQuery<T> = {}, options: DocumentQueryOptions<T> = {}) => {
         await mongo.connect();
         const _options = { ...options, projection: undefined, lean: options?.lean ?? true };
         return await this.model.find(filter, options?.projection, _options);
