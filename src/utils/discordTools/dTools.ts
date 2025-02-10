@@ -1,5 +1,6 @@
 import {
     AnyThreadChannel,
+    Client,
     DMChannel,
     Guild,
     GuildBasedChannel,
@@ -9,6 +10,8 @@ import {
     PartialGroupDMChannel,
     Role,
     TextBasedChannel,
+    TextChannel,
+    User,
     VoiceBasedChannel
 } from "discord.js";
 
@@ -32,7 +35,7 @@ export function __zero(str?: string | undefined | null): string {
 }
 
 /** Check if the given string is a mention or a snowflake.
- * 
+ *
  * Looks for formats like `<@123456789>`, or a numeric string with at least 6 digits.
  * @param str The string to check. */
 export function isMentionOrSnowflake(str: string): boolean {
@@ -63,6 +66,20 @@ export function getFirstMentionId(options: { message?: Message; content?: string
 
     const firstArg = options.content?.split(" ")[0] || "";
     return mentionId || isMentionOrSnowflake(firstArg) ? cleanMention(firstArg) : "";
+}
+
+/** Fetch a user from the client, checking the cache first.
+ * @param client - The client to fetch the user from.
+ * @param userId - The ID of the user to fetch. */
+export async function fetchUser(client: Client<true>, userId: string): Promise<User | null> {
+    return client.users.cache.get(userId) || (await client.users.fetch(__zero(userId)).catch(() => null));
+}
+
+/** Fetch a guild from the client, checking the cache first.
+ * @param client - The client to fetch the guild from.
+ * @param guildId - The ID of the guild to fetch. */
+export async function fetchGuild(client: Client<true>, guildId: string): Promise<Guild | null> {
+    return client.guilds.cache.get(guildId) || (await client.guilds.fetch(__zero(guildId)).catch(() => null));
 }
 
 /** Fetch a member from a guild, checking the cache first.
@@ -99,11 +116,29 @@ export async function fetchChannel<T extends ChannelType>(
     return channel ? (channel as any) : null;
 }
 
-/** Fetche a role from a guild, checking the cache first.
+/** Fetch a role from a guild, checking the cache first.
  * @param guild - The guild to fetch the role from.
  * @param roleId - The ID of the role to fetch. */
 export async function fetchRole(guild: Guild, roleId: string): Promise<Role | null> {
     return guild.roles.cache.get(roleId) || (await guild.roles.fetch(__zero(roleId)).catch(() => null)) || null;
 }
 
-export default { __zero, isMentionOrSnowflake, cleanMention, getFirstMentionId, fetchMember, fetchChannel, fetchRole };
+/** Fetch a message from a channel, checking the cache first.
+ * @param channel - The channel to fetch the message from.
+ * @param messageId - The ID of the message to fetch. */
+export async function fetchMessage(channel: TextChannel | VoiceBasedChannel, messageId: string): Promise<Message | null> {
+    return channel.messages.cache.get(messageId) || (await channel.messages.fetch(__zero(messageId)).catch(() => null)) || null;
+}
+
+export default {
+    __zero,
+    isMentionOrSnowflake,
+    cleanMention,
+    getFirstMentionId,
+    fetchUser,
+    fetchGuild,
+    fetchMember,
+    fetchChannel,
+    fetchRole,
+    fetchMessage
+};
