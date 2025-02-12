@@ -15,20 +15,20 @@
     "author": "",
     "license": "Apache-2.0",
     "devDependencies": {
-        "@types/node": "^22.10.2",
+        "@types/node": "^22.13.1",
         "nodemon": "^3.1.9",
-        "prettier": "^3.4.2",
+        "prettier": "^3.5.0",
         "ts-node": "^10.9.2",
         "tsc-alias": "^1.8.10",
         "tsconfig-paths": "^4.2.0",
-        "typescript": "^5.7.2"
+        "typescript": "^5.7.3"
     },
     "dependencies": {
-        "@napi-rs/canvas": "^0.1.65",
+        "@napi-rs/canvas": "^0.1.67",
         "axios": "^1.7.9",
         "chalk": "4.1.2",
-        "discord.js": "^14.16.3",
+        "discord.js": "^14.18.0",
         "dotenv": "^16.4.7",
-        "mongoose": "^8.8.4"
+        "mongoose": "^8.10.0"
     }
 }
