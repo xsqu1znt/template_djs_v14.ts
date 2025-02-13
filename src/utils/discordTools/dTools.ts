@@ -16,7 +16,7 @@ import {
 } from "discord.js";
 
 type MentionType = "user" | "channel" | "role";
-type ChannelType = "dm" | "text" | "thread" | "voice";
+type ChannelType = "dm" | "text" | "thread" | "voice" | "any";
 
 type FetchedChannel<T> = T extends "dm"
     ? PartialGroupDMChannel | DMChannel | PartialDMChannel
@@ -24,7 +24,9 @@ type FetchedChannel<T> = T extends "dm"
       ? GuildBasedChannel & TextBasedChannel
       : T extends "thread"
         ? AnyThreadChannel
-        : VoiceBasedChannel;
+        : T extends "any"
+          ? GuildBasedChannel
+          : VoiceBasedChannel;
 
 /** Returns the string if it's populated, or "0" otherwise.
  *
@@ -127,7 +129,9 @@ export async function fetchRole(guild: Guild, roleId: string): Promise<Role | nu
  * @param channel - The channel to fetch the message from.
  * @param messageId - The ID of the message to fetch. */
 export async function fetchMessage(channel: TextChannel | VoiceBasedChannel, messageId: string): Promise<Message | null> {
-    return channel.messages.cache.get(messageId) || (await channel.messages.fetch(__zero(messageId)).catch(() => null)) || null;
+    return (
+        channel.messages.cache.get(messageId) || (await channel.messages.fetch(__zero(messageId)).catch(() => null)) || null
+    );
 }
 
 export default {
