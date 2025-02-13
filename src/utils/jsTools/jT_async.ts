@@ -3,6 +3,8 @@ import { EventEmitter } from "node:stream";
 import __date from "./jT_date";
 
 type AnyFunc = (...args: any) => any;
+type LoopIntervalCallback<T extends AnyFunc> = (loop: LoopInterval<T>) => any;
+type LoopIntervalEmitCallback<T extends AnyFunc> = (loop: LoopInterval<T>, ...args: any) => any;
 
 interface LoopIntervalEvents {
     executed: [any];
@@ -23,7 +25,7 @@ export async function sleep(ms: string | number): Promise<void> {
     return await setTimeout(__date.parseTime(ms));
 }
 
-export class LoopInterval<T extends AnyFunc> {
+export class LoopInterval<T extends LoopIntervalCallback<T>> {
     private running: boolean = false;
     private delay: number;
 
@@ -42,7 +44,7 @@ export class LoopInterval<T extends AnyFunc> {
         const main = async () => {
             if (!this.running) return this.__eventEmitter.emit("stop");
             // Both call the function and emit the executed event
-            this.EventEmitter.emit("executed", await fn());
+            this.EventEmitter.emit("executed", await fn(this));
         };
 
         this.__eventEmitter.on("execute", async () => main);
@@ -53,7 +55,7 @@ export class LoopInterval<T extends AnyFunc> {
             }
         });
 
-        this.__eventEmitter.on("bump", async () => this.EventEmitter.emit("bumped", await fn()));
+        this.__eventEmitter.on("bump", async () => this.EventEmitter.emit("bumped", await fn(this)));
 
         this.__eventEmitter.on("start", _immediate => {
             if (this.running) return;
@@ -109,22 +111,22 @@ export class LoopInterval<T extends AnyFunc> {
 
     /** Add a listener to call each time a cycle completes.
      * @param fn The function to call. */
-    on(fn: (arg: Awaited<ReturnType<T>>) => any): this {
-        this.EventEmitter.on("executed", fn);
+    on(fn: (loop: LoopInterval<T>, ...args: any) => any): this {
+        this.EventEmitter.on("executed", (...args: any) => fn(this, args));
         return this;
     }
 
     /** Add a listener to call once a cycle completes.
      * @param fn The function to call. */
-    once(fn: (arg: Awaited<ReturnType<T>>) => any): this {
-        this.EventEmitter.once("executed", fn);
+    once(fn: (loop: LoopInterval<T>, ...args: any) => any): this {
+        this.EventEmitter.once("executed", (...args: any) => fn(this, args));
         return this;
     }
 
     /** Remove a listener from the cycle.
      * @param fn The function to remove. */
-    off(fn: (arg: Awaited<ReturnType<T>>) => any): this {
-        this.EventEmitter.off("executed", fn);
+    off(fn: (loop: LoopInterval<T>, ...args: any) => any): this {
+        this.EventEmitter.off("executed", (...args: any) => fn(this, args));
         return this;
     }
 }
