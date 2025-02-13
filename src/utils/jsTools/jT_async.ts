@@ -3,8 +3,7 @@ import { EventEmitter } from "node:stream";
 import __date from "./jT_date";
 
 type AnyFunc = (...args: any) => any;
-type LoopIntervalCallback<T extends AnyFunc> = (loop: LoopInterval<T>) => any;
-type LoopIntervalEmitCallback<T extends AnyFunc> = (loop: LoopInterval<T>, ...args: any) => any;
+type LoopIntervalCallback = (loop: LoopInterval<AnyFunc>) => any;
 
 interface LoopIntervalEvents {
     executed: [any];
@@ -25,7 +24,7 @@ export async function sleep(ms: string | number): Promise<void> {
     return await setTimeout(__date.parseTime(ms));
 }
 
-export class LoopInterval<T extends LoopIntervalCallback<T>> {
+export class LoopInterval<T extends LoopIntervalCallback> {
     private running: boolean = false;
     private delay: number;
 
