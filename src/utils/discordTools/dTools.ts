@@ -5,12 +5,12 @@ import {
     Guild,
     GuildBasedChannel,
     GuildMember,
+    GuildTextBasedChannel,
     Message,
     PartialDMChannel,
     PartialGroupDMChannel,
     Role,
     TextBasedChannel,
-    TextChannel,
     User,
     VoiceBasedChannel
 } from "discord.js";
@@ -128,7 +128,7 @@ export async function fetchRole(guild: Guild, roleId: string): Promise<Role | nu
 /** Fetch a message from a channel, checking the cache first.
  * @param channel - The channel to fetch the message from.
  * @param messageId - The ID of the message to fetch. */
-export async function fetchMessage(channel: TextChannel | VoiceBasedChannel, messageId: string): Promise<Message | null> {
+export async function fetchMessage(channel: GuildTextBasedChannel | VoiceBasedChannel, messageId: string): Promise<Message | null> {
     return (
         channel.messages.cache.get(messageId) || (await channel.messages.fetch(__zero(messageId)).catch(() => null)) || null
     );
