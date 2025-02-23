@@ -11,13 +11,13 @@ export const __command: PrefixCommand = {
 
     execute: async (client, message) => {
         // Create an array of responses
-        let choices = [
-            "What's up, **$DISPLAY_NAME**! Have a cookie! :cookie:",
-            "Hey, **$DISPLAY_NAME**! Have a glass of milk! :milk:"
+        const choices = [
+            "What's up, **$USER_NAME**! Have a cookie! :cookie:",
+            "Hey, **$USER_NAME**! Have a glass of milk! :milk:"
         ];
 
         // Create the embed ( Cookie )
-        let embed_cookie = new BetterEmbed({
+        const embed_cookie = new BetterEmbed({
             context: { message },
             description: jsTools.choice(choices)
         });
