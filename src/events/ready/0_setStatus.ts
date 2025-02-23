@@ -8,7 +8,7 @@ import { IN_DEV_MODE } from "@constants";
 import config from "@configs";
 
 export const __event: DJSClientEvent<"ready"> = {
-    name: __filename.split(/\.js|\.ts/)[0],
+    name: __filename.split("/").pop()!.split(".")[0],
     event: "ready",
 
     execute: async client => {

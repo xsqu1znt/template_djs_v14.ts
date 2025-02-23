@@ -56,7 +56,7 @@ function hasRequiredPermissions(member: GuildMember, required: PermissionResolva
 }
 
 export const __event: DJSClientEvent<"interactionCreate"> = {
-    name: __filename.split(/\.js|\.ts/)[0],
+    name: __filename.split("/").pop()!.split(".")[0],
     event: "interactionCreate",
 
     execute: async (client, interaction) => {

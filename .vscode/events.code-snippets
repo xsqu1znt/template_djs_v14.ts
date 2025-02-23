@@ -7,7 +7,7 @@
             "import { DJSClientEvent } from \"@customTypes/events\";\n",
 
             "export const __event: DJSClientEvent<\"${1:}\"> = {",
-            "    name: __filename.split(/\\.js|\\.ts/)[0],",
+            "    name: __filename.split(\"/\").pop()!.split(\".\")[0],",
             "    event: \"${1:}\",\n",
 
             "    execute: async (client${2:}) => {",
