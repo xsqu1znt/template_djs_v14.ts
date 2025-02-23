@@ -4,13 +4,6 @@ import config from "@configs";
 
 import { MONGO_URI, IN_DEV_MODE } from "@constants";
 
-/* - - - - - { Models } - - - - - */
-export * as models from "@models";
-
-/* - - - - - { Managers } - - - - - */
-import guildManager from "./guildManager";
-export { guildManager };
-
 /* - - - - - { Meta Functions } - - - - - */
 let connectionAttempts = 0;
 
@@ -20,12 +13,7 @@ let connection: mongoose.Mongoose | null = null;
 /** Connect to MongoDB. */
 export async function connect(uri: string = MONGO_URI): Promise<mongoose.Mongoose | null> {
     if (!uri) {
-        logger.error("::MONGO", "MONGO_URI is not set");
-        return null;
-    }
-
-    if (IN_DEV_MODE && !MONGO_URI) {
-        logger.error("::MONGO", "DEV_MODE is enabled, but MONGO_URI_DEV is not set");
+        logger.error("::MONGO", IN_DEV_MODE ? "DEV_MODE is enabled, but MONGO_URI_DEV is not set" : "MONGO_URI is not set");
         return null;
     }
 

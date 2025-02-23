@@ -1,5 +1,5 @@
+import { DJSClientEvent } from "@customTypes/events";
 import { InteractionBasedCommandOptions } from "@customTypes/commands";
-import { InteractionEventModule } from "@customTypes/events";
 
 import {
     ActionRowBuilder,
@@ -11,7 +11,7 @@ import {
     MessageActionRowComponentBuilder,
     PermissionResolvable
 } from "discord.js";
-import { BetterEmbed } from "@utils/discordTools";
+import { BetterEmbed } from "djstools";
 import logger from "@utils/logger";
 
 import config from "@configs";
@@ -55,8 +55,8 @@ function hasRequiredPermissions(member: GuildMember, required: PermissionResolva
     return { has, missing, passed: has.length === required.length };
 }
 
-export const __event: InteractionEventModule = {
-    name: "processInteractionCommand",
+export const __event: DJSClientEvent<"interactionCreate"> = {
+    name: __filename.split(/\.js|\.ts/)[0],
     event: "interactionCreate",
 
     execute: async (client, interaction) => {
@@ -70,7 +70,7 @@ export const __event: InteractionEventModule = {
         // Command doesn't exist
         if (!interactionCommand) {
             return await interaction
-                .reply({ content: `**/\`${interaction.commandName}\`** is not a command.`, ephemeral: true })
+                .reply({ content: `**/\`${interaction.commandName}\`** is not a command.`, flags: "Ephemeral" })
                 .catch(err => logger.error("::COMMAND", `'/${interaction.commandName}' is not a command.`, err));
         }
 
@@ -80,7 +80,7 @@ export const __event: InteractionEventModule = {
         // Check if the command is guild only, and if the interaction was not used in a guild
         if (_commandOptions?.guildOnly === false && !interaction.inGuild()) {
             return await interaction
-                .reply({ content: "This command can only be used inside of a server.", ephemeral: true })
+                .reply({ content: "This command can only be used inside of a server.", flags: "Ephemeral" })
                 .catch(null);
         }
 
@@ -98,7 +98,7 @@ export const __event: InteractionEventModule = {
                     color: "Orange",
                     title: "⚠️ Staff Only",
                     description: `Only the developers of ${client.user} can use this command.`
-                }).send(interaction, { ephemeral: true, fetchReply: false });
+                }).send(interaction, { flags: "Ephemeral", withResponse: true });
             }
 
             /* NOTE: The following options require the command to have been used in a cached guild */
@@ -109,7 +109,7 @@ export const __event: InteractionEventModule = {
                         color: "Orange",
                         title: "⚠️ Server Admin Only",
                         description: "You must be an admin of this server to use this command."
-                    }).send(interaction, { ephemeral: true, fetchReply: false });
+                    }).send(interaction, { flags: "Ephemeral", withResponse: true });
                 }
 
                 // Check if the user has the required permissions in the current guild
@@ -121,7 +121,7 @@ export const __event: InteractionEventModule = {
                             color: "Orange",
                             title: "⚠️ Missing Permissions",
                             description: `You must have the following permissions:\n${_permCheck.missing.join(", ")}`
-                        }).send(interaction, { ephemeral: true, fetchReply: false });
+                        }).send(interaction, { flags: "Ephemeral", withResponse: true });
                     }
                 }
 
@@ -134,7 +134,7 @@ export const __event: InteractionEventModule = {
                             color: "Orange",
                             title: "⚠️ Missing Permissions",
                             description: `I need the following permissions:\n${_permCheck.missing.join(", ")}`
-                        }).send(interaction, { ephemeral: true, fetchReply: false });
+                        }).send(interaction, { flags: "Ephemeral", withResponse: true });
                     }
                 }
             } else {
@@ -143,7 +143,7 @@ export const __event: InteractionEventModule = {
                     return await interaction
                         .reply({
                             content: "This command uses options that require the command to be used in a server.",
-                            ephemeral: true
+                            flags: "Ephemeral"
                         })
                         .catch(null);
                 }
@@ -153,7 +153,7 @@ export const __event: InteractionEventModule = {
             if (_commandOptions.deferReply) {
                 await interaction.deferReply().catch(null);
             } else if (_commandOptions.deferReplyEphemeral) {
-                await interaction.deferReply({ ephemeral: true }).catch(null);
+                await interaction.deferReply({ flags: "Ephemeral" }).catch(null);
             }
         }
 
@@ -166,13 +166,13 @@ export const __event: InteractionEventModule = {
             return await _execute(client, interaction).then(async message => {
                 // Show an error if nothing happened
                 if (!message && !interaction.replied && !interaction.deferred) {
-                    return await interaction.reply({
+                    return interaction.reply({
                         content: `Something went wrong! **\`/${interaction.commandName}\`** didn't finish executing.`,
-                        ephemeral: true
+                        flags: "Ephemeral"
                     });
                 }
 
-                /* TODO: run code here after the command finished executing... */
+                /* TODO: Run code here after the command finished executing... */
             });
         } catch (err) {
             let _configSupport = config.client.support_server;
@@ -205,8 +205,8 @@ export const __event: InteractionEventModule = {
             // Let the user know an error occurred
             embed_executeError.send(interaction, {
                 components: aR_supportServer as ActionRowBuilder<MessageActionRowComponentBuilder>,
-                ephemeral: true,
-                fetchReply: false
+                flags: "Ephemeral",
+                withResponse: true
             });
 
             // prettier-ignore

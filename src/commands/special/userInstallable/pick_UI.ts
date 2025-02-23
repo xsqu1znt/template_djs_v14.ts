@@ -1,8 +1,8 @@
 import { UserInstallableCommand } from "@customTypes/commands";
 
 import { SlashCommandBuilder } from "discord.js";
-import { BetterEmbed } from "@utils/discordTools";
-import jt from "@utils/jsTools";
+import { BetterEmbed } from "djstools";
+import jsTools from "jstools";
 
 export const __command: UserInstallableCommand = {
     builder: new SlashCommandBuilder()
@@ -19,15 +19,15 @@ export const __command: UserInstallableCommand = {
 
     execute: async (client, interaction) => {
         // Get the user's choices from the interaction
-        let choices = interaction.options.get("choices", true).value as string;
+        const choices = interaction.options.get("choices", true).value as string;
 
         // Create the embed ( Pick )
-        let embed_pick = new BetterEmbed({
+        const embed_pick = new BetterEmbed({
             context: { interaction },
-            description: jt.choice(choices.split(",")).trim()
+            description: jsTools.choice(choices.split(",")).trim()
         });
 
         // Reply to the interaction with the embed
-        return await embed_pick.send(interaction);
+        return embed_pick.send(interaction);
     }
 };

@@ -1,7 +1,7 @@
 import { createInterface } from "node:readline";
 import { Client } from "discord.js";
 import AppCommandManager from "@utils/AppCommandManager";
-import jt from "@utils/jsTools";
+import jsTools from "jstools";
 import logger from "./logger";
 
 function resolveGuildIds(client: Client, args: string[]) {
@@ -90,7 +90,7 @@ export default async function (client: Client, acm: AppCommandManager): Promise<
     });
 
     rl.on("line", async line => {
-        const args = jt.forceArray(line.split(" ")).map(s => s.trim());
+        const args = jsTools.forceArray(line.split(" ")).map(s => s.trim());
         const commandName = args[0];
 
         if (!commandName || !commandName.startsWith("/")) return;

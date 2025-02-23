@@ -2,51 +2,15 @@
     "DJS Event": {
         "scope": "typescript",
         "prefix": "event-base",
-        "description": "A template for client events that don't have a custom EventModule interface.",
+        "description": "A base template for any DJS client event.",
         "body": [
-            "import { BaseEventModule } from \"@customTypes/events\";\n",
+            "import { DJSClientEvent } from \"@customTypes/events\";\n",
 
-            "export const __event: BaseEventModule = {",
-            "    name: \"${1:${TM_FILENAME_BASE}}\",",
-            "    event: \"${2:messageCreate}\",\n",
+            "export const __event: DJSClientEvent<\"${1:}\"> = {",
+            "    name: __filename.split(/\\.js|\\.ts/)[0],",
+            "    event: \"${1:}\",\n",
 
-            "    execute: async (client, ${3:message}) => {",
-            "        /* TODO: code to run once the event is triggered... */$0",
-            "    }",
-            "};\n"
-        ]
-    },
-
-    "DJS Event (InteractionCreate)": {
-        "scope": "typescript",
-        "prefix": "event-ic",
-        "description": "A client.on(\"interactionCreate\") event template.",
-        "body": [
-            "import { InteractionEventModule } from \"@customTypes/events\";\n",
-
-            "export const __event: InteractionEventModule = {",
-            "    name: \"${1:${TM_FILENAME_BASE}}\",",
-            "    event: \"interactionCreate\",\n",
-
-            "    execute(client, interaction) {",
-            "        /* TODO: code to run once the event is triggered... */$0",
-            "    }",
-            "};\n"
-        ]
-    },
-
-    "DJS Event (MessageCreate)": {
-        "scope": "typescript",
-        "prefix": "event-mc",
-        "description": "A client.on(\"messageCreate\") event template.",
-        "body": [
-            "import { MessageCreateEventModule } from \"@customTypes/events\";\n",
-
-            "export const __event: MessageCreateEventModule = {",
-            "    name: \"${1:${TM_FILENAME_BASE}}\",",
-            "    event: \"messageCreate\",\n",
-
-            "    execute: async (client, message) => {",
+            "    execute: async (client${2:}) => {",
             "        /* TODO: code to run once the event is triggered... */$0",
             "    }",
             "};\n"

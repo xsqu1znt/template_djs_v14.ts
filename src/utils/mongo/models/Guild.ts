@@ -8,7 +8,7 @@ export interface IGuild {
     joinedAt: number;
 }
 
-export const schema = new Schema<IGuild>(
+export const GuildSchema = new Schema<IGuild>(
     {
         _id: { type: String, required: true },
 
@@ -18,4 +18,4 @@ export const schema = new Schema<IGuild>(
     { collection: "Guilds" }
 );
 
-export const model = Model<IGuild>("Guilds", schema);
+export const GuildModel = Model<IGuild>("Guilds", GuildSchema);

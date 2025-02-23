@@ -16,9 +16,7 @@
         "paths": {
             "@customTypes/*": ["./src/types/*"],
 
-            "@configs": ["./src/configs"],
             "@events/*": ["./src/events/*"],
-            "@models": ["./src/models"],
 
             "@slashCommands/*": ["./src/commands/slash/*"],
             "@prefixCommands/*": ["./src/commands/prefix/*"],
@@ -26,8 +24,9 @@
 
             "@utils/*": ["./src/utils/*"],
 
+            "@configs": ["./src/configs.ts"],
             "@constants": ["./src/constants.ts"],
-            "@pkgJSON": ["./src/../package.json"]
+            "@localStore": ["./src/localStore.ts"]
         },
 
         /* Emit */

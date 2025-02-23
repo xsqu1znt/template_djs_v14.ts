@@ -7,8 +7,8 @@
             "import { SlashCommand } from \"@customTypes/commands\";\n",
 
             "import { SlashCommandBuilder } from \"discord.js\";",
-            "import { BetterEmbed } from \"@utils/discordTools\";",
-            "import jt from \"@utils/jsTools\";\n",
+            "import { BetterEmbed } from \"djstools\";",
+            "import jsTools from \"jstools\";\n",
 
             "export const __command: SlashCommand = {",
             "    category: \"Fun\",",
@@ -20,19 +20,19 @@
 
             "    execute: async (client, interaction) => {",
             "        // Create an array of responses",
-            "        let choices = [",
+            "        const choices = [",
             "            \"What's up, **\\$USER_NAME**! Have a cookie! :cookie:\",",
             "            \"Hey, **\\$USER_NAME**! Have a glass of milk! :milk:\"",
             "        ];\n",
 
             "        // Create the embed ( Cookie )",
-            "        let embed_${1:cookie} = new BetterEmbed({",
+            "        const embed_${1:cookie} = new BetterEmbed({",
             "            context: { interaction },",
-            "            description: jt.choice(choices)",
+            "            description: jsTools.choice(choices)",
             "        });\n",
 
             "        // Reply to the interaction with the embed",
-            "        return await embed_${1:cookie}.send(interaction);$0",
+            "        return embed_${1:cookie}.send(interaction);$0",
             "    }",
             "};\n"
         ]
@@ -46,8 +46,8 @@
             "import { GuildSlashCommand } from \"@customTypes/commands\";\n",
 
             "import { SlashCommandBuilder } from \"discord.js\";",
-            "import { BetterEmbed } from \"@utils/discordTools\";",
-            "import jt from \"@utils/jsTools\";\n",
+            "import { BetterEmbed } from \"djstools\";",
+            "import jsTools from \"jstools\";\n",
 
             "export const __command: GuildSlashCommand = {",
             "    category: \"Fun\",",
@@ -59,19 +59,19 @@
 
             "    execute: async (client, interaction) => {",
             "        // Create an array of responses",
-            "        let choices = [",
+            "        const choices = [",
             "            \"What's up, **\\$USER_NAME**! Have a cookie! :cookie:\",",
             "            \"Hey, **\\$USER_NAME**! Have a glass of milk! :milk:\"",
             "        ];\n",
 
             "        // Create the embed ( Cookie )",
-            "        let embed_${1:cookie} = new BetterEmbed({",
+            "        const embed_${1:cookie} = new BetterEmbed({",
             "            context: { interaction },",
-            "            description: jt.choice(choices)",
+            "            description: jsTools.choice(choices)",
             "        });\n",
 
             "        // Reply to the interaction with the embed",
-            "        return await embed_${1:cookie}.send(interaction);$0",
+            "        return embed_${1:cookie}.send(interaction);$0",
             "    }",
             "};\n"
         ]
@@ -84,8 +84,8 @@
         "body": [
             "import { PrefixCommand } from \"@customTypes/commands\";\n",
 
-            "import { BetterEmbed } from \"@utils/discordTools\";",
-            "import jt from \"@utils/jsTools\";\n",
+            "import { BetterEmbed } from \"djstools\";",
+            "import jsTools from \"jstools\";\n",
 
             "export const __command: PrefixCommand = {",
             "    name: \"${1:cookie}\",",
@@ -95,19 +95,19 @@
 
             "    execute: async (client, message, { }) => {",
             "        // Create an array of responses",
-            "        let choices = [",
+            "        const choices = [",
             "            \"What's up, **\\$USER_NAME**! Have a cookie! :cookie:\",",
             "            \"Hey, **\\$USER_NAME**! Have a glass of milk! :milk:\"",
             "        ];\n",
 
             "        // Create the embed ( Cookie )",
-            "        let embed_${1:cookie} = new BetterEmbed({",
+            "        const embed_${1:cookie} = new BetterEmbed({",
             "            context: { message },",
-            "            description: jt.choice(choices)",
+            "            description: jsTools.choice(choices)",
             "        });\n",
 
             "        // Reply to the message with the embed",
-            "        return await embed_${1:cookie}.send(message, { allowedMentions: { repliedUser: false } });$0",
+            "        return embed_${1:cookie}.send(message, { allowedMentions: { repliedUser: false } });$0",
             "    }",
             "};\n"
         ]
@@ -120,8 +120,8 @@
         "body": [
             "import { GuildPrefixCommand } from \"@customTypes/commands\";\n",
 
-            "import { BetterEmbed } from \"@utils/discordTools\";",
-            "import jt from \"@utils/jsTools\";\n",
+            "import { BetterEmbed } from \"djstools\";",
+            "import jsTools from \"jstools\";\n",
 
             "export const __command: GuildPrefixCommand = {",
             "    name: \"${1:cookie}\",",
@@ -131,19 +131,19 @@
 
             "    execute: async (client, message, { }) => {",
             "        // Create an array of responses",
-            "        let choices = [",
+            "        const choices = [",
             "            \"What's up, **\\$USER_NAME**! Have a cookie! :cookie:\",",
             "            \"Hey, **\\$USER_NAME**! Have a glass of milk! :milk:\"",
             "        ];\n",
 
             "        // Create the embed ( Cookie )",
-            "        let embed_${1:cookie} = new BetterEmbed({",
+            "        const embed_${1:cookie} = new BetterEmbed({",
             "            context: { message },",
-            "            description: jt.choice(choices)",
+            "            description: jsTools.choice(choices)",
             "        });\n",
 
             "        // Reply to the message with the embed",
-            "        return await embed_${1:cookie}.send(message, { allowedMentions: { repliedUser: false } });$0",
+            "        return embed_${1:cookie}.send(message, { allowedMentions: { repliedUser: false } });$0",
             "    }",
             "};\n"
         ]
@@ -157,7 +157,7 @@
             "import { ContextMenuCommand } from \"@customTypes/commands\";\n",
 
             "import { ApplicationCommandType, ContextMenuCommandBuilder, ContextMenuCommandType } from \"discord.js\";",
-            "import { BetterEmbed } from \"@utils/discordTools\";\n",
+            "import { BetterEmbed } from \"djstools\";\n",
 
             "export const __command: ContextMenuCommand = {",
             "    category: \"Fun\",\n",
@@ -170,13 +170,13 @@
             "        if (!interaction.is${2|User,Message|}ContextMenuCommand()) return;\n",
 
             "        // Create the embed ( Avatar )",
-            "        let embed_${4:avatar} = new BetterEmbed({",
+            "        const embed_${4:avatar} = new BetterEmbed({",
             "            title: `${interaction.${3|targetUser,targetMessage.member?.user|}.username}'s Avatar`,",
             "            imageURL: interaction.${3|targetUser,targetMessage.member?.user|}.displayAvatarURL({ size: 4096 })",
             "        });\n",
 
             "        // Reply to the interaction with the embed",
-            "        return await embed_${4:avatar}.send(interaction);$0",
+            "        return embed_${4:avatar}.send(interaction);$0",
             "    }",
             "};\n"
         ]
@@ -190,7 +190,7 @@
             "import { GuildContextMenuCommand } from \"@customTypes/commands\";\n",
 
             "import { ApplicationCommandType, ContextMenuCommandBuilder, ContextMenuCommandType } from \"discord.js\";",
-            "import { BetterEmbed } from \"@utils/discordTools\";\n",
+            "import { BetterEmbed } from \"djstools\";\n",
 
             "export const __command: GuildContextMenuCommand = {",
             "    category: \"Fun\",",
@@ -204,13 +204,13 @@
             "        if (!interaction.is${2|User,Message|}ContextMenuCommand()) return;\n",
 
             "        // Create the embed ( Avatar )",
-            "        let embed_${4:avatar} = new BetterEmbed({",
+            "        const embed_${4:avatar} = new BetterEmbed({",
             "            title: `${interaction.${3|targetUser,targetMessage.member?.user|}.username}'s Avatar`,",
             "            imageURL: interaction.${3|targetUser,targetMessage.member?.user|}.displayAvatarURL({ size: 4096 })",
             "        });\n",
 
             "        // Reply to the interaction with the embed",
-            "        return await embed_${4:avatar}.send(interaction);$0",
+            "        return embed_${4:avatar}.send(interaction);$0",
             "    }",
             "};\n"
         ]
@@ -224,8 +224,8 @@
             "import { UserInstallableCommand } from \"@customTypes/commands\";\n",
 
             "import { SlashCommandBuilder } from \"discord.js\";",
-            "import { BetterEmbed } from \"@utils/discordTools\";",
-            "import jt from \"@utils/jsTools\";\n",
+            "import { BetterEmbed } from \"djstools\";",
+            "import jsTools from \"jstools\";\n",
 
             "export const __command: UserInstallableCommand = {",
             "    builder: new SlashCommandBuilder()",
@@ -242,16 +242,16 @@
 
             "    execute: async (client, interaction) => {",
             "        // Get the user's choices from the interaction",
-            "        let choices = interaction.options.get(\"choices\", true).value as string;\n",
+            "        const choices = interaction.options.get(\"choices\", true).value as string;\n",
 
             "        // Create the embed ( Pick )",
-            "        let embed_${1:pick} = new BetterEmbed({",
+            "        const embed_${1:pick} = new BetterEmbed({",
             "            context: { interaction },",
-            "            description: jt.choice(choices.split(\",\")).trim()",
+            "            description: jsTools.choice(choices.split(\",\")).trim()",
             "        });\n",
 
             "        // Reply to the interaction with the embed",
-            "        return await embed_${1:pick}.send(interaction);$0",
+            "        return embed_${1:pick}.send(interaction);$0",
             "    }",
             "};\n"
         ]
@@ -265,8 +265,8 @@
             "import { GuildUserInstallableCommand } from \"@customTypes/commands\";\n",
 
             "import { SlashCommandBuilder } from \"discord.js\";",
-            "import { BetterEmbed } from \"@utils/discordTools\";",
-            "import jt from \"@utils/jsTools\";\n",
+            "import { BetterEmbed } from \"djstools\";",
+            "import jsTools from \"jstools\";\n",
 
             "export const __command: GuildUserInstallableCommand = {",
             "    builder: new SlashCommandBuilder()",
@@ -284,16 +284,16 @@
 
             "    execute: async (client, interaction) => {",
             "        // Get the user's choices from the interaction",
-            "        let choices = interaction.options.get(\"choices\", true).value as string;\n",
+            "        const choices = interaction.options.get(\"choices\", true).value as string;\n",
 
             "        // Create the embed ( Pick )",
-            "        let embed_${1:pick} = new BetterEmbed({",
+            "        const embed_${1:pick} = new BetterEmbed({",
             "            context: { interaction },",
-            "            description: jt.choice(choices.split(\",\")).trim()",
+            "            description: jsTools.choice(choices.split(\",\")).trim()",
             "        });\n",
 
             "        // Reply to the interaction with the embed",
-            "        return await embed_${1:pick}.send(interaction);$0",
+            "        return embed_${1:pick}.send(interaction);$0",
             "    }",
             "};\n"
         ]

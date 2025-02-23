@@ -1,6 +1,6 @@
 import { PrefixCommand } from "@customTypes/commands";
 
-import { guildManager } from "@utils/mongo";
+import { guildManager } from "@utils/mongo/managers";
 
 export const __command: PrefixCommand = {
     name: "prefix",
@@ -25,7 +25,7 @@ export const __command: PrefixCommand = {
         await guildManager.setPrefix(message.guild.id, prefix);
 
         // Reply to the user with the new prefix
-        return await message.reply({
+        return message.reply({
             content: `My prefix has been changed to \`${prefix}\`.`,
             allowedMentions: { repliedUser: false }
         });

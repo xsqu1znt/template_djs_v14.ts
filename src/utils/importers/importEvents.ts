@@ -1,16 +1,16 @@
-import { BaseEventModule } from "@customTypes/events";
+import { DJSClientEvent } from "@customTypes/events";
 
 import { Client } from "discord.js";
 import logger from "@utils/logger";
-import jt from "@utils/jsTools";
-import * as path from "path";
+import jsTools from "jstools";
+import path from "node:path";
 
 const EVENT_MODULE_RELATIVE_PATH = "../../events";
 const EVENT_MODULE_DIRECTORY = path.join(__dirname, EVENT_MODULE_RELATIVE_PATH);
 const EVENT_MODULE_LOG_PATH = "events";
 
 async function importEventModules() {
-    let files = jt
+    let files = jsTools
         .readDir(EVENT_MODULE_DIRECTORY, { recursive: true })
         .filter(fn => fn.endsWith(".js") || fn.endsWith(".ts"));
 
@@ -20,7 +20,7 @@ async function importEventModules() {
             let _path = path.join(__dirname, EVENT_MODULE_RELATIVE_PATH, fn);
             let _logPath = `./${path.join(EVENT_MODULE_LOG_PATH, fn)}`;
             let _module = await import(_path)
-                .then(m => m.__event as BaseEventModule)
+                .then(m => m.__event as DJSClientEvent<any>)
                 .catch(err => {
                     // Log the error to the console
                     logger.error("::IMPORT_EVENT", `Failed to import event module at '${_logPath}'`, err);
@@ -32,7 +32,7 @@ async function importEventModules() {
     );
 
     // Filter out modules that failed to import and return
-    return modules.filter(m => m.module) as { module: BaseEventModule; path: string }[];
+    return modules.filter(m => m.module) as { module: DJSClientEvent<any>; path: string }[];
 }
 
 export default async function (client: Client<true>): Promise<void> {
@@ -44,7 +44,7 @@ export default async function (client: Client<true>): Promise<void> {
     }
 
     // Get an array of every EventType imported
-    let eventTypes = jt.unique(events.map(e => e.module.event));
+    let eventTypes = jsTools.unique(events.map(e => e.module.event));
 
     // Group events by EventType
     let eventsGrouped = eventTypes.map(type => events.filter(e => e.module.event === type));

@@ -1,7 +1,7 @@
 import { PrefixCommand } from "@customTypes/commands";
 
-import { BetterEmbed } from "@utils/discordTools";
-import jt from "@utils/jsTools";
+import { BetterEmbed } from "djstools";
+import jsTools from "jstools";
 
 export const __command: PrefixCommand = {
     name: "cookie",
@@ -19,10 +19,10 @@ export const __command: PrefixCommand = {
         // Create the embed ( Cookie )
         let embed_cookie = new BetterEmbed({
             context: { message },
-            description: jt.choice(choices)
+            description: jsTools.choice(choices)
         });
 
         // Reply to the message with the embed
-        return await embed_cookie.send(message, { allowedMentions: { repliedUser: false } });
+        return embed_cookie.send(message, { allowedMentions: { repliedUser: false } });
     }
 };

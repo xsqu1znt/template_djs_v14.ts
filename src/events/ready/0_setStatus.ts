@@ -1,14 +1,14 @@
-import { BaseEventModule } from "@customTypes/events";
+import { DJSClientEvent } from "@customTypes/events";
 import { ActivityData, ClientActivity } from "@customTypes/misc";
 
 import { ActivityType } from "discord.js";
-import jt from "@utils/jsTools";
+import jsTools from "jstools";
 
 import { IN_DEV_MODE } from "@constants";
 import config from "@configs";
 
-export const __event: BaseEventModule = {
-    name: "setClientActivity",
+export const __event: DJSClientEvent<"ready"> = {
+    name: __filename.split(/\.js|\.ts/)[0],
     event: "ready",
 
     execute: async client => {
@@ -23,7 +23,7 @@ export const __event: BaseEventModule = {
             let _data: ActivityData = structuredClone(
                 Array.isArray(clientActivity.ACTIVITY)
                     ? clientActivity?.RANDOM_ACTIVITY
-                        ? jt.choice(clientActivity.ACTIVITY)
+                        ? jsTools.choice(clientActivity.ACTIVITY)
                         : clientActivity.ACTIVITY[activityIndex]
                     : clientActivity.ACTIVITY
             );
@@ -44,8 +44,8 @@ export const __event: BaseEventModule = {
             if (_data.NAME.includes("$")) {
                 // Basic context
                 _data.NAME = _data.NAME
-                    .replace("$USER_COUNT", jt.formatThousands(client.users.cache.size))
-                    .replace("$GUILD_COUNT", jt.formatThousands(client.guilds.cache.size))
+                    .replace("$USER_COUNT", jsTools.formatThousands(client.users.cache.size))
+                    .replace("$GUILD_COUNT", jsTools.formatThousands(client.guilds.cache.size))
                     .replace("$INVITE", config.client.support_server.INVITE_URL);
 
                 // Support server context
@@ -54,7 +54,7 @@ export const __event: BaseEventModule = {
 				    	if (!guild) return _data.NAME = _data.NAME.replace("$SUPPORT_SERVER_MEMBER_COUNT", "0");
 
 				    	// Guild member count
-				    	_data.NAME = _data.NAME.replace("$SUPPORT_SERVER_MEMBER_COUNT", jt.formatThousands(guild.members.cache.size));
+				    	_data.NAME = _data.NAME.replace("$SUPPORT_SERVER_MEMBER_COUNT", jsTools.formatThousands(guild.members.cache.size));
 				    }).catch(err => console.log("Failed to fetch the support server for client status", err));
 			    }
             }
@@ -83,7 +83,7 @@ export const __event: BaseEventModule = {
 
             if (clientActivity?.INTERVAL) {
                 // Sleep
-                await jt.sleep(jt.parseTime(clientActivity.INTERVAL));
+                await jsTools.sleep(jsTools.parseTime(clientActivity.INTERVAL));
 
                 // Run it back
                 return await setStatus();

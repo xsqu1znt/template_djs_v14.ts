@@ -3,8 +3,8 @@ import { SlashCommand, PrefixCommand, ContextMenuCommand, UserInstallableCommand
 import { Client } from "discord.js";
 import AppCommandManager from "@utils/AppCommandManager";
 import logger from "@utils/logger";
-import jt from "@utils/jsTools";
-import * as path from "path";
+import jsTools from "jstools";
+import path from "node:path";
 
 const MODULE_RELATIVE_PATHS = {
     slash: "../../commands/slash",
@@ -68,7 +68,7 @@ async function importCommandModules<T extends CommandType>(commandType: T): Prom
             break;
     }
 
-    let files = jt
+    let files = jsTools
         .readDir(_moduleDirectory, { recursive: true })
         .filter(fn => _moduleNameMatch.find(m => fn.includes(m)) && (fn.endsWith(".js") || fn.endsWith(".ts")));
 

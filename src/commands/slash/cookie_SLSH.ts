@@ -1,8 +1,8 @@
 import { SlashCommand } from "@customTypes/commands";
 
 import { SlashCommandBuilder } from "discord.js";
-import { BetterEmbed } from "@utils/discordTools";
-import jt from "@utils/jsTools";
+import { BetterEmbed } from "djstools";
+import jsTools from "jstools";
 
 export const __command: SlashCommand = {
     category: "Fun",
@@ -20,10 +20,10 @@ export const __command: SlashCommand = {
         // Create the embed ( Cookie )
         let embed_cookie = new BetterEmbed({
             context: { interaction },
-            description: jt.choice(choices)
+            description: jsTools.choice(choices)
         });
 
         // Reply to the interaction with the embed
-        return await embed_cookie.send(interaction);
+        return embed_cookie.send(interaction);
     }
 };

@@ -20,7 +20,7 @@ interface LogOptions {
 }
 
 import { Client } from "discord.js";
-import jt from "@utils/jsTools";
+import jsTools from "jstools";
 import chalk from "chalk";
 
 import { VERSION } from "@constants";
@@ -96,7 +96,7 @@ export function error(header: string, msg: string, err?: any, options?: LogOptio
 
 /* - - - - - { Client } - - - - - */
 export const client = {
-    starting: (): void => log(`::CLIENT ⏳ ${chalk.italic(jt.choice(config.logger.STARTUP_MESSAGES))}`),
+    starting: (): void => log(`::CLIENT ⏳ ${chalk.italic(jsTools.choice(config.logger.STARTUP_MESSAGES))}`),
     connecting: (): void => log(`::CLIENT ⏳ ${chalk.italic("Connecting to Discord...")}`),
     online: (): void => log(`::CLIENT ✅ ${chalk.greenBright("Successfuly connected to Discord!")}`),
     ready: (client?: Client) =>

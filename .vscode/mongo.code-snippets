@@ -10,30 +10,28 @@
             "    _id: string;",
             "};\n",
 
-            "export const schema = new Schema<${1:I${TM_FILENAME_BASE}}>(",
+            "export const ${1:${TM_FILENAME_BASE}}Schema = new Schema<${1:I${TM_FILENAME_BASE}}>(",
             "    {",
             "        _id: { type: String, required: true }$0",
             "    },",
             "    { collection: \"${2:${TM_FILENAME_BASE}s}\" }",
             ");\n",
 
-            "export const model = Model<${1:I${TM_FILENAME_BASE}}>(\"${2:${TM_FILENAME_BASE}s}\", schema);\n"
+            "export const ${1:${TM_FILENAME_BASE}}Model = Model<${1:I${TM_FILENAME_BASE}}>(\"${2:${TM_FILENAME_BASE}s}\", schema);\n"
         ]
     },
 
     "Mongo Manager": {
         "scope": "typescript",
         "prefix": "mongo-manager",
-        "description": "A collection manager template using docUtils.",
+        "description": "A document manager template using docUtils.",
         "body": [
-            "import { guildModel } from \"@models\";",
-            "import DocumentUtils from \"./docUtils\";\n",
+            "import { ${1:GuildModel} } from \"@utils/mongo/models\";",
+            "import DocumentUtils from \"@utils/mongo/docUtils\";\n",
 
-            "const docUtils = new DocumentUtils(guildModel);\n",
-
-            "$0\n",
-
-            "export default {",
+            "const docUtils = new DocumentUtils(${1:GuildModel});",
+            "$0",
+            "export const ${2:${TM_FILENAME_BASE}} = {",
             "    ...docUtils.__exports,",
             "};\n"
         ]

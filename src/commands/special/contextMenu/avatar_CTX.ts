@@ -1,7 +1,7 @@
 import { ContextMenuCommand } from "@customTypes/commands";
 
 import { ApplicationCommandType, ContextMenuCommandBuilder, ContextMenuCommandType } from "discord.js";
-import { BetterEmbed } from "@utils/discordTools";
+import { BetterEmbed } from "djstools";
 
 export const __command: ContextMenuCommand = {
     category: "Fun",
@@ -15,12 +15,12 @@ export const __command: ContextMenuCommand = {
         if (!interaction.isUserContextMenuCommand()) return;
 
         // Create the embed ( Avatar )
-        let embed_avatar = new BetterEmbed({
+        const embed_avatar = new BetterEmbed({
             title: `${interaction.targetUser.username}'s Avatar`,
             imageURL: interaction.targetUser.displayAvatarURL({ size: 4096 })
         });
 
         // Reply to the interaction with the embed
-        return await embed_avatar.send(interaction);
+        return embed_avatar.send(interaction);
     }
 };

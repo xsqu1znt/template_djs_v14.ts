@@ -1,4 +1,4 @@
-import { MessageCreateEventModule } from "@customTypes/events";
+import { DJSClientEvent } from "@customTypes/events";
 import { PrefixCommandParams } from "@customTypes/commands";
 
 import {
@@ -11,8 +11,8 @@ import {
     PermissionResolvable,
     userMention
 } from "discord.js";
-import { BetterEmbed } from "@utils/discordTools";
-import { guildManager } from "@utils/mongo";
+import { BetterEmbed } from "djstools";
+import { guildManager } from "@utils/mongo/managers";
 import logger from "@utils/logger";
 
 import config from "@configs";
@@ -56,8 +56,8 @@ function hasRequiredPermissions(member: GuildMember, required: PermissionResolva
     return { has, missing, passed: has.length === required.length };
 }
 
-export const __event: MessageCreateEventModule = {
-    name: "processPrefixCommand",
+export const __event: DJSClientEvent<"messageCreate"> = {
+    name: __filename.split(/\.js|\.ts/)[0],
     event: "messageCreate",
 
     execute: async (client, message) => {
@@ -113,7 +113,7 @@ export const __event: MessageCreateEventModule = {
                     color: "Orange",
                     title: "⚠️ Staff Only",
                     description: `Only the developers of ${client.user} can use this command.`
-                }).send(message, { allowedMentions: { repliedUser: false }, fetchReply: false });
+                }).send(message, { allowedMentions: { repliedUser: false }, flags: "Ephemeral" });
             }
 
             // Check if the command requires the user to have admin permission in the current guild
@@ -122,7 +122,7 @@ export const __event: MessageCreateEventModule = {
                     color: "Orange",
                     title: "⚠️ Server Admin Only",
                     description: "You must be an admin of this server to use this command."
-                }).send(message, { allowedMentions: { repliedUser: false }, fetchReply: false });
+                }).send(message, { allowedMentions: { repliedUser: false }, flags: "Ephemeral" });
             }
 
             // Check if the user has the required permissions in the current guild
@@ -134,7 +134,7 @@ export const __event: MessageCreateEventModule = {
                         color: "Orange",
                         title: "⚠️ Missing Permissions",
                         description: `You must have the following permissions:\n${_permCheck.missing.join(", ")}`
-                    }).send(message, { allowedMentions: { repliedUser: false }, fetchReply: false });
+                    }).send(message, { allowedMentions: { repliedUser: false }, flags: "Ephemeral" });
                 }
             }
 
@@ -147,7 +147,7 @@ export const __event: MessageCreateEventModule = {
                         color: "Orange",
                         title: "⚠️ Missing Permissions",
                         description: `I need the following permissions:\n${_permCheck.missing.join(", ")}`
-                    }).send(message, { allowedMentions: { repliedUser: false }, fetchReply: false });
+                    }).send(message, { allowedMentions: { repliedUser: false }, flags: "Ephemeral" });
                 }
             }
         }
@@ -157,7 +157,7 @@ export const __event: MessageCreateEventModule = {
             const extra: PrefixCommandParams = { prefix, commandName, cleanContent };
 
             return await prefixCommand.execute(client, message, extra).then(async message => {
-                /* TODO: run code here after the command finished executing... */
+                /* TODO: Run code here after the command finished executing... */
             });
         } catch (err) {
             let _configSupport = config.client.support_server;
@@ -191,7 +191,7 @@ export const __event: MessageCreateEventModule = {
             embed_executeError.send(message, {
                 components: aR_supportServer as ActionRowBuilder<MessageActionRowComponentBuilder>,
                 allowedMentions: { repliedUser: false },
-                fetchReply: false
+                flags: "Ephemeral"
             });
 
             // prettier-ignore

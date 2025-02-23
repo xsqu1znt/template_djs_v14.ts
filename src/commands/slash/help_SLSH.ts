@@ -1,8 +1,8 @@
 import { SlashCommand } from "@customTypes/commands";
 
 import { SlashCommandBuilder } from "discord.js";
-import { BetterEmbed, PageNavigator } from "@utils/discordTools";
-import jt from "@utils/jsTools";
+import { BetterEmbed, PageNavigator } from "djstools";
+import jsTools from "jstools";
 
 const categoryIcons: { [key: string]: string } = {
     Fun: "🎉",
@@ -21,7 +21,7 @@ export const __command: SlashCommand = {
 
     execute: async (client, interaction) => {
         // Get the current slash commands and filter out ones that are set to be hidden
-        let commands = [...client.commands.slash.all.values()].filter(cmd => !cmd?.options?.hidden);
+        const commands = [...client.commands.slash.all.values()].filter(cmd => !cmd?.options?.hidden);
 
         /* error */
         if (!commands.length) {
@@ -29,11 +29,11 @@ export const __command: SlashCommand = {
         }
 
         // Parse command categories
-        let categoryNames = jt
+        const categoryNames = jsTools
             .unique(
                 commands.map(cmd => {
-                    let _name = cmd?.category || "";
-                    let _icon = _name in categoryIcons ? categoryIcons[_name] : null;
+                    const _name = cmd?.category || "";
+                    const _icon = _name in categoryIcons ? categoryIcons[_name] : null;
                     return { name: _name, icon: _icon };
                 }),
                 "name"
@@ -42,12 +42,12 @@ export const __command: SlashCommand = {
             .sort((a, b) => a.name.localeCompare(b.name));
 
         /* - - - - - { Format Commands into List } - - - - - */
-        let commandList = [];
-        let categoryEmbeds = [];
+        const commandList = [];
+        const categoryEmbeds = [];
 
         // Iterate through each command
         /*! NOTE: the design of the commands in the list can be edited here */
-        for (let command of commands) {
+        for (const command of commands) {
             let listEntry = "- $ICON**/$NAME**"
                 .replace("$ICON", command.options?.emoji ? `${command.options?.emoji} ` : "")
                 .replace("$NAME", command.builder.name);
@@ -66,27 +66,27 @@ export const __command: SlashCommand = {
         }
 
         // Iterate through each category and make an embed for it
-        for (let category of categoryNames) {
+        for (const category of categoryNames) {
             // Get all the commands for the current category
-            let _commands = commandList.filter(cmd => cmd.category === category.name);
+            const _commands = commandList.filter(cmd => cmd.category === category.name);
             if (!_commands.length) continue;
 
             // Sort command names alphabetically
             _commands.sort((a, b) => a.name.localeCompare(b.name));
 
             // Split commands by max page length
-            let _command_groups = jt.chunk(_commands, config.maxPageLength);
+            const _command_groups = jsTools.chunk(_commands, config.maxPageLength);
 
             /* - - - - - { Create the Embed Page } - - - - - */
-            let embeds = [];
+            const embeds = [];
 
             // Iterate through each command group and create an embed for it
             for (let i = 0; i < _command_groups.length; i++) {
-                let group = _command_groups[i];
+                const group = _command_groups[i];
 
                 // Create the embed ( Help Page )
                 /*! NOTE: the design of the embed can be edited here */
-                let embed = new BetterEmbed({
+                const embed = new BetterEmbed({
                     title: `Help`,
                     description: group.map(cmd => cmd.formatted).join("\n"),
                     footer: `Page ${i + 1} of ${_command_groups.length} • Category: $ICON$NAME`
@@ -104,12 +104,12 @@ export const __command: SlashCommand = {
 
         /* - - - - - { Page Navigation } - - - - - */
         const pageNav = new PageNavigator({
-            allowedParticipants: interaction.user,
+            allowedParticipants: [interaction.user],
             pages: categoryEmbeds
         });
 
         pageNav.addSelectMenuOptions(...categoryNames.map(cat => ({ emoji: cat.icon, label: cat.name })));
 
-        return await pageNav.send(interaction, { allowedMentions: { repliedUser: false } });
+        return pageNav.send(interaction, { allowedMentions: { repliedUser: false } });
     }
 };

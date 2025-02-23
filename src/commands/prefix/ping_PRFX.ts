@@ -1,7 +1,7 @@
 import { PrefixCommand } from "@customTypes/commands";
 
 import mongo from "@utils/mongo";
-import jt from "@utils/jsTools";
+import jsTools from "jstools";
 
 export const __command: PrefixCommand = {
     name: "ping",
@@ -11,11 +11,11 @@ export const __command: PrefixCommand = {
 
     execute: async (client, message) => {
         // Ping the database
-        let db_ping = jt.formatThousands(Number(await mongo.ping()));
+        const db_ping = jsTools.formatThousands(Number(await mongo.ping()));
 
         // Reply to the interaction with the client and database ping
         return await message.reply({
-            content: `Client: **${jt.formatThousands(client.ws.ping)}ms**, Database: **${db_ping}ms**`,
+            content: `Client: **${jsTools.formatThousands(client.ws.ping)}ms**, Database: **${db_ping}ms**`,
             allowedMentions: { repliedUser: false }
         });
     }
