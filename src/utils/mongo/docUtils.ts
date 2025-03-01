@@ -1,4 +1,4 @@
-import { Model, QueryOptions, RootFilterQuery, UpdateQuery } from "mongoose";
+import { AggregateOptions, Model, PipelineStage, QueryOptions, RootFilterQuery, UpdateQuery } from "mongoose";
 
 import mongo from "@utils/mongo";
 
@@ -78,7 +78,12 @@ export default class DocumentUtils<T> {
             /** Update a document in the collection based on the provided filter.
              * @param filter The filter used to find the document. It can be a string representing the document's `_id` or an object representing the document's properties.
              * @param updateQuery The update operations to be applied to the document. */
-            __updateAll: this.updateAll
+            __updateAll: this.updateAll,
+
+            /** Perform an aggregation on the collection.
+             * @param pipeline The aggregation pipeline stages.
+             * @param options Optional parameters for the aggregation operation. */
+            __aggregate: this.aggregate
         };
     }
 
@@ -179,5 +184,13 @@ export default class DocumentUtils<T> {
     updateAll = async (filter: RootFilterQuery<T>, updateQuery: UpdateQuery<T>) => {
         await mongo.connect();
         return await this.model.updateMany(filter, updateQuery);
+    };
+
+    /** Perform an aggregation on the collection.
+     * @param pipeline The aggregation pipeline stages.
+     * @param options Optional parameters for the aggregation operation. */
+    aggregate = async (pipeline: PipelineStage[], options?: AggregateOptions) => {
+        await mongo.connect();
+        return (await this.model.aggregate(pipeline, options)) ?? [];
     };
 }
