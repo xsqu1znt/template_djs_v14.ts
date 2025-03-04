@@ -1,16 +1,14 @@
-import { PrefixCommand } from "@customTypes/commands";
+import { GuildPrefixCommand } from "@customTypes/commands";
 
 import { guildManager } from "@utils/mongo/managers";
 
-export const __command: PrefixCommand = {
+export const __command: GuildPrefixCommand = {
     name: "prefix",
     description: "Set the prefix for the current server.",
     category: "Utility",
-    options: { emoji: "⚙️", guildOnly: true, requiredUserPerms: ["Administrator"] },
+    options: { emoji: "⚙️", guildOnly: true, guildAdminOnly: true },
 
     execute: async (client, message, { cleanContent }) => {
-        if (!message.inGuild()) return;
-
         const prefix = cleanContent || null;
 
         // Reply with the current prefix if a new prefix wasn't provided
