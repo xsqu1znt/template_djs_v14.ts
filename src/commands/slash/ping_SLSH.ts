@@ -15,7 +15,7 @@ export const __command: SlashCommand = {
         let db_ping = jsTools.formatThousands(Number(await mongo.ping()));
 
         // Reply to the interaction with the client and database ping
-        return await interaction.editReply({
+        return interaction.editReply({
             content: `Client: **${jsTools.formatThousands(client.ws.ping)}ms**, Database: **${db_ping}ms**`
         });
     }

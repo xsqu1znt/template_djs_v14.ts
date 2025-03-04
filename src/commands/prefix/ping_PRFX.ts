@@ -14,7 +14,7 @@ export const __command: PrefixCommand = {
         const db_ping = jsTools.formatThousands(Number(await mongo.ping()));
 
         // Reply to the interaction with the client and database ping
-        return await message.reply({
+        return message.reply({
             content: `Client: **${jsTools.formatThousands(client.ws.ping)}ms**, Database: **${db_ping}ms**`,
             allowedMentions: { repliedUser: false }
         });

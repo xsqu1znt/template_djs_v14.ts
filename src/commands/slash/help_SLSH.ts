@@ -25,7 +25,7 @@ export const __command: SlashCommand = {
 
         /* error */
         if (!commands.length) {
-            return await interaction.reply({ content: "There are no commands available.", ephemeral: true });
+            return interaction.reply({ content: "There are no commands available.", ephemeral: true });
         }
 
         // Parse command categories

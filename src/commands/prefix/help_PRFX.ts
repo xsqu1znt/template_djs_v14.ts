@@ -27,7 +27,7 @@ export const __command: PrefixCommand = {
 
         /* error */
         if (!commands.length) {
-            return await message.reply({
+            return message.reply({
                 content: "There are no commands available.",
                 allowedMentions: { repliedUser: false }
             });

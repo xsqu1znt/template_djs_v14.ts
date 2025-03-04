@@ -13,7 +13,7 @@ export const __command: GuildPrefixCommand = {
 
         // Reply with the current prefix if a new prefix wasn't provided
         if (!prefix) {
-            return await message.reply({
+            return message.reply({
                 content: `My prefix is \`${await guildManager.fetchPrefix(message.guild.id)}\`.`,
                 allowedMentions: { repliedUser: false }
             });
