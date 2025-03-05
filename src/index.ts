@@ -20,7 +20,7 @@ if (!TOKEN) {
 
 if (IN_DEV_MODE) {
     logger.debug(
-        "DEV_MODE is enabled! You can change this by setting DEV_MODE to false in either .env or config_client.json",
+        "DEV_MODE is enabled! You can change this by setting DEV_MODE to false in either .env or configs/client.json",
         { timestamp: false, bold: true }
     );
 }
