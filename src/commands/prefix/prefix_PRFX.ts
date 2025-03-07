@@ -6,6 +6,7 @@ export const __command: GuildPrefixCommand = {
     name: "prefix",
     description: "Set the prefix for the current server.",
     category: "Utility",
+    usage: "<prefix>",
     options: { emoji: "⚙️", guildOnly: true, guildAdminOnly: true },
 
     execute: async (client, message, { cleanContent }) => {
