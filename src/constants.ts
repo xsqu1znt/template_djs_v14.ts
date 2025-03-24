@@ -16,7 +16,7 @@ export const argsv = {
 
 /* - - - - - { Environment } - - - - -  */
 /** The version of the project. */
-export const VERSION: string = process.env.VERSION || config.client.VERSION;
+export const APP_VERSION: string = process.env.APP_VERSION || config.client.APP_VERSION;
 
 const USING_AUTO_DEV_MODE = process.env.AUTO_DEV_MODE ?? config.client.AUTO_DEV_MODE;
 const AUTO_AND_IS_IN_DIST = USING_AUTO_DEV_MODE ? (__dirname.includes("dist") ? true : false) : null;

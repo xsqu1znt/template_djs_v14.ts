@@ -1,5 +1,5 @@
 {
-    "VERSION": "1.0.0",
+    "APP_VERSION": "1.0.0",
 
     "AUTO_DEV_MODE": true,
     "DEV_MODE_OVERRIDE": null,
