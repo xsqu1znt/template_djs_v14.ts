@@ -1,8 +1,8 @@
 import {
     BaseInteraction,
+    ChatInputCommandInteraction,
     Client,
     ClientEvents,
-    CommandInteraction,
     ContextMenuCommandBuilder,
     ContextMenuCommandInteraction,
     InteractionResponse,
@@ -29,7 +29,10 @@ export interface SlashCommand {
     /** Extra options for this command. */
     options?: InteractionBasedCommandOptions;
     /** Executed when the command is used. */
-    execute: (client: Client<true>, interaction: CommandInteraction) => Promise<InteractionResponse | Message | void | null>;
+    execute: (
+        client: Client<true>,
+        interaction: ChatInputCommandInteraction
+    ) => Promise<InteractionResponse | Message | void | null>;
 }
 
 export interface GuildSlashCommand extends SlashCommand {
@@ -38,7 +41,7 @@ export interface GuildSlashCommand extends SlashCommand {
     /** Executed when the command is used. */
     execute: (
         client: Client<true>,
-        interaction: CommandInteraction<"cached">
+        interaction: ChatInputCommandInteraction<"cached">
     ) => Promise<InteractionResponse | Message | void | null>;
 }
 
@@ -119,14 +122,14 @@ export interface UserInstallableCommand {
     /** Extra options for this command. */
     options?: Omit<InteractionBasedCommandOptions, "emoji" | "hidden">;
     /** Executed when the command is used. */
-    execute: (client: Client<true>, interaction: CommandInteraction) => Promise<Message | void | null>;
+    execute: (client: Client<true>, interaction: ChatInputCommandInteraction) => Promise<Message | void | null>;
 }
 
 export interface GuildUserInstallableCommand extends UserInstallableCommand {
     /** Extra options for this command. */
     options?: Omit<InteractionBasedCommandOptions, "emoji" | "hidden"> & { guildOnly: true };
     /** Executed when the command is used. */
-    execute: (client: Client<true>, interaction: CommandInteraction<"cached">) => Promise<Message | void | null>;
+    execute: (client: Client<true>, interaction: ChatInputCommandInteraction<"cached">) => Promise<Message | void | null>;
 }
 
 /* - - - - - { Options } - - - - - */
