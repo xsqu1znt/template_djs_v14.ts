@@ -1,4 +1,3 @@
-import { SlashCommandOptionsOnlyBuilder } from "discord.js";
 import {
     BaseInteraction,
     Client,
@@ -11,13 +10,20 @@ import {
     MessageContextMenuCommandInteraction,
     PermissionResolvable,
     SlashCommandBuilder,
+    SlashCommandOptionsOnlyBuilder,
+    SlashCommandSubcommandGroupBuilder,
+    SlashCommandSubcommandsOnlyBuilder,
     UserContextMenuCommandInteraction
 } from "discord.js";
 
 /* - - - - - { Types } - - - - - */
 export interface SlashCommand {
     /** Slash command builder. */
-    builder: SlashCommandBuilder | SlashCommandOptionsOnlyBuilder;
+    builder:
+        | SlashCommandBuilder
+        | SlashCommandOptionsOnlyBuilder
+        | SlashCommandSubcommandsOnlyBuilder
+        | SlashCommandSubcommandGroupBuilder;
     /** The category to place the command inside the help command. */
     category?: string;
     /** Extra options for this command. */
