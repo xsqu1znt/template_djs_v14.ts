@@ -1,6 +1,5 @@
 /** @file Reusable functions for using `console.log()`, but in 4k ultra HD retrocolor. */
 
-/** */
 interface FormatStyle {
     name: string;
     text: () => string;
