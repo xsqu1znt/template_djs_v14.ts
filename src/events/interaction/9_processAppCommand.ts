@@ -74,6 +74,11 @@ export const __event: DJSClientEvent<"interactionCreate"> = {
                 .catch(err => logger.error("::COMMAND", `'/${interaction.commandName}' is not a command.`, err));
         }
 
+        // Ensure the guild is saved in the database
+        if (interaction.guildId && !(await guildManager.__exists(interaction.guildId))) {
+            await guildManager.__insertOrUpdate(interaction.guildId, {});
+        }
+
         /* - - - - - { Parse Command Options } - - - - - */
         let _commandOptions: InteractionBasedCommandOptions = { ...interactionCommand.options };
 
