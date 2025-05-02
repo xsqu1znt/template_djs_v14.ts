@@ -37,6 +37,8 @@ export default class DocumentUtils<T> {
 
     get __exports() {
         return {
+            /** The model used to interact with the collection. */
+            __model: this.__model,
             /** Count the number of documents in the collection.
              * @param filter An optional filter to count only the documents that match it. */
             __count: this.count,
