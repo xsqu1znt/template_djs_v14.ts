@@ -33,7 +33,7 @@ export interface DocumentUpsertOptions<T> extends DocumentQueryOptions<T> {
 }
 
 export default class DocumentUtils<T> {
-    constructor(public model: Model<T>) {}
+    constructor(public __model: Model<T>) {}
 
     get __exports() {
         return {
@@ -91,7 +91,7 @@ export default class DocumentUtils<T> {
      * @param filter An optional filter to count only the documents that match it. */
     count = async (filter?: RootFilterQuery<T>): Promise<number> => {
         await mongo.connect();
-        return await this.model.countDocuments(filter);
+        return await this.__model.countDocuments(filter);
     };
 
     /** Check if a document exists in the collection based on the provided filter.
@@ -100,9 +100,9 @@ export default class DocumentUtils<T> {
         await mongo.connect();
         switch (typeof filter) {
             case "string":
-                return (await this.model.exists({ _id: filter })) ? true : false;
+                return (await this.__model.exists({ _id: filter })) ? true : false;
             case "object":
-                return (await this.model.exists(filter)) ? true : false;
+                return (await this.__model.exists(filter)) ? true : false;
             default:
                 return false;
         }
@@ -117,7 +117,7 @@ export default class DocumentUtils<T> {
         const _upsertOptions = { ...upsertOptions, lean: upsertOptions?.lean ?? true };
         if ((upsertOptions.checkExists ?? true) && (await this.exists(_id)))
             return await this.update(_id, upsertQuery, _upsertOptions);
-        return await new this.model({ _id, ...upsertQuery }).save();
+        return await new this.__model({ _id, ...upsertQuery }).save();
     };
 
     /** Delete a document from the collection based on the provided `_id` or filter.
@@ -125,9 +125,9 @@ export default class DocumentUtils<T> {
     delete = async (filter: string | RootFilterQuery<T>) => {
         await mongo.connect();
         if (typeof filter === "string") {
-            return await this.model.findByIdAndDelete(filter);
+            return await this.__model.findByIdAndDelete(filter);
         } else {
-            return await this.model.deleteOne(filter);
+            return await this.__model.deleteOne(filter);
         }
     };
 
@@ -135,7 +135,7 @@ export default class DocumentUtils<T> {
      * @param filter The filter used to find the documents to delete. */
     deleteAll = async (filter: RootFilterQuery<T>) => {
         await mongo.connect();
-        return await this.model.deleteMany(filter);
+        return await this.__model.deleteMany(filter);
     };
 
     /** Fetch a document from the collection based on the provided `_id` or filter.
@@ -145,9 +145,9 @@ export default class DocumentUtils<T> {
         await mongo.connect();
         const _options = { ...options, projection: undefined, lean: options?.lean ?? true };
         if (typeof filter === "string") {
-            return await this.model.findById(filter, options?.projection, _options);
+            return await this.__model.findById(filter, options?.projection, _options);
         } else {
-            return await this.model.findOne(filter, options?.projection, _options);
+            return await this.__model.findOne(filter, options?.projection, _options);
         }
     };
 
@@ -157,7 +157,7 @@ export default class DocumentUtils<T> {
     fetchAll = async (filter: RootFilterQuery<T> = {}, options: DocumentQueryOptions<T> = {}) => {
         await mongo.connect();
         const _options = { ...options, projection: undefined, lean: options?.lean ?? true };
-        return await this.model.find(filter, options?.projection, _options);
+        return await this.__model.find(filter, options?.projection, _options);
     };
 
     /** Update a document in the collection based on the provided filter.
@@ -172,9 +172,9 @@ export default class DocumentUtils<T> {
         await mongo.connect();
         const _options = { ...options, lean: options?.lean ?? true };
         if (typeof filter === "string") {
-            return await this.model.findByIdAndUpdate(filter, updateQuery, _options);
+            return await this.__model.findByIdAndUpdate(filter, updateQuery, _options);
         } else {
-            return await this.model.findOneAndUpdate(filter, updateQuery, _options);
+            return await this.__model.findOneAndUpdate(filter, updateQuery, _options);
         }
     };
 
@@ -183,7 +183,7 @@ export default class DocumentUtils<T> {
      * @param updateQuery The update operations to be applied to the document. */
     updateAll = async (filter: RootFilterQuery<T>, updateQuery: UpdateQuery<T>) => {
         await mongo.connect();
-        return await this.model.updateMany(filter, updateQuery);
+        return await this.__model.updateMany(filter, updateQuery);
     };
 
     /** Perform an aggregation on the collection.
@@ -191,6 +191,6 @@ export default class DocumentUtils<T> {
      * @param options Optional parameters for the aggregation operation. */
     aggregate = async (pipeline: PipelineStage[], options?: AggregateOptions) => {
         await mongo.connect();
-        return (await this.model.aggregate(pipeline, options)) ?? [];
+        return (await this.__model.aggregate(pipeline, options)) ?? [];
     };
 }
