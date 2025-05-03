@@ -27,9 +27,9 @@
         "axios": "^1.7.9",
         "chalk": "4.1.2",
         "discord.js": "^14.18.0",
-        "djstools": "github:squ1dggly/djsTools",
+        "djstools": "github:xsqu1znt/djsTools",
         "dotenv": "^16.4.7",
-        "jstools": "github:squ1dggly/jsTools",
+        "jstools": "github:xsqu1znt/jsTools",
         "mongoose": "^8.10.1"
     }
 }
