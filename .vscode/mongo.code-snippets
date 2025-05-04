@@ -32,7 +32,7 @@
             "const docUtils = new DocumentUtils(${1:GuildModel});",
             "$0",
             "export const ${2:${TM_FILENAME_BASE}} = {",
-            "    ...docUtils.__exports,",
+            "    ...docUtils.__exports",
             "};\n"
         ]
     }
