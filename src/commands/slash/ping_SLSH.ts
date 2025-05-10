@@ -12,7 +12,7 @@ export const __command: SlashCommand = {
 
     execute: async (client, interaction) => {
         // Ping the database
-        let db_ping = jsTools.formatThousands(Number(await mongo.ping()));
+        const db_ping = jsTools.formatThousands(Number(await mongo.ping()));
 
         // Reply to the interaction with the client and database ping
         return interaction.editReply({

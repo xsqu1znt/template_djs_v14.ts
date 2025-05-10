@@ -62,7 +62,7 @@ export const __command: PrefixCommand = {
             const extraDetails = [];
 
             // Add the command description, if it exists
-            if (command?.description) extraDetails.push(` - *${command.description}*`);
+            if (command?.description) extraDetails.push(`   - *${command.description}*`);
 
             // Add the command aliases, if any
             if (command?.aliases?.length)

@@ -54,7 +54,7 @@ export const __command: SlashCommand = {
 
             // Add the command description, if it exists
             if (command.builder.description) {
-                listEntry += `\n - *${command.builder.description}*`;
+                listEntry += `\n    - *${command.builder.description}*`;
             }
 
             // Append the list entry
