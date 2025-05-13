@@ -63,7 +63,7 @@ export default class DocumentUtils<T> {
              * @param insertQuery The query to use for the insert operation. */
             __insert: this.insert,
 
-            /** Insert a document into the collection if it doesn't already exist, or updates it if it does.
+            /** Insert a document into the collection if it doesn't already exist, or update it if it does.
              * @param _id The unique identifier for the document.
              * @param upsertQuery The query to use for the upsert operation.
              * @param upsertOptions Optional parameters for the upsert operation. `lean` is `true` by default. */
@@ -87,9 +87,7 @@ export default class DocumentUtils<T> {
              * @param options Optional parameters for filtering and querying the document. `lean` is `true` by default. */
             __fetchAll: this.fetchAll,
 
-            /** Preform a distinct operation on a field in the collection.
-             *
-             * This will return all documents in the collection that have unique values for the specified field.
+            /** Fetch every unique value in the collection for the specified field.
              * @param field The field to perform the distinct operation on.
              * @param filter The filter used to find the documents to fetch. */
             __distinct: this.distinct,
@@ -144,7 +142,7 @@ export default class DocumentUtils<T> {
         return doc.toObject();
     };
 
-    /** Insert a document into the collection if it doesn't already exist, or updates it if it does.
+    /** Insert a document into the collection if it doesn't already exist, or update it if it does.
      * @param _id The unique identifier for the document.
      * @param upsertQuery The query to use for the upsert operation.
      * @param upsertOptions Optional parameters for the upsert operation. `lean` is `true` by default. */
@@ -210,9 +208,7 @@ export default class DocumentUtils<T> {
         return (await this.__model.aggregate(pipeline, options)) ?? [];
     };
 
-    /** Preform a distinct operation on a field in the collection.
-     *
-     * This will return all documents in the collection that have unique values for the specified field.
+    /** Fetch every unique value in the collection for the specified field.
      * @param field The field to perform the distinct operation on.
      * @param filter The filter used to find the documents to fetch. */
     distinct = async <P extends string>(field: P, filter?: RootFilterQuery<T>) => {
