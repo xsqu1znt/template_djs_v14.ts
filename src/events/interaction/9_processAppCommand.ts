@@ -77,7 +77,7 @@ export const __event: DJSClientEvent<"interactionCreate"> = {
 
         // Ensure the guild is saved in the database
         if (interaction.guildId && !(await guildManager.__exists(interaction.guildId))) {
-            await guildManager.__insertOrUpdate(interaction.guildId, {});
+            await guildManager.__upsert(interaction.guildId, {});
         }
 
         /* - - - - - { Parse Command Options } - - - - - */

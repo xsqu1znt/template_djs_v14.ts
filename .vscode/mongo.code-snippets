@@ -27,9 +27,9 @@
         "description": "A document manager template using docUtils.",
         "body": [
             "import { ${1:GuildModel} } from \"@utils/mongo/models\";",
-            "import DocumentUtils from \"@utils/mongo/docUtils\";\n",
+            "import MongoDocumentUtils from \"@utils/mongo/docUtils\";\n",
 
-            "const docUtils = new DocumentUtils(${1:GuildModel});",
+            "const docUtils = new MongoDocumentUtils(${1:GuildModel});",
             "$0",
             "export const ${2:${TM_FILENAME_BASE}} = {",
             "    ...docUtils.__exports",

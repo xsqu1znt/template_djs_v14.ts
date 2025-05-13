@@ -1,9 +1,9 @@
 import { GuildModel } from "@utils/mongo/models";
-import DocumentUtils from "@utils/mongo/docUtils";
+import MongoDocumentUtils from "@utils/mongo/docUtils";
 
 import configs from "@configs";
 
-const docUtils = new DocumentUtils(GuildModel);
+const docUtils = new MongoDocumentUtils(GuildModel);
 
 async function fetchPrefix(guildId: string): Promise<string> {
     let prefix = (await docUtils.fetch(guildId, { projection: { prefix: 1 } }))?.prefix;

@@ -1,4 +1,12 @@
-import { AggregateOptions, Model, PipelineStage, QueryOptions, RootFilterQuery, UpdateQuery } from "mongoose";
+import {
+    AggregateOptions,
+    HydratedDocument,
+    Model,
+    PipelineStage,
+    QueryOptions,
+    RootFilterQuery,
+    UpdateQuery
+} from "mongoose";
 
 import mongo from "@utils/mongo";
 
@@ -6,12 +14,14 @@ export type ProjectionTemplate<T> = {
     [P in keyof T]: number;
 };
 
+export type LeanOrHydratedDocument<T, O extends QueryOptions<T>> = O["lean"] extends false ? HydratedDocument<T> : T;
+
 export interface DocumentQueryOptions<T> extends QueryOptions {
     /** ___CAUTION: Upserting a document this way will only save the `_id` property.___
      *
      * ___If you have other required properties, they will be ignored and might throw an error upon saving.___
      *
-     * ___Use {@link DocumentUtils.insertOrUpdate insertOrUpdate} instead for the above case.___*/
+     * ___Use {@link DocumentUtils.upsert upsert} instead for the above case.___*/
     upsert?: boolean;
     /** The template used to filter the returned document.
      *
@@ -39,6 +49,7 @@ export default class DocumentUtils<T> {
         return {
             /** The model used to interact with the collection. */
             __model: this.__model,
+
             /** Count the number of documents in the collection.
              * @param filter An optional filter to count only the documents that match it. */
             __count: this.count,
@@ -47,11 +58,16 @@ export default class DocumentUtils<T> {
              * @param filter The filter used to find the document. It can be a string representing the document's `_id` or an object representing the document's properties. */
             __exists: this.exists,
 
+            /** Insert a document into the collection if it doesn't already exist.
+             * @param _id The unique identifier for the document.
+             * @param insertQuery The query to use for the insert operation. */
+            __insert: this.insert,
+
             /** Insert a document into the collection if it doesn't already exist, or updates it if it does.
              * @param _id The unique identifier for the document.
              * @param upsertQuery The query to use for the upsert operation.
              * @param upsertOptions Optional parameters for the upsert operation. `lean` is `true` by default. */
-            __insertOrUpdate: this.insertOrUpdate,
+            __upsert: this.upsert,
 
             /** Delete a document from the collection based on the provided `_id` or filter.
              * @param filter The filter used to find the document. It can be a string representing the document's `_id` or an object representing the document's properties. */
@@ -71,6 +87,18 @@ export default class DocumentUtils<T> {
              * @param options Optional parameters for filtering and querying the document. `lean` is `true` by default. */
             __fetchAll: this.fetchAll,
 
+            /** Preform a distinct operation on a field in the collection.
+             *
+             * This will return all documents in the collection that have unique values for the specified field.
+             * @param field The field to perform the distinct operation on.
+             * @param filter The filter used to find the documents to fetch. */
+            __distinct: this.distinct,
+
+            /** Perform an aggregation on the collection.
+             * @param pipeline The aggregation pipeline stages.
+             * @param options Optional parameters for the aggregation operation. */
+            __aggregate: this.aggregate,
+
             /** Update a document in the collection based on the provided filter.
              * @param filter The filter used to find the document. It can be a string representing the document's `_id` or an object representing the document's properties.
              * @param query The update operations to be applied to the document.
@@ -80,12 +108,7 @@ export default class DocumentUtils<T> {
             /** Update a document in the collection based on the provided filter.
              * @param filter The filter used to find the document. It can be a string representing the document's `_id` or an object representing the document's properties.
              * @param updateQuery The update operations to be applied to the document. */
-            __updateAll: this.updateAll,
-
-            /** Perform an aggregation on the collection.
-             * @param pipeline The aggregation pipeline stages.
-             * @param options Optional parameters for the aggregation operation. */
-            __aggregate: this.aggregate
+            __updateAll: this.updateAll
         };
     }
 
@@ -110,11 +133,22 @@ export default class DocumentUtils<T> {
         }
     };
 
+    /** Insert a document into the collection if it doesn't already exist.
+     * @param _id The unique identifier for the document.
+     * @param insertQuery The query to use for the insert operation. */
+    insert = async (_id: string, insertQuery: Partial<T> = {}) => {
+        await mongo.connect();
+        if (await this.exists(_id)) return null;
+        const doc = new this.__model({ _id, ...insertQuery });
+        await doc.save();
+        return doc.toObject();
+    };
+
     /** Insert a document into the collection if it doesn't already exist, or updates it if it does.
      * @param _id The unique identifier for the document.
      * @param upsertQuery The query to use for the upsert operation.
      * @param upsertOptions Optional parameters for the upsert operation. `lean` is `true` by default. */
-    insertOrUpdate = async (_id: string, upsertQuery: Partial<T> = {}, upsertOptions: DocumentUpsertOptions<T> = {}) => {
+    upsert = async (_id: string, upsertQuery: Partial<T> = {}, upsertOptions: DocumentUpsertOptions<T> = {}) => {
         await mongo.connect();
         const _upsertOptions = { ...upsertOptions, lean: upsertOptions?.lean ?? true };
         if ((upsertOptions.checkExists ?? true) && (await this.exists(_id)))
@@ -143,34 +177,58 @@ export default class DocumentUtils<T> {
     /** Fetch a document from the collection based on the provided `_id` or filter.
      * @param filter The filter used to find the document. It can be a string representing the document's `_id` or an object representing the document's properties.
      * @param options Optional parameters for filtering and querying the document. `lean` is `true` by default. */
-    fetch = async (filter: string | RootFilterQuery<T>, options: DocumentQueryOptions<T> = {}) => {
+    fetch = async <O extends DocumentQueryOptions<T>>(
+        filter: string | RootFilterQuery<T>,
+        options?: O
+    ): Promise<LeanOrHydratedDocument<T, O> | null> => {
         await mongo.connect();
-        const _options = { ...options, projection: undefined, lean: options?.lean ?? true };
+        const _opts = { ...options, lean: options?.lean ?? true };
         if (typeof filter === "string") {
-            return await this.__model.findById(filter, options?.projection, _options);
+            return await this.__model.findById(filter, _opts?.projection, _opts);
         } else {
-            return await this.__model.findOne(filter, options?.projection, _options);
+            return await this.__model.findOne(filter, _opts?.projection, _opts);
         }
     };
 
     /** Fetch all documents from the collection that match the provided filter.
      * @param filter The filter used to find the documents to fetch.
      * @param options Optional parameters for filtering and querying the document. `lean` is `true` by default. */
-    fetchAll = async (filter: RootFilterQuery<T> = {}, options: DocumentQueryOptions<T> = {}) => {
+    fetchAll = async <O extends DocumentQueryOptions<T>>(
+        filter: RootFilterQuery<T> = {},
+        options?: O
+    ): Promise<LeanOrHydratedDocument<T, O>[]> => {
         await mongo.connect();
-        const _options = { ...options, projection: undefined, lean: options?.lean ?? true };
-        return await this.__model.find(filter, options?.projection, _options);
+        const _opts = { ...options, lean: options?.lean ?? true };
+        return await this.__model.find(filter, options?.projection, _opts);
+    };
+
+    /** Perform an aggregation on the collection.
+     * @param pipeline The aggregation pipeline stages.
+     * @param options Optional parameters for the aggregation operation. */
+    aggregate = async (pipeline: PipelineStage[], options?: AggregateOptions) => {
+        await mongo.connect();
+        return (await this.__model.aggregate(pipeline, options)) ?? [];
+    };
+
+    /** Preform a distinct operation on a field in the collection.
+     *
+     * This will return all documents in the collection that have unique values for the specified field.
+     * @param field The field to perform the distinct operation on.
+     * @param filter The filter used to find the documents to fetch. */
+    distinct = async <P extends string>(field: P, filter?: RootFilterQuery<T>) => {
+        await mongo.connect();
+        return await this.__model.distinct(field, filter);
     };
 
     /** Update a document in the collection based on the provided filter.
      * @param filter The filter used to find the document. It can be a string representing the document's `_id` or an object representing the document's properties.
      * @param updateQuery The update operations to be applied to the document.
      * @param options Optional parameters for the update operation. `lean` is `true` by default. */
-    update = async (
+    update = async <O extends DocumentQueryOptions<T>>(
         filter: string | RootFilterQuery<T>,
         updateQuery: UpdateQuery<T>,
-        options: DocumentQueryOptions<T> = {}
-    ) => {
+        options?: O
+    ): Promise<LeanOrHydratedDocument<T, O> | null> => {
         await mongo.connect();
         const _options = { ...options, lean: options?.lean ?? true };
         if (typeof filter === "string") {
@@ -186,13 +244,5 @@ export default class DocumentUtils<T> {
     updateAll = async (filter: RootFilterQuery<T>, updateQuery: UpdateQuery<T>) => {
         await mongo.connect();
         return await this.__model.updateMany(filter, updateQuery);
-    };
-
-    /** Perform an aggregation on the collection.
-     * @param pipeline The aggregation pipeline stages.
-     * @param options Optional parameters for the aggregation operation. */
-    aggregate = async (pipeline: PipelineStage[], options?: AggregateOptions) => {
-        await mongo.connect();
-        return (await this.__model.aggregate(pipeline, options)) ?? [];
     };
 }

@@ -26,7 +26,7 @@
 
             "@configs": ["./src/configs.ts"],
             "@constants": ["./src/constants.ts"],
-            "@localStore": ["./src/localStore.ts"]
+            "@store": ["src/store.ts"]
         },
 
         /* Emit */
