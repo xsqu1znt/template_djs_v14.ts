@@ -138,8 +138,10 @@ export default class DocumentUtils<T> {
         await mongo.connect();
         if (await this.exists(_id)) return null;
         const doc = new this.__model({ _id, ...insertQuery });
-        await doc.save();
-        return doc.toObject();
+        return await doc
+            .save()
+            .then(() => doc.toObject())
+            .catch(() => null);
     };
 
     /** Insert a document into the collection if it doesn't already exist, or update it if it does.
