@@ -205,7 +205,7 @@ export default class DocumentUtils<T> {
     /** Perform an aggregation on the collection.
      * @param pipeline The aggregation pipeline stages.
      * @param options Optional parameters for the aggregation operation. */
-    aggregate = async (pipeline: PipelineStage[], options?: AggregateOptions) => {
+    aggregate = async <R>(pipeline: PipelineStage[], options?: AggregateOptions): Promise<R[]> => {
         await mongo.connect();
         return (await this.__model.aggregate(pipeline, options)) ?? [];
     };
