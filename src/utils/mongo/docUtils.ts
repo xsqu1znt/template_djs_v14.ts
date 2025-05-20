@@ -169,7 +169,7 @@ export default class DocumentUtils<T> {
 
     /** Delete all documents from the collection that match the provided filter.
      * @param filter The filter used to find the documents to delete. */
-    deleteAll = async (filter: RootFilterQuery<T>) => {
+    deleteAll = async (filter: RootFilterQuery<T> = {}) => {
         await mongo.connect();
         return await this.__model.deleteMany(filter);
     };
