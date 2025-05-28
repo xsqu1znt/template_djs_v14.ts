@@ -66,10 +66,10 @@ export const __command: PrefixCommand = {
 
             // Add the command aliases, if any
             if (command?.aliases?.length)
-                extraDetails.push(` - aliases: ${command.aliases.map(a => `\`${a}\``).join(", ")}`);
+                extraDetails.push(`   - aliases: ${command.aliases.map(a => `\`${a}\``).join(", ")}`);
 
             // Add an example of how the command's used, if provided
-            if (command?.usage) extraDetails.push(` - usage: \`${command.usage}\``);
+            if (command?.usage) extraDetails.push(`   - usage: \`${command.usage}\``);
 
             // Append the extra details to the original string
             if (extraDetails.length) listEntry += `\n${extraDetails.join("\n")}`;
