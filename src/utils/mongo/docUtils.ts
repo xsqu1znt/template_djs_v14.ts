@@ -53,7 +53,7 @@ export default class DocumentUtils<T> {
             __model: this.__model,
 
             /** Generates a new ObjectId in HEX format.
-             * @param time The timestamp to use for the ObjectId. If not provided, it will use the current time. */
+             * @param time The timestamp to use for the ObjectId. In milliseconds. If not provided, it will use the current time. */
             __objectId: this.objectId,
 
             /** Generates a random, unique hex string with a specified number of bytes.
@@ -123,9 +123,9 @@ export default class DocumentUtils<T> {
     }
 
     /** Generates a new ObjectId in HEX format.
-     * @param time The timestamp to use for the ObjectId. If not provided, it will use the current time. */
+     * @param time The timestamp to use for the ObjectId. In milliseconds. If not provided, it will use the current time. */
     objectId(time?: number) {
-        return new Types.ObjectId(time).toHexString();
+        return new Types.ObjectId(time ? Math.floor(time / 1000) : undefined).toHexString();
     }
 
     /** Generates a random, unique hex string with a specified number of bytes.
