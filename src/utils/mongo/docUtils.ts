@@ -5,9 +5,11 @@ import {
     PipelineStage,
     QueryOptions,
     RootFilterQuery,
+    Types,
     UpdateQuery
 } from "mongoose";
 
+import { randomBytes } from "node:crypto";
 import mongo from "@utils/mongo";
 
 export type ProjectionTemplate<T> = {
@@ -49,6 +51,15 @@ export default class DocumentUtils<T> {
         return {
             /** The model used to interact with the collection. */
             __model: this.__model,
+
+            /** Generate a new ObjectId in HEX format. */
+            __objectId: this.objectId,
+
+            /** Generates a random, unique hex string with a specified number of bytes.
+             * It will attempt to generate a new string until it finds one that isn't already used.
+             * @param bytes The number of bytes to use for the generated hex string.
+             * @param maxRetries The maximum number of times to attempt to generate a unique hex string. */
+            __hexId: this.hexId,
 
             /** Count the number of documents in the collection.
              * @param filter An optional filter to count only the documents that match it. */
@@ -108,6 +119,27 @@ export default class DocumentUtils<T> {
              * @param updateQuery The update operations to be applied to the document. */
             __updateAll: this.updateAll
         };
+    }
+
+    /** Generate a new ObjectId in HEX format. */
+    objectId() {
+        return new Types.ObjectId().toHexString();
+    }
+
+    /** Generates a random, unique hex string with a specified number of bytes.
+     * It will attempt to generate a new string until it finds one that isn't already used.
+     * @param bytes The number of bytes to use for the generated hex string.
+     * @param maxRetries The maximum number of times to attempt to generate a unique hex string. */
+    async hexId(bytes: number, maxRetries: number = 10) {
+        const _new = () => Buffer.from(randomBytes(bytes)).toString("hex");
+        let tries = 0;
+        let id = _new();
+        while (await this.exists(id)) {
+            if (tries >= maxRetries) break;
+            tries++;
+            id = _new();
+        }
+        return id;
     }
 
     /** Count the number of documents in the collection.
