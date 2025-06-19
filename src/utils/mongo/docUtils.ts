@@ -273,7 +273,7 @@ export default class DocumentUtils<T> {
     /** Update a document in the collection based on the provided filter.
      * @param filter The filter used to find the documents to update.
      * @param updateQuery The update operations to be applied to the document. */
-    updateAll = async (filter: RootFilterQuery<T>, updateQuery: UpdateQuery<T>) => {
+    updateAll = async (filter: RootFilterQuery<T> = {}, updateQuery: UpdateQuery<T>) => {
         await mongo.connect();
         return await this.__model.updateMany(filter, updateQuery);
     };
