@@ -136,7 +136,7 @@ export default class DocumentUtils<T> {
         const _new = () => Buffer.from(randomBytes(bytes)).toString("hex");
         let tries = 0;
         let id = _new();
-        while (await this.exists(id)) {
+        while (await this.__model.exists({ _id: id })) {
             if (tries >= maxRetries) break;
             tries++;
             id = _new();
